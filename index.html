@@ -21,12 +21,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root, [data-theme="dark"] {
-      --bg: #14081f;
-      --bg-elev: rgba(48, 28, 68, 0.82);
-      --bg-card: rgba(42, 24, 62, 0.78);
+      --bg: #120b18;
+      --bg-elev: rgba(45, 28, 48, 0.88);
+      --bg-card: rgba(40, 24, 42, 0.82);
       --bg-soft: rgba(255, 200, 160, 0.06);
-      --line: rgba(255, 210, 180, 0.14);
-      --line-strong: rgba(255, 200, 150, 0.28);
+      --line: rgba(255, 210, 180, 0.12);
+      --line-strong: rgba(255, 200, 150, 0.24);
       --text: #ffe0b0;
       --text-soft: #f5c48a;
       --muted: #d4a078;
@@ -43,10 +43,10 @@
       --font-body: "Space Grotesk", system-ui, sans-serif;
       --safe-b: env(safe-area-inset-bottom, 0px);
       --safe-t: env(safe-area-inset-top, 0px);
-      --topbar-bg: rgba(20, 8, 32, 0.78);
-      --gate-rad-gold: rgba(160, 40, 200, 0.55);
-      --gate-rad-silver: rgba(220, 30, 140, 0.5);
-      --shadow-card: 0 0 0 1px rgba(255, 200, 160, 0.08), 0 24px 60px rgba(40, 0, 60, 0.55);
+      --topbar-bg: rgba(18, 11, 24, 0.82);
+      --gate-rad-gold: rgba(59, 29, 49, 0.45);
+      --gate-rad-silver: rgba(36, 25, 48, 0.4);
+      --shadow-card: 0 0 0 1px rgba(255, 200, 160, 0.07), 0 24px 60px rgba(10, 4, 16, 0.55);
       --toast-bg: #ffe0b0;
       --toast-fg: #1a0820;
       --scheme: dark;
@@ -56,10 +56,16 @@
       --surface-shine: linear-gradient(160deg, rgba(255, 220, 180, 0.1), transparent 45%);
       --chrome: linear-gradient(115deg, #ffe9c0 0%, #ffd090 35%, #ffb070 65%, #ffe0b0 100%);
       --chrome-soft: linear-gradient(90deg, #c060ff, #e040a0, #ff9a60);
-      --glow: 0 0 36px rgba(255, 180, 100, 0.25);
-      --glow-magenta: rgba(230, 20, 150, 0.55);
-      --glow-violet: rgba(120, 20, 200, 0.6);
+      --glow: 0 0 28px rgba(255, 180, 100, 0.18);
+      --glow-magenta: rgba(62, 31, 50, 0.55);
+      --glow-violet: rgba(36, 25, 48, 0.6);
       --accent-lavender: #b8a8ff;
+      --plum-1: #120b18;
+      --plum-2: #1a0d1a;
+      --plum-3: #241930;
+      --plum-4: #2d1e3d;
+      --plum-5: #3b1d31;
+      --plum-6: #3e1f32;
     }
 
     [data-theme="light"] {
@@ -103,12 +109,15 @@
     body {
       font-family: var(--font-body);
       background:
-        radial-gradient(900px 700px at 75% 40%, rgba(255, 20, 160, 0.55), transparent 55%),
-        radial-gradient(800px 650px at 55% 45%, rgba(140, 0, 220, 0.65), transparent 52%),
-        radial-gradient(700px 500px at 20% 15%, rgba(90, 0, 180, 0.5), transparent 55%),
-        radial-gradient(600px 450px at 90% 85%, rgba(200, 0, 120, 0.45), transparent 50%),
-        radial-gradient(500px 400px at 40% 90%, rgba(100, 20, 160, 0.4), transparent 55%),
-        linear-gradient(165deg, #1a0830 0%, #2a0a45 35%, #1c0628 70%, #12041c 100%);
+        radial-gradient(900px 620px at 82% 48%, rgba(62, 31, 50, 0.85), transparent 58%),
+        radial-gradient(700px 500px at 35% 30%, rgba(45, 30, 61, 0.55), transparent 55%),
+        linear-gradient(105deg,
+          #120b18 0%,
+          #1a0d1a 22%,
+          #241930 48%,
+          #2d1e3d 68%,
+          #3b1d31 86%,
+          #3e1f32 100%);
       color: var(--text);
       min-height: 100dvh;
       line-height: 1.5;
@@ -122,10 +131,10 @@
       inset: 0;
       pointer-events: none;
       z-index: 0;
-      opacity: 1;
+      opacity: 0.9;
       background:
-        radial-gradient(ellipse 80% 60% at 70% 45%, rgba(180, 60, 255, 0.25), transparent 65%),
-        radial-gradient(ellipse 50% 40% at 30% 70%, rgba(255, 40, 140, 0.2), transparent 70%);
+        linear-gradient(120deg, rgba(18, 11, 24, 0.35), transparent 45%, rgba(62, 31, 50, 0.25)),
+        radial-gradient(ellipse 70% 55% at 70% 45%, rgba(59, 29, 49, 0.45), transparent 70%);
     }
     [data-theme="light"] body::before {
       background-image:
@@ -1733,7 +1742,7 @@
       border-color: #ffc878 !important;
     }
     .progress-bar > i {
-      background: linear-gradient(90deg, #c060ff, #ff9a60, #ffe0b0) !important;
+      background: linear-gradient(90deg, #3b1d31, #ff9a60, #ffe0b0) !important;
     }
     .badge {
       color: #ffe0b0 !important;
@@ -1741,12 +1750,12 @@
       background: rgba(255, 180, 100, 0.15) !important;
     }
     .topbar {
-      background: rgba(24, 8, 40, 0.75) !important;
-      border-bottom-color: rgba(255, 200, 160, 0.12) !important;
+      background: rgba(18, 11, 24, 0.82) !important;
+      border-bottom-color: rgba(255, 200, 160, 0.1) !important;
     }
     .search-soft, .person-filter, .card, .kpi, .prio-item, .cal-shell, .week-block, .stat, .modal, .user-card {
-      background: linear-gradient(160deg, rgba(70, 30, 100, 0.55), rgba(35, 15, 55, 0.7)) !important;
-      border-color: rgba(255, 200, 160, 0.14) !important;
+      background: linear-gradient(160deg, rgba(45, 30, 61, 0.72), rgba(26, 13, 26, 0.85)) !important;
+      border-color: rgba(255, 200, 160, 0.12) !important;
       backdrop-filter: blur(18px) !important;
     }
     .search-soft { border-radius: 999px !important; color: #ffe0b0 !important; }
