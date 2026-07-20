@@ -173,6 +173,16 @@
       padding: calc(1.75rem + var(--safe-t)) 1.25rem calc(1.75rem + var(--safe-b));
       overflow: hidden;
     }
+    #gate::before {
+      content: "";
+      position: absolute;
+      inset: 12% 18% 22% 18%;
+      border: 1px solid rgba(210, 220, 230, 0.08);
+      border-radius: 28px;
+      pointer-events: none;
+      z-index: 0;
+      mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+    }
     #gate::after {
       content: "";
       position: absolute;
@@ -183,6 +193,22 @@
       box-shadow: var(--glow);
       z-index: 0;
     }
+    .gate-spark {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #e8eef4;
+      box-shadow: 0 0 10px rgba(232, 238, 244, 0.8);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.55;
+      animation: sparkFloat 7s ease-in-out infinite;
+    }
+    .gate-spark:nth-child(1) { top: 18%; left: 16%; animation-delay: 0s; }
+    .gate-spark:nth-child(2) { top: 28%; right: 18%; width: 2px; height: 2px; animation-delay: 1.4s; }
+    .gate-spark:nth-child(3) { bottom: 24%; left: 22%; animation-delay: 2.2s; }
+    .gate-spark:nth-child(4) { bottom: 30%; right: 14%; width: 2px; height: 2px; animation-delay: 3.1s; }
 
     .theme-fab {
       position: absolute;
@@ -221,8 +247,8 @@
 
     .gate-logo-wrap {
       position: relative;
-      width: min(440px, 96%);
-      margin: 0 auto 1.2rem;
+      width: min(400px, 92%);
+      margin: 0 auto 0.85rem;
       display: grid;
       place-items: center;
     }
@@ -273,12 +299,12 @@
 
     .gate-inner h1 {
       font-family: var(--font-display);
-      font-size: clamp(1.35rem, 4vw, 1.85rem);
+      font-size: clamp(1.25rem, 3.6vw, 1.65rem);
       font-weight: 700;
       letter-spacing: -0.02em;
       text-transform: none;
       line-height: 1.2;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.55rem;
       color: var(--text);
       background: none;
       -webkit-text-fill-color: unset;
@@ -287,6 +313,41 @@
       font-style: normal;
       color: var(--gold-bright);
       opacity: 1;
+    }
+    .gate-ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      margin: 0 auto 1.15rem;
+      width: min(220px, 70%);
+    }
+    .gate-ornament::before,
+    .gate-ornament::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(210, 220, 230, 0.55));
+    }
+    .gate-ornament::after {
+      background: linear-gradient(90deg, rgba(210, 220, 230, 0.55), transparent);
+    }
+    .gate-ornament i {
+      width: 7px;
+      height: 7px;
+      border: 1px solid #c5ccd4;
+      transform: rotate(45deg);
+      box-shadow: 0 0 12px rgba(220, 230, 240, 0.45);
+      background: linear-gradient(135deg, #f0f4f8, #8a929c);
+      flex: 0 0 auto;
+    }
+    .gate-seal {
+      font-size: 0.62rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #a8b0b8;
+      font-weight: 500;
+      margin: -0.35rem auto 1.35rem;
     }
     .gate-sub {
       color: var(--text-soft);
@@ -318,6 +379,7 @@
     .user-card {
       -webkit-appearance: none;
       appearance: none;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -343,9 +405,18 @@
     }
     .user-card:hover, .user-card:focus-visible {
       transform: translateY(-3px);
-      border-color: var(--line-strong);
-      box-shadow: var(--shadow-card), var(--glow);
+      border-color: rgba(220, 230, 240, 0.4);
+      box-shadow: var(--shadow-card), 0 0 0 1px rgba(220, 230, 240, 0.12), 0 0 28px rgba(200, 210, 220, 0.18);
       outline: none;
+    }
+    .user-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(145deg, rgba(255,255,255,0.08), transparent 42%);
+      opacity: 0.7;
     }
     .user-card .photo {
       width: 72px;
@@ -1804,6 +1875,10 @@
       0%, 100% { filter: drop-shadow(0 0 16px rgba(220, 230, 240, 0.22)) drop-shadow(0 8px 24px rgba(0,0,0,0.3)); }
       50% { filter: drop-shadow(0 0 28px rgba(240, 245, 255, 0.4)) drop-shadow(0 8px 28px rgba(0,0,0,0.35)); }
     }
+    @keyframes sparkFloat {
+      0%, 100% { transform: translateY(0); opacity: 0.35; }
+      50% { transform: translateY(-10px); opacity: 0.8; }
+    }
 
     @media (max-width: 640px) {
       .panel-head p { max-width: none; }
@@ -2077,12 +2152,18 @@
 <body>
   <!-- LOGIN -->
   <div id="gate">
+    <span class="gate-spark" aria-hidden="true"></span>
+    <span class="gate-spark" aria-hidden="true"></span>
+    <span class="gate-spark" aria-hidden="true"></span>
+    <span class="gate-spark" aria-hidden="true"></span>
     <button type="button" class="theme-fab" id="themeToggleGate" title="Cambiar tema">☾ Oscuro</button>
     <div class="gate-inner">
       <div class="gate-logo-wrap">
         <img class="gate-logo" src="assets/dharma-gc-logo.png" alt="DHARMA SOLUTIONS" width="420" height="180" />
       </div>
       <h1>Tablero <em>de proyectos</em></h1>
+      <div class="gate-ornament" aria-hidden="true"><i></i></div>
+      <div class="gate-seal">Carmen · Edgar</div>
       <div class="user-picks">
         <div class="user-card carmen" data-user="carmen" role="button" tabindex="0">
           <div class="photo"><img src="assets/carmen.jpg" alt="Carmen" /></div>
