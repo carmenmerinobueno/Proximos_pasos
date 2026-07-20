@@ -1378,6 +1378,168 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* —— v4: filtros, dropdowns, pendientes —— */
+    .person-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin: -0.35rem 0 1rem;
+      align-items: center;
+    }
+    .person-filter.hidden { display: none; }
+    .person-filter .lbl {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      margin-right: 0.25rem;
+    }
+    .person-filter button {
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      background: var(--bg-elev);
+    }
+    .person-filter button.active {
+      background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+      color: #14110c;
+      border-color: transparent;
+    }
+
+    .search-soft {
+      width: 100%;
+      margin-bottom: 0.75rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--bg-elev);
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+    .search-soft:focus {
+      outline: 1px solid var(--gold);
+      border-color: var(--gold);
+    }
+    .search-soft::placeholder { color: var(--muted); }
+
+    .legend-soft {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-bottom: 0.85rem;
+      letter-spacing: 0.01em;
+    }
+
+    .dd { position: relative; display: inline-block; }
+    .dd-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      min-height: 1.7rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--text-soft);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .dd-btn.has { border-color: transparent; }
+    .dd-btn.p1 { background: rgba(180,70,70,0.18); color: #b45a5a; }
+    .dd-btn.p2 { background: rgba(180,100,130,0.16); color: #a66b82; }
+    .dd-btn.p3 { background: rgba(100,130,155,0.16); color: #6a8499; }
+    .dd-btn.p4 { background: rgba(120,120,120,0.16); color: #7a7a7a; }
+    .dd-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      z-index: 30;
+      min-width: 180px;
+      padding: 0.35rem;
+      border-radius: 12px;
+      border: 1px solid var(--line-strong);
+      background: var(--bg-elev);
+      box-shadow: var(--shadow-card);
+    }
+    .dd.open .dd-menu { display: block; }
+    .dd-menu button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.45rem 0.55rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+    }
+    .dd-menu button:hover { background: var(--bg-soft); color: var(--text); }
+
+    .task.tone-p1 { background: rgba(180,70,70,0.1); border-color: rgba(180,70,70,0.22); }
+    .task.tone-p2 { background: rgba(180,100,130,0.09); border-color: rgba(180,100,130,0.2); }
+    .task.tone-p3 { background: rgba(100,130,155,0.1); border-color: rgba(100,130,155,0.22); }
+    .task.tone-p4 { background: rgba(120,120,120,0.1); border-color: rgba(120,120,120,0.2); }
+    .task.tone-done { background: rgba(80,140,100,0.12); border-color: rgba(80,140,100,0.25); }
+
+    .prio-item.tone-p1 { background: rgba(180,70,70,0.1); border-color: rgba(180,70,70,0.25); }
+    .prio-item.tone-p2 { background: rgba(180,100,130,0.09); border-color: rgba(180,100,130,0.22); }
+    .prio-item.tone-p3 { background: rgba(100,130,155,0.1); border-color: rgba(100,130,155,0.22); }
+    .prio-item.tone-p4 { background: rgba(120,120,120,0.1); border-color: rgba(120,120,120,0.2); }
+    .prio-item.tone-done { background: rgba(80,140,100,0.12); border-color: rgba(80,140,100,0.28); opacity: 0.85; }
+
+    .meta-dates {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .countdown {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .countdown.late { color: var(--danger); }
+    .code-chip {
+      font-family: ui-monospace, monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .mini.has-content {
+      background: var(--gold-dim);
+      color: var(--gold-bright);
+      border-color: transparent;
+    }
+    .block-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 1rem 0 0.55rem;
+    }
+
+    [data-theme="light"] .dd-btn.p1 { background: #f3e4e4; color: #8f4545; }
+    [data-theme="light"] .dd-btn.p2 { background: #f6e8ee; color: #8f556c; }
+    [data-theme="light"] .dd-btn.p3 { background: #e6eef3; color: #4f6a7c; }
+    [data-theme="light"] .dd-btn.p4 { background: #ececec; color: #5c5c5c; }
+    [data-theme="light"] .prio-item.tone-p1,
+    [data-theme="light"] .task.tone-p1 { background: #f7ecec; }
+    [data-theme="light"] .prio-item.tone-p2,
+    [data-theme="light"] .task.tone-p2 { background: #f9eef3; }
+    [data-theme="light"] .prio-item.tone-p3,
+    [data-theme="light"] .task.tone-p3 { background: #eef3f7; }
+    [data-theme="light"] .prio-item.tone-p4,
+    [data-theme="light"] .task.tone-p4 { background: #f0f0f0; }
+    [data-theme="light"] .prio-item.tone-done,
+    [data-theme="light"] .task.tone-done { background: #e8f2eb; }
+    [data-theme="light"] .mini.has-content {
+      background: rgba(168,132,58,0.16);
+      color: var(--gold-bright);
+    }
+
     @keyframes rise {
       from { opacity: 0; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
@@ -1450,15 +1612,23 @@
         <button type="button" data-tab="actividad">Actividad</button>
       </nav>
 
+      <div class="person-filter" id="personFilter">
+        <span class="lbl">Ver</span>
+        <button type="button" data-person="" class="active">Todos</button>
+        <button type="button" data-person="edgar">Edgar</button>
+        <button type="button" data-person="carmen">Carmen</button>
+      </div>
+
       <section class="panel active" id="panel-pendientes">
         <div class="panel-head">
           <div>
             <h2>Pendientes</h2>
-            <p>Todo lo abierto, ordenado por Eisenhower (P1→P4) y luego por fecha.</p>
+            <p>Abiertas por prioridad y deadline · completadas por fecha de cierre.</p>
           </div>
         </div>
         <div class="kpi-grid" id="kpiGrid"></div>
-        <div class="prio-legend" id="legendPendientes"></div>
+        <div class="legend-soft" id="legendPendientes"></div>
+        <input type="search" class="search-soft" id="pendingSearch" placeholder="Buscar por código o nombre…" autocomplete="off" />
         <ul class="prio-list" id="prioList"></ul>
       </section>
 
@@ -1487,7 +1657,7 @@
         <div class="panel-head">
           <div>
             <h2>Emprendimientos</h2>
-            <p>App y Replay — independientes. Añade proyectos, pasos y tareas.</p>
+            <p>App y Replay. Añade proyectos, pasos y tareas.</p>
           </div>
           <button type="button" class="btn btn-gold" data-add-project="emprendimientos">+ Proyecto</button>
         </div>
@@ -1605,17 +1775,72 @@
       4: { label: "NO importante y NO urgente", hint: "Aparcar o eliminar", cls: "p4" }
     };
 
+    const CHAMPIONS = {
+      edgar: { id: "edgar", label: "Edgar" },
+      carmen: { id: "carmen", label: "Carmen" },
+      both: { id: "both", label: "C&E" },
+      third: { id: "third", label: "Tercero" }
+    };
+
+    let personFilter = ""; // "" | edgar | carmen
+    let pendingQuery = "";
+    let activityPersonFilter = ""; // for activity tab uses same personFilter UI
+
     function taskPriority(t) {
       const n = Number(t?.priority);
       return n >= 1 && n <= 4 ? n : 2;
     }
 
+    function taskChampion(t) {
+      const c = t?.champion;
+      return CHAMPIONS[c] ? c : "both";
+    }
+
+    function matchesPersonFilter(t, filter) {
+      if (!filter) return true;
+      const c = taskChampion(t);
+      if (c === "both" || c === "third") return true;
+      return c === filter;
+    }
+
+    function genShortCode(used) {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let code = "";
+      for (let attempt = 0; attempt < 80; attempt++) {
+        code = "";
+        for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+        if (!used.has(code)) {
+          used.add(code);
+          return code;
+        }
+      }
+      return ("X" + Date.now().toString(36)).slice(-5).toUpperCase();
+    }
+
     function normalizeState(s) {
       if (!s?.projects) return s;
+      const used = new Set();
       s.projects.forEach((p) => {
         (p.steps || []).forEach((st) => {
           (st.tasks || []).forEach((t) => {
             t.priority = taskPriority(t);
+            t.champion = taskChampion(t);
+            if (!t.description) t.description = t.description || "";
+            if (typeof t.note !== "string") t.note = t.note || "";
+            if (!t.createdAt) t.createdAt = t.doneAt || todayISO();
+            if (t.shortCode && /^[A-Z0-9]{5}$/i.test(t.shortCode)) {
+              used.add(t.shortCode.toUpperCase());
+              t.shortCode = t.shortCode.toUpperCase();
+            }
+          });
+        });
+      });
+      s.projects.forEach((p) => {
+        (p.steps || []).forEach((st) => {
+          (st.tasks || []).forEach((t) => {
+            if (!t.shortCode || !/^[A-Z0-9]{5}$/.test(t.shortCode)) {
+              t.shortCode = genShortCode(used);
+            }
           });
         });
       });
@@ -1623,41 +1848,67 @@
     }
 
     function legendHtml() {
-      return `
-        <div class="prio-legend-title">Cuadrante de Eisenhower</div>
-        <div class="prio-legend-sub">Lo importante ↑ · Lo urgente → · Elige P1–P4 en cada tarea</div>
-        <div class="eisen-cell p2">
-          <div class="lvl">P2</div>
-          <strong>${PRIORITY[2].label}</strong>
-          <span>${PRIORITY[2].hint}</span>
-        </div>
-        <div class="eisen-cell p1">
-          <div class="lvl">P1</div>
-          <strong>${PRIORITY[1].label}</strong>
-          <span>${PRIORITY[1].hint}</span>
-        </div>
-        <div class="eisen-cell p4">
-          <div class="lvl">P4</div>
-          <strong>${PRIORITY[4].label}</strong>
-          <span>${PRIORITY[4].hint}</span>
-        </div>
-        <div class="eisen-cell p3">
-          <div class="lvl">P3</div>
-          <strong>${PRIORITY[3].label}</strong>
-          <span>${PRIORITY[3].hint}</span>
-        </div>
-      `;
+      return `P1 urgente+importante · P2 planificar · P3 acotar · P4 aparcar`;
     }
 
     function paintLegends() {
       const el = document.getElementById("legendPendientes");
-      if (el) el.innerHTML = legendHtml();
+      if (el) el.textContent = legendHtml();
     }
 
+    function deadlineLabel(iso) {
+      if (!iso) return "";
+      const today = todayISO();
+      const t0 = new Date(today + "T12:00:00");
+      const t1 = new Date(iso + "T12:00:00");
+      const diff = Math.round((t1 - t0) / 86400000);
+      if (diff === 0) return { text: "hoy", late: false };
+      if (diff > 0) return { text: `en ${diff} día${diff === 1 ? "" : "s"}`, late: false };
+      const n = Math.abs(diff);
+      return { text: `hace ${n} día${n === 1 ? "" : "s"}`, late: true };
+    }
+
+    function dropdownHtml(kind, value, options) {
+      const current = options.find((o) => o.id === value) || options[0];
+      const btnCls = kind === "prio" ? `dd-btn has ${PRIORITY[value]?.cls || "p2"}` : "dd-btn has";
+      const btnLabel = kind === "prio" ? `P${value}` : current.label;
+      return `
+        <div class="dd" data-dd="${kind}">
+          <button type="button" class="${btnCls}" data-dd-toggle>${btnLabel}</button>
+          <div class="dd-menu">
+            ${options.map((o) => `<button type="button" data-dd-val="${o.id}">${kind === "prio" ? "P" + o.id + " · " : ""}${o.label}</button>`).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function bindDropdown(root, onPick) {
+      const dd = root.querySelector(".dd");
+      if (!dd) return;
+      dd.querySelector("[data-dd-toggle]")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        document.querySelectorAll(".dd.open").forEach((x) => { if (x !== dd) x.classList.remove("open"); });
+        dd.classList.toggle("open");
+      });
+      dd.querySelectorAll("[data-dd-val]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          dd.classList.remove("open");
+          onPick(btn.dataset.ddVal);
+        });
+      });
+    }
+
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".dd.open").forEach((x) => x.classList.remove("open"));
+    });
+
     function priorityButtons(active) {
-      return [1, 2, 3, 4].map((n) =>
-        `<button type="button" class="${PRIORITY[n].cls} ${active === n ? "active" : ""}" data-prio="${n}" title="${PRIORITY[n].label}">P${n}</button>`
-      ).join("");
+      return dropdownHtml("prio", active, [1, 2, 3, 4].map((n) => ({ id: n, label: PRIORITY[n].label })));
+    }
+
+    function championDropdown(active) {
+      return dropdownHtml("champ", active, Object.values(CHAMPIONS));
     }
 
     const LOCAL_KEY = "ce-tablero-v3-shared";
@@ -2148,9 +2399,11 @@
       paintLegends();
       await ensureCloudSpace();
       await pullCloud();
+      state = normalizeState(state || DEFAULT_SEED());
       document.getElementById("gate").style.display = "none";
       document.getElementById("app").classList.add("ready");
       paintWho();
+      updatePersonFilterUI();
       renderAll();
       logActivity("entrada", "Ha entrado al tablero");
       scheduleSave(false);
@@ -2185,13 +2438,43 @@
     }
 
     /* ——— Tabs ——— */
+    const TABS_WITH_PERSON_FILTER = new Set(["pendientes","emprendimientos","tfg","casa","cursos","marcas","resumen","actividad"]);
+
+    function updatePersonFilterUI() {
+      const bar = document.getElementById("personFilter");
+      const activeTab = document.querySelector("#tabs button.active")?.dataset.tab;
+      if (!bar) return;
+      const show = TABS_WITH_PERSON_FILTER.has(activeTab) && activeTab !== "calendario";
+      bar.classList.toggle("hidden", !show);
+      bar.querySelectorAll("button[data-person]").forEach((b) => {
+        const val = b.dataset.person;
+        b.classList.toggle("active", val === personFilter);
+      });
+    }
+
+    document.getElementById("personFilter")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-person]");
+      if (!btn) return;
+      personFilter = btn.dataset.person || "";
+      updatePersonFilterUI();
+      renderAll();
+    });
+
+    document.getElementById("pendingSearch")?.addEventListener("input", (e) => {
+      pendingQuery = (e.target.value || "").trim().toLowerCase();
+      renderPendientes();
+    });
+
     document.getElementById("tabs").addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-tab]");
       if (!btn) return;
       document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("active", b === btn));
       document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + btn.dataset.tab));
+      updatePersonFilterUI();
       if (btn.dataset.tab === "pendientes") renderPendientes();
       if (btn.dataset.tab === "calendario") renderCalendario();
+      if (btn.dataset.tab === "actividad") renderActivity();
+      if (btn.dataset.tab === "resumen") renderWeek();
     });
 
     /* ——— Render ——— */
@@ -2229,16 +2512,23 @@
     }
 
     function renderPendientes() {
-      const items = allTasks();
-      const pending = items.filter(({ t }) => !t.done);
+      const items = allTasks().filter(({ t }) => matchesPersonFilter(t, personFilter));
+      const q = pendingQuery;
+      const filtered = !q ? items : items.filter(({ t, p }) => {
+        const hay = `${t.shortCode || ""} ${t.label || ""} ${p.title || ""}`.toLowerCase();
+        return hay.includes(q);
+      });
+
+      const pending = filtered.filter(({ t }) => !t.done);
+      const completed = filtered.filter(({ t }) => t.done);
       const withDate = pending.filter(({ t }) => t.date);
       const today = todayISO();
       const overdue = withDate.filter(({ t }) => t.date < today);
       const dueToday = withDate.filter(({ t }) => t.date === today);
       const p1 = pending.filter(({ t }) => taskPriority(t) === 1).length;
-      const done = items.filter(({ t }) => t.done).length;
-      const total = items.length;
-      const pct = total ? Math.round((done / total) * 100) : 0;
+      const doneCount = allTasks().filter(({ t }) => t.done).length;
+      const total = allTasks().length;
+      const pct = total ? Math.round((doneCount / total) * 100) : 0;
 
       const kpi = document.getElementById("kpiGrid");
       if (!kpi) return;
@@ -2246,7 +2536,7 @@
         <div class="kpi">
           <div class="kpi-label">Pendientes</div>
           <div class="kpi-value">${pending.length}</div>
-          <div class="kpi-hint">de ${total} tareas totales</div>
+          <div class="kpi-hint">en esta vista</div>
         </div>
         <div class="kpi alert">
           <div class="kpi-label">P1 abiertas</div>
@@ -2261,56 +2551,115 @@
         <div class="kpi silver-tone">
           <div class="kpi-label">Avance</div>
           <div class="kpi-value">${pct}%</div>
-          <div class="kpi-hint">${done} completadas</div>
+          <div class="kpi-hint">${doneCount} completadas</div>
         </div>
       `;
 
-      const sorted = pending.slice().sort((a, b) => {
+      const openSorted = pending.slice().sort((a, b) => {
         const pd = taskPriority(a.t) - taskPriority(b.t);
         if (pd) return pd;
         return (a.t.date || "9999").localeCompare(b.t.date || "9999");
       });
+      const doneSorted = completed.slice().sort((a, b) =>
+        (b.t.doneAt || "").localeCompare(a.t.doneAt || "")
+      );
 
       const el = document.getElementById("prioList");
       if (!el) return;
-      if (!sorted.length) {
-        el.innerHTML = `<li class="empty" style="border:none;background:transparent;display:block">No hay nada pendiente. ¡Bien!</li>`;
-        return;
-      }
 
-      el.innerHTML = sorted.map(({ p, t }) => {
+      function rowHtml({ p, t }, isDone) {
         const pr = taskPriority(t);
-        const isOverdue = t.date && t.date < today;
-        const isToday = t.date === today;
+        const ch = taskChampion(t);
+        const isOverdue = !isDone && t.date && t.date < today;
+        const isToday = !isDone && t.date === today;
+        const cd = !isDone && t.date ? deadlineLabel(t.date) : null;
+        const hasNote = !!(t.note && t.note.trim());
+        const hasDesc = !!(t.description && t.description.trim());
         const dateBlock = t.date
           ? (() => {
               const d = t.date.split("-");
               return `<div class="prio-date">${d[2]}<span>${d[1]}/${d[0].slice(2)}</span></div>`;
             })()
           : `<div class="prio-date">—<span>sin fecha</span></div>`;
+        const tone = isDone ? "tone-done" : `tone-p${pr}`;
         return `
-          <li class="prio-item ${isOverdue ? "overdue" : ""} ${isToday ? "today" : ""}">
+          <li class="prio-item ${tone} ${isOverdue ? "overdue" : ""} ${isToday ? "today" : ""}" data-task-row="${t.id}">
             ${dateBlock}
             <div class="prio-body">
-              <strong><span class="p-badge ${PRIORITY[pr].cls}">P${pr}</span> ${escapeHtml(t.label)}</strong>
-              <div class="sub">${escapeHtml(p.title)} · ${AREA_LABELS[p.area] || p.area} · ${PRIORITY[pr].label}${isOverdue ? " · vencida" : isToday ? " · hoy" : ""}</div>
-              ${t.note ? `<div class="note-snip">${escapeHtml(t.note)}</div>` : ""}
+              <strong>
+                <span class="p-badge ${PRIORITY[pr].cls}">P${pr}</span>
+                ${escapeHtml(t.label)}
+              </strong>
+              <div class="sub">
+                <span class="code-chip">${escapeHtml(t.shortCode || "—")}</span>
+                · ${escapeHtml(p.title)}
+                · ${CHAMPIONS[ch].label}
+                ${cd ? ` · <span class="countdown ${cd.late ? "late" : ""}">${cd.text}</span>` : ""}
+              </div>
+              <div class="meta-dates">
+                creada ${t.createdAt ? fmtDay(t.createdAt) : "—"}
+                ${isDone && t.doneAt ? ` · hecha ${fmtDay(t.doneAt)}` : ""}
+              </div>
+              <div class="task-meta" style="padding-left:0;margin-top:0.45rem">
+                <button type="button" class="mini ${hasDesc ? "has-content" : ""}" data-act="desc">Descripción</button>
+                <button type="button" class="mini ${hasNote ? "has-content" : ""}" data-act="note">Nota</button>
+              </div>
+              <div class="task-note" data-pane="desc"><textarea data-field="description" placeholder="Contexto estable de la tarea…">${escapeHtml(t.description || "")}</textarea></div>
+              <div class="task-note" data-pane="note"><textarea data-field="note" placeholder="Apunte del día a día…">${escapeHtml(t.note || "")}</textarea></div>
             </div>
-            <input class="check" type="checkbox" data-toggle="${t.id}" title="Completar" />
+            <input class="check" type="checkbox" data-toggle="${t.id}" ${isDone ? "checked" : ""} title="Completar" />
           </li>
         `;
-      }).join("");
+      }
+
+      if (!openSorted.length && !doneSorted.length) {
+        el.innerHTML = `<li class="empty" style="border:none;background:transparent;display:block">No hay tareas en esta vista.</li>`;
+        return;
+      }
+
+      el.innerHTML = `
+        ${openSorted.length ? `<li class="block-title" style="list-style:none;border:none;background:transparent;display:block;padding:0">Por hacer</li>${openSorted.map((x) => rowHtml(x, false)).join("")}` : ""}
+        ${doneSorted.length ? `<li class="block-title" style="list-style:none;border:none;background:transparent;display:block;padding:0">Completadas</li>${doneSorted.map((x) => rowHtml(x, true)).join("")}` : ""}
+      `;
 
       el.querySelectorAll("[data-toggle]").forEach((chk) => {
         chk.addEventListener("change", () => {
           const meta = findTask(chk.dataset.toggle);
           if (!meta) return;
-          meta.task.done = true;
-          meta.task.doneAt = todayISO();
-          meta.task.doneBy = currentUser.id;
-          logActivity("completar", `«${meta.task.label}» desde Pendientes`);
+          meta.task.done = chk.checked;
+          meta.task.doneAt = chk.checked ? todayISO() : null;
+          meta.task.doneBy = chk.checked ? currentUser.id : null;
+          logActivity(chk.checked ? "completar" : "reabrir", `«${meta.task.label}» (${meta.task.shortCode})`);
           scheduleSave(true);
           renderAll();
+        });
+      });
+
+      el.querySelectorAll("[data-task-row]").forEach((row) => {
+        const meta = findTask(row.dataset.taskRow);
+        if (!meta) return;
+        const t = meta.task;
+        row.querySelectorAll("[data-act]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const pane = row.querySelector(`[data-pane="${btn.dataset.act === "desc" ? "desc" : "note"}"]`);
+            const open = pane.classList.toggle("open");
+            if (open) pane.querySelector("textarea")?.focus();
+          });
+        });
+        row.querySelectorAll("textarea[data-field]").forEach((ta) => {
+          ta.addEventListener("change", () => {
+            const field = ta.dataset.field;
+            const prev = (t[field] || "").trim();
+            const next = ta.value;
+            t[field] = next;
+            const has = !!(next || "").trim();
+            const btn = row.querySelector(`[data-act="${field === "description" ? "desc" : "note"}"]`);
+            btn?.classList.toggle("has-content", has);
+            if (!prev && has) logActivity(field === "note" ? "nota" : "descripción", `Creó ${field} en «${t.label}» (${t.shortCode})`);
+            else if (prev && !has) logActivity(field === "note" ? "nota" : "descripción", `Eliminó ${field} de «${t.label}» (${t.shortCode})`);
+            else logActivity(field === "note" ? "nota" : "descripción", `Editó ${field} de «${t.label}» (${t.shortCode})`);
+            scheduleSave(true);
+          });
         });
       });
     }
@@ -2553,26 +2902,43 @@
     }
 
     function renderTask(p, step, t) {
+      if (!matchesPersonFilter(t, personFilter)) {
+        const empty = document.createElement("div");
+        empty.style.display = "none";
+        return empty;
+      }
       const el = document.createElement("div");
-      el.className = "task" + (t.done ? " done" : "");
-      const hasNote = !!(t.note && t.note.trim());
       const pr = taskPriority(t);
+      const ch = taskChampion(t);
+      const hasNote = !!(t.note && t.note.trim());
+      const hasDesc = !!(t.description && t.description.trim());
+      el.className = "task " + (t.done ? "done tone-done" : `tone-p${pr}`);
       el.innerHTML = `
         <div class="task-row">
           <input class="check" type="checkbox" ${t.done ? "checked" : ""} />
           <div>
             <div class="task-label" contenteditable="true">${escapeHtml(t.label)}</div>
-            ${t.doneBy ? `<div class="byline ${t.doneBy}">Hecho por ${USERS[t.doneBy]?.short || t.doneBy}${t.doneAt ? " · " + fmtDay(t.doneAt) : ""}</div>` : ""}
+            <div class="meta-dates">
+              <span class="code-chip">${escapeHtml(t.shortCode || "—")}</span>
+              · creada ${t.createdAt ? fmtDay(t.createdAt) : "—"}
+              ${t.done && t.doneAt ? ` · hecha ${fmtDay(t.doneAt)}` : ""}
+              ${t.doneBy ? ` · por ${USERS[t.doneBy]?.short || t.doneBy}` : ""}
+            </div>
           </div>
           <button type="button" class="icon-btn" data-act="del-task" title="Eliminar">×</button>
         </div>
         <div class="task-meta">
           <label>Fecha <input type="date" value="${t.date || ""}" /></label>
-          <div class="p-select" title="Prioridad Eisenhower">${priorityButtons(pr)}</div>
-          <button type="button" class="mini ${hasNote ? "on" : ""}" data-act="note">Nota</button>
+          <span data-wrap="prio">${priorityButtons(pr)}</span>
+          <span data-wrap="champ">${championDropdown(ch)}</span>
+          <button type="button" class="mini ${hasDesc ? "has-content" : ""}" data-act="desc">Descripción</button>
+          <button type="button" class="mini ${hasNote ? "has-content" : ""}" data-act="note">Nota</button>
         </div>
-        <div class="task-note ${hasNote ? "open" : ""}">
-          <textarea placeholder="Apunta lo que quieras…">${escapeHtml(t.note || "")}</textarea>
+        <div class="task-note" data-pane="desc">
+          <textarea data-field="description" placeholder="Contexto estable de la tarea…">${escapeHtml(t.description || "")}</textarea>
+        </div>
+        <div class="task-note" data-pane="note">
+          <textarea data-field="note" placeholder="Apunte del día a día…">${escapeHtml(t.note || "")}</textarea>
         </div>
       `;
 
@@ -2581,8 +2947,7 @@
         t.done = check.checked;
         t.doneAt = check.checked ? todayISO() : null;
         t.doneBy = check.checked ? currentUser.id : null;
-        el.classList.toggle("done", t.done);
-        logActivity(check.checked ? "completar" : "reabrir", `«${t.label}» en ${p.title}`);
+        logActivity(check.checked ? "completar" : "reabrir", `«${t.label}» (${t.shortCode}) en ${p.title}`);
         scheduleSave(true);
         renderAll();
       });
@@ -2591,46 +2956,61 @@
         const v = e.target.textContent.trim();
         if (v && v !== t.label) {
           t.label = v;
-          logActivity("editar", `Tarea → «${v}»`);
+          logActivity("editar", `Tarea → «${v}» (${t.shortCode})`);
           scheduleSave(true);
         }
       });
 
       el.querySelector('input[type="date"]').addEventListener("change", (e) => {
         t.date = e.target.value || "";
-        logActivity("fecha", `Fecha en «${t.label}»: ${t.date ? fmtDay(t.date) : "sin fecha"}`);
+        logActivity("fecha", `Fecha en «${t.label}» (${t.shortCode}): ${t.date ? fmtDay(t.date) : "sin fecha"}`);
         scheduleSave(true);
         renderAll();
       });
 
-      el.querySelectorAll("[data-prio]").forEach((btn) => {
+      bindDropdown(el.querySelector('[data-wrap="prio"]'), (val) => {
+        const n = Number(val);
+        t.priority = n;
+        logActivity("prioridad", `«${t.label}» (${t.shortCode}) → P${n}`);
+        scheduleSave(true);
+        renderAll();
+      });
+      bindDropdown(el.querySelector('[data-wrap="champ"]'), (val) => {
+        t.champion = val;
+        logActivity("champion", `«${t.label}» (${t.shortCode}) → ${CHAMPIONS[val].label}`);
+        scheduleSave(true);
+        renderAll();
+      });
+
+      el.querySelectorAll("[data-act='desc'], [data-act='note']").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const n = Number(btn.dataset.prio);
-          t.priority = n;
-          logActivity("prioridad", `«${t.label}» → P${n} (${PRIORITY[n].label})`);
-          scheduleSave(true);
-          renderAll();
+          const key = btn.dataset.act === "desc" ? "desc" : "note";
+          const pane = el.querySelector(`[data-pane="${key}"]`);
+          const open = pane.classList.toggle("open");
+          if (open) pane.querySelector("textarea")?.focus();
         });
       });
 
-      const noteBtn = el.querySelector('[data-act="note"]');
-      const noteWrap = el.querySelector(".task-note");
-      const noteArea = noteWrap.querySelector("textarea");
-      noteBtn.addEventListener("click", () => {
-        noteWrap.classList.toggle("open");
-        if (noteWrap.classList.contains("open")) noteArea.focus();
-      });
-      noteArea.addEventListener("change", () => {
-        t.note = noteArea.value;
-        noteBtn.classList.toggle("on", !!(t.note || "").trim());
-        logActivity("nota", `Nota en tarea «${t.label}»`);
-        scheduleSave(true);
-        renderWeek();
+      el.querySelectorAll("textarea[data-field]").forEach((ta) => {
+        ta.addEventListener("change", () => {
+          const field = ta.dataset.field;
+          const prev = (t[field] || "").trim();
+          const next = ta.value;
+          t[field] = next;
+          const has = !!(next || "").trim();
+          const btn = el.querySelector(`[data-act="${field === "description" ? "desc" : "note"}"]`);
+          btn?.classList.toggle("has-content", has);
+          if (!prev && has) logActivity(field === "note" ? "nota" : "descripción", `Creó ${field} en «${t.label}» (${t.shortCode})`);
+          else if (prev && !has) logActivity(field === "note" ? "nota" : "descripción", `Eliminó ${field} de «${t.label}» (${t.shortCode})`);
+          else logActivity(field === "note" ? "nota" : "descripción", `Editó ${field} de «${t.label}» (${t.shortCode})`);
+          scheduleSave(true);
+        });
       });
 
       el.querySelector('[data-act="del-task"]').addEventListener("click", () => {
+        if (!confirm("¿Eliminar esta tarea?")) return;
         step.tasks = step.tasks.filter((x) => x.id !== t.id);
-        logActivity("eliminar", `Eliminó tarea «${t.label}»`);
+        logActivity("eliminar", `Eliminó tarea «${t.label}» (${t.shortCode})`);
         scheduleSave(true);
         renderAll();
       });
@@ -2659,7 +3039,7 @@
       document.getElementById("weekRange").textContent =
         `${fmtDay(toISO(mon))} – ${fmtDay(toISO(addDays(mon, 6)))}`;
 
-      const items = allTasks();
+      const items = allTasks().filter(({ t }) => matchesPersonFilter(t, personFilter));
       const done = items.filter(({ t }) => t.done && t.doneAt && inWeek(t.doneAt, mon));
       const due = items.filter(({ t }) => t.date && inWeek(t.date, mon));
       const notes = items.filter(({ t }) => (t.note || "").trim() && ((t.date && inWeek(t.date, mon)) || (t.doneAt && inWeek(t.doneAt, mon))));
@@ -2715,11 +3095,13 @@
 
     function renderActivity() {
       const el = document.getElementById("activityList");
-      if (!state.activity.length) {
-        el.innerHTML = `<li class="empty">Aún no hay actividad.</li>`;
+      let list = state.activity || [];
+      if (personFilter) list = list.filter((a) => a.userId === personFilter);
+      if (!list.length) {
+        el.innerHTML = `<li class="empty">Aún no hay actividad${personFilter ? " de " + (USERS[personFilter]?.short || personFilter) : ""}.</li>`;
         return;
       }
-      el.innerHTML = state.activity.slice(0, 80).map((a) => `
+      el.innerHTML = list.slice(0, 100).map((a) => `
         <li>
           <div class="when">${fmtWhen(a.at)}</div>
           <div class="who-tag ${a.userId}">${escapeHtml(a.userName)}</div>
@@ -2798,12 +3180,16 @@
       const step = p.steps.find((s) => s.id === stepId);
       openModal(`
         <h3>Nueva tarea</h3>
-        <div class="row"><label>Qué hay que hacer</label><input type="text" id="mTitle" placeholder="Descripción de la tarea" /></div>
-        <div class="row"><label>Fecha (opcional)</label><input type="date" id="mDate" style="width:100%;background:var(--input-bg);border:1px solid var(--line);border-radius:10px;padding:0.7rem;color-scheme:var(--scheme)" /></div>
+        <div class="row"><label>Qué hay que hacer</label><input type="text" id="mTitle" placeholder="Título de la tarea" /></div>
+        <div class="row"><label>Descripción (opcional)</label><textarea id="mDesc" placeholder="Contexto estable…"></textarea></div>
+        <div class="row"><label>Fecha / deadline (opcional)</label><input type="date" id="mDate" style="width:100%;background:var(--input-bg);border:1px solid var(--line);border-radius:10px;padding:0.7rem;color-scheme:var(--scheme)" /></div>
         <div class="row">
-          <label>Prioridad Eisenhower</label>
-          <div class="p-select" id="mPrio">${priorityButtons(2)}</div>
-          <p class="hint" style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted)">Por defecto P2 · importante y no urgente</p>
+          <label>Prioridad</label>
+          <div id="mPrio">${priorityButtons(2)}</div>
+        </div>
+        <div class="row">
+          <label>Champion</label>
+          <div id="mChamp">${championDropdown("both")}</div>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" id="mCancel">Cancelar</button>
@@ -2811,29 +3197,47 @@
         </div>
       `);
       let chosen = 2;
-      const prioBox = modalBody.querySelector("#mPrio");
-      prioBox.onclick = (e) => {
-        const b = e.target.closest("[data-prio]");
-        if (!b) return;
-        chosen = Number(b.dataset.prio);
-        prioBox.innerHTML = priorityButtons(chosen);
-      };
+      let champ = "both";
+      function rebindPrio() {
+        bindDropdown(modalBody.querySelector("#mPrio"), (val) => {
+          chosen = Number(val);
+          modalBody.querySelector("#mPrio").innerHTML = priorityButtons(chosen);
+          rebindPrio();
+        });
+      }
+      function rebindChamp() {
+        bindDropdown(modalBody.querySelector("#mChamp"), (val) => {
+          champ = val;
+          modalBody.querySelector("#mChamp").innerHTML = championDropdown(champ);
+          rebindChamp();
+        });
+      }
+      rebindPrio();
+      rebindChamp();
 
       modalBody.querySelector("#mCancel").onclick = closeModal;
       modalBody.querySelector("#mOk").onclick = () => {
         const label = modalBody.querySelector("#mTitle").value.trim();
         if (!label) return toast("Escribe la tarea");
-        step.tasks.push({
+        const used = new Set();
+        allTasks().forEach(({ t }) => { if (t.shortCode) used.add(t.shortCode); });
+        const shortCode = genShortCode(used);
+        const task = {
           id: uid("task"),
+          shortCode,
           label,
+          description: modalBody.querySelector("#mDesc").value || "",
           date: modalBody.querySelector("#mDate").value || "",
           note: "",
           priority: chosen,
+          champion: champ,
+          createdAt: todayISO(),
           done: false,
           doneAt: null,
           doneBy: null
-        });
-        logActivity("crear", `Añadió tarea «${label}» (P${chosen})`);
+        };
+        step.tasks.push(task);
+        logActivity("crear", `Añadió tarea «${label}» (${shortCode}) · P${chosen} · ${CHAMPIONS[champ].label}`);
         scheduleSave(true);
         closeModal();
         renderAll();
