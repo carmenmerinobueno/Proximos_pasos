@@ -318,27 +318,52 @@
       box-shadow: var(--shadow-card), var(--glow);
       outline: none;
     }
-    .user-card.carmen .avatar {
-      background: var(--gold-dim);
-      color: var(--gold-bright);
-      border-color: rgba(230,236,242,0.35);
-    }
+    .user-card.carmen .avatar,
     .user-card.edgar .avatar {
-      background: var(--silver-dim);
-      color: var(--silver);
-      border-color: rgba(139,148,158,0.4);
+      background: transparent;
+      border-color: rgba(255, 200, 160, 0.35);
+      padding: 0;
+      overflow: hidden;
     }
     .avatar {
-      width: 44px;
-      height: 44px;
+      width: 56px;
+      height: 56px;
       border-radius: 999px;
-      border: 1px solid;
+      border: 2px solid rgba(255, 200, 160, 0.35);
       display: grid;
       place-items: center;
       font-weight: 700;
       font-size: 0.78rem;
       letter-spacing: 0.08em;
       font-family: var(--font-display);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .who-pill .dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      overflow: hidden;
+      padding: 0;
+    }
+    .who-pill .dot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .user-card strong {
       display: block;
@@ -514,8 +539,8 @@
       max-width: 160px;
     }
     .who-pill .dot {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 999px;
       display: grid;
       place-items: center;
@@ -524,9 +549,21 @@
       letter-spacing: 0.04em;
       flex-shrink: 0;
       font-family: var(--font-display);
+      overflow: hidden;
+      padding: 0;
     }
-    .who-pill.carmen .dot { background: var(--gold-dim); color: var(--gold-bright); box-shadow: 0 0 10px rgba(240,247,251,0.2); }
-    .who-pill.edgar .dot { background: var(--silver-dim); color: var(--silver); }
+    .who-pill .dot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .who-pill.carmen .dot,
+    .who-pill.edgar .dot {
+      background: transparent;
+      box-shadow: none;
+      border: 1px solid rgba(255, 200, 160, 0.3);
+    }
     .who-pill .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .sync-status {
       font-size: 0.62rem;
@@ -1986,18 +2023,18 @@
       <p class="gate-sub">Elige quién eres. Entráis al mismo panel de la empresa; todo queda registrado para el equipo.</p>
       <div class="user-picks">
         <button type="button" class="user-card carmen" data-user="carmen">
-          <div class="avatar">CM</div>
+          <div class="avatar"><img src="assets/carmen.jpg" alt="Carmen" width="56" height="56" /></div>
           <div>
             <strong>Carmen Merino Bueno</strong>
-            <span>Entrar como Carmen · chrome</span>
+            <span>Entrar como Carmen</span>
           </div>
           <span class="arrow">→</span>
         </button>
         <button type="button" class="user-card edgar" data-user="edgar">
-          <div class="avatar">EG</div>
+          <div class="avatar"><img src="assets/edgar.jpg" alt="Edgar" width="56" height="56" /></div>
           <div>
             <strong>Edgar Gabriel Pablo Ramos</strong>
-            <span>Entrar como Edgar · steel</span>
+            <span>Entrar como Edgar</span>
           </div>
           <span class="arrow">→</span>
         </button>
@@ -2199,8 +2236,8 @@
 
   <script>
     const USERS = {
-      carmen: { id: "carmen", name: "Carmen Merino Bueno", short: "Carmen", initials: "CM", tone: "carmen" },
-      edgar: { id: "edgar", name: "Edgar Gabriel Pablo Ramos", short: "Edgar", initials: "EG", tone: "edgar" }
+      carmen: { id: "carmen", name: "Carmen Merino Bueno", short: "Carmen", initials: "CM", tone: "carmen", photo: "assets/carmen.jpg" },
+      edgar: { id: "edgar", name: "Edgar Gabriel Pablo Ramos", short: "Edgar", initials: "EG", tone: "edgar", photo: "assets/edgar.jpg" }
     };
 
     const PRIORITY = {
@@ -2869,7 +2906,12 @@
     function paintWho() {
       const pill = document.getElementById("whoPill");
       pill.className = "who-pill " + currentUser.tone;
-      document.getElementById("whoDot").textContent = currentUser.initials;
+      const dot = document.getElementById("whoDot");
+      if (currentUser.photo) {
+        dot.innerHTML = `<img src="${currentUser.photo}" alt="${currentUser.short}" />`;
+      } else {
+        dot.textContent = currentUser.initials;
+      }
       document.getElementById("whoName").textContent = currentUser.short;
       setSyncStatus(isPantryId(spaceId) ? "Sincronizado" : "Panel compartido");
     }
