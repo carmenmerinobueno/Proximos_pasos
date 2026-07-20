@@ -1410,8 +1410,8 @@
 
     .search-soft {
       width: 100%;
-      margin-bottom: 0.75rem;
-      padding: 0.55rem 0.85rem;
+      margin-bottom: 0;
+      padding: 0.55rem 2rem 0.55rem 0.85rem;
       border-radius: 10px;
       border: 1px solid var(--line);
       background: var(--bg-elev);
@@ -1423,6 +1423,33 @@
       border-color: var(--gold);
     }
     .search-soft::placeholder { color: var(--muted); }
+
+    .search-wrap {
+      position: relative;
+      width: 100%;
+      margin-bottom: 0.85rem;
+    }
+    .search-wrap.hidden { display: none; }
+    .search-clear {
+      position: absolute;
+      right: 0.45rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .search-wrap.has-value .search-clear { display: inline-flex; }
+    .search-clear:hover { color: var(--text); background: var(--bg-soft); }
 
     .legend-soft {
       font-size: 0.72rem;
@@ -1619,6 +1646,11 @@
         <button type="button" data-person="carmen">Carmen</button>
       </div>
 
+      <div class="search-wrap" id="sharedSearchWrap">
+        <input type="search" class="search-soft" id="sharedSearch" placeholder="Buscar por código o nombre…" autocomplete="off" />
+        <button type="button" class="search-clear" id="sharedSearchClear" title="Limpiar búsqueda" aria-label="Limpiar">×</button>
+      </div>
+
       <section class="panel active" id="panel-pendientes">
         <div class="panel-head">
           <div>
@@ -1628,7 +1660,6 @@
         </div>
         <div class="kpi-grid" id="kpiGrid"></div>
         <div class="legend-soft" id="legendPendientes"></div>
-        <input type="search" class="search-soft" id="pendingSearch" placeholder="Buscar por código o nombre…" autocomplete="off" />
         <ul class="prio-list" id="prioList"></ul>
       </section>
 
@@ -1783,8 +1814,7 @@
     };
 
     let personFilter = ""; // "" | edgar | carmen
-    let pendingQuery = "";
-    let activityPersonFilter = ""; // for activity tab uses same personFilter UI
+    let sharedQuery = ""; // búsqueda compartida (código + nombre)
 
     function taskPriority(t) {
       const n = Number(t?.priority);
@@ -1801,6 +1831,28 @@
       const c = taskChampion(t);
       if (c === "both" || c === "third") return true;
       return c === filter;
+    }
+
+    function matchesSearch(t, p) {
+      if (!sharedQuery) return true;
+      const hay = `${t.shortCode || ""} ${t.label || ""} ${p?.title || ""}`.toLowerCase();
+      return hay.includes(sharedQuery);
+    }
+
+    function taskVisible(t, p) {
+      return matchesPersonFilter(t, personFilter) && matchesSearch(t, p);
+    }
+
+    function activityMatchesSearch(a) {
+      if (!sharedQuery) return true;
+      const detail = `${a.detail || ""} ${a.action || ""}`.toLowerCase();
+      if (detail.includes(sharedQuery)) return true;
+      return allTasks().some(({ t, p }) => {
+        if (!matchesSearch(t, p)) return false;
+        const code = (t.shortCode || "").toLowerCase();
+        const label = (t.label || "").toLowerCase();
+        return (code && detail.includes(code)) || (label.length > 1 && detail.includes(label));
+      });
     }
 
     function genShortCode(used) {
@@ -2439,17 +2491,36 @@
 
     /* ——— Tabs ——— */
     const TABS_WITH_PERSON_FILTER = new Set(["pendientes","emprendimientos","tfg","casa","cursos","marcas","resumen","actividad"]);
+    const TABS_WITH_SEARCH = new Set(["pendientes","emprendimientos","tfg","casa","cursos","marcas","resumen","actividad"]);
 
     function updatePersonFilterUI() {
       const bar = document.getElementById("personFilter");
+      const searchWrap = document.getElementById("sharedSearchWrap");
       const activeTab = document.querySelector("#tabs button.active")?.dataset.tab;
-      if (!bar) return;
-      const show = TABS_WITH_PERSON_FILTER.has(activeTab) && activeTab !== "calendario";
-      bar.classList.toggle("hidden", !show);
-      bar.querySelectorAll("button[data-person]").forEach((b) => {
-        const val = b.dataset.person;
-        b.classList.toggle("active", val === personFilter);
-      });
+      if (bar) {
+        const show = TABS_WITH_PERSON_FILTER.has(activeTab);
+        bar.classList.toggle("hidden", !show);
+        bar.querySelectorAll("button[data-person]").forEach((b) => {
+          b.classList.toggle("active", (b.dataset.person || "") === personFilter);
+        });
+      }
+      if (searchWrap) {
+        searchWrap.classList.toggle("hidden", !TABS_WITH_SEARCH.has(activeTab));
+        syncSharedSearchUI();
+      }
+    }
+
+    function syncSharedSearchUI() {
+      const input = document.getElementById("sharedSearch");
+      const wrap = document.getElementById("sharedSearchWrap");
+      if (!input || !wrap) return;
+      wrap.classList.toggle("has-value", !!(input.value || "").trim());
+    }
+
+    function setSharedQueryFromInput(raw) {
+      sharedQuery = (raw || "").trim().toLowerCase();
+      syncSharedSearchUI();
+      renderAll();
     }
 
     document.getElementById("personFilter")?.addEventListener("click", (e) => {
@@ -2460,9 +2531,15 @@
       renderAll();
     });
 
-    document.getElementById("pendingSearch")?.addEventListener("input", (e) => {
-      pendingQuery = (e.target.value || "").trim().toLowerCase();
-      renderPendientes();
+    document.getElementById("sharedSearch")?.addEventListener("input", (e) => {
+      setSharedQueryFromInput(e.target.value);
+    });
+
+    document.getElementById("sharedSearchClear")?.addEventListener("click", () => {
+      const input = document.getElementById("sharedSearch");
+      if (input) input.value = "";
+      setSharedQueryFromInput("");
+      input?.focus();
     });
 
     document.getElementById("tabs").addEventListener("click", (e) => {
@@ -2512,12 +2589,8 @@
     }
 
     function renderPendientes() {
-      const items = allTasks().filter(({ t }) => matchesPersonFilter(t, personFilter));
-      const q = pendingQuery;
-      const filtered = !q ? items : items.filter(({ t, p }) => {
-        const hay = `${t.shortCode || ""} ${t.label || ""} ${p.title || ""}`.toLowerCase();
-        return hay.includes(q);
-      });
+      const items = allTasks().filter(({ t, p }) => taskVisible(t, p));
+      const filtered = items;
 
       const pending = filtered.filter(({ t }) => !t.done);
       const completed = filtered.filter(({ t }) => t.done);
@@ -2902,7 +2975,7 @@
     }
 
     function renderTask(p, step, t) {
-      if (!matchesPersonFilter(t, personFilter)) {
+      if (!taskVisible(t, p)) {
         const empty = document.createElement("div");
         empty.style.display = "none";
         return empty;
@@ -3039,7 +3112,7 @@
       document.getElementById("weekRange").textContent =
         `${fmtDay(toISO(mon))} – ${fmtDay(toISO(addDays(mon, 6)))}`;
 
-      const items = allTasks().filter(({ t }) => matchesPersonFilter(t, personFilter));
+      const items = allTasks().filter(({ t, p }) => taskVisible(t, p));
       const done = items.filter(({ t }) => t.done && t.doneAt && inWeek(t.doneAt, mon));
       const due = items.filter(({ t }) => t.date && inWeek(t.date, mon));
       const notes = items.filter(({ t }) => (t.note || "").trim() && ((t.date && inWeek(t.date, mon)) || (t.doneAt && inWeek(t.doneAt, mon))));
@@ -3097,11 +3170,14 @@
       const el = document.getElementById("activityList");
       let list = state.activity || [];
       if (personFilter) list = list.filter((a) => a.userId === personFilter);
+      if (sharedQuery) list = list.filter((a) => activityMatchesSearch(a));
       if (!list.length) {
-        el.innerHTML = `<li class="empty">Aún no hay actividad${personFilter ? " de " + (USERS[personFilter]?.short || personFilter) : ""}.</li>`;
+        const who = personFilter ? " de " + (USERS[personFilter]?.short || personFilter) : "";
+        const q = sharedQuery ? " para esta búsqueda" : "";
+        el.innerHTML = `<li class="empty">Aún no hay actividad${who}${q}.</li>`;
         return;
       }
-      el.innerHTML = list.slice(0, 100).map((a) => `
+      el.innerHTML = list.slice(0, 120).map((a) => `
         <li>
           <div class="when">${fmtWhen(a.at)}</div>
           <div class="who-tag ${a.userId}">${escapeHtml(a.userName)}</div>
