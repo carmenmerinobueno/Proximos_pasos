@@ -256,14 +256,16 @@
     .gate-logo-wrap::before {
       content: "";
       position: absolute;
-      inset: 18% 4%;
-      border-radius: 40px;
-      background: radial-gradient(ellipse at center,
-        rgba(62, 31, 50, 0.4) 0%,
-        transparent 70%);
-      filter: blur(16px);
+      inset: 8% -6%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse 70% 58% at 50% 50%,
+        rgba(62, 31, 50, 0.28) 0%,
+        rgba(62, 31, 50, 0.1) 42%,
+        transparent 72%);
+      filter: blur(28px);
       z-index: 0;
       pointer-events: none;
+      mix-blend-mode: soft-light;
     }
     .gate-logo-wrap::after {
       content: "";
@@ -289,21 +291,35 @@
       width: 100%;
       height: auto;
       display: block;
-      mix-blend-mode: normal;
-      -webkit-mask-image: none;
-      mask-image: none;
+      mix-blend-mode: plus-lighter;
+      -webkit-mask-image: radial-gradient(ellipse 84% 78% at 50% 50%,
+        #000 38%,
+        rgba(0, 0, 0, 0.92) 55%,
+        rgba(0, 0, 0, 0.45) 70%,
+        transparent 86%);
+      mask-image: radial-gradient(ellipse 84% 78% at 50% 50%,
+        #000 38%,
+        rgba(0, 0, 0, 0.92) 55%,
+        rgba(0, 0, 0, 0.45) 70%,
+        transparent 86%);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
       filter: drop-shadow(0 0 18px rgba(220, 230, 240, 0.28)) drop-shadow(0 8px 24px rgba(0,0,0,0.35));
       animation: logoPulse 4.5s ease-in-out infinite;
     }
     [data-theme="light"] .gate-logo-wrap::before {
-      background: radial-gradient(ellipse at center,
-        rgba(90, 45, 60, 0.22) 0%,
-        transparent 70%);
+      background: radial-gradient(ellipse 70% 58% at 50% 50%,
+        rgba(90, 45, 60, 0.16) 0%,
+        rgba(90, 45, 60, 0.06) 45%,
+        transparent 72%);
+      mix-blend-mode: multiply;
     }
     [data-theme="light"] .gate-logo {
-      mix-blend-mode: normal;
-      opacity: 1;
-      filter: drop-shadow(0 6px 16px rgba(55, 35, 50, 0.22));
+      mix-blend-mode: darken;
+      opacity: 0.98;
+      filter: drop-shadow(0 6px 16px rgba(55, 35, 50, 0.18));
     }
 
     .gate-kicker {
@@ -674,14 +690,20 @@
       max-width: 200px;
       object-fit: contain;
       flex-shrink: 0;
-      mix-blend-mode: normal;
-      -webkit-mask-image: none;
-      mask-image: none;
+      mix-blend-mode: plus-lighter;
+      -webkit-mask-image: radial-gradient(ellipse 86% 80% at 50% 50%,
+        #000 40%,
+        rgba(0, 0, 0, 0.85) 62%,
+        transparent 88%);
+      mask-image: radial-gradient(ellipse 86% 80% at 50% 50%,
+        #000 40%,
+        rgba(0, 0, 0, 0.85) 62%,
+        transparent 88%);
       filter: drop-shadow(0 0 8px rgba(220, 230, 240, 0.25));
     }
     [data-theme="light"] .brand-logo {
-      mix-blend-mode: normal;
-      opacity: 1;
+      mix-blend-mode: darken;
+      opacity: 0.98;
     }
     .brand h1 {
       font-family: var(--font-display);
