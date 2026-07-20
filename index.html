@@ -1371,7 +1371,6 @@
     <div class="wrap">
       <nav class="tabs" id="tabs">
         <button type="button" data-tab="pendientes" class="active">Pendientes</button>
-        <button type="button" data-tab="prioridad">Prioridad</button>
         <button type="button" data-tab="calendario">Calendario</button>
         <button type="button" data-tab="emprendimientos">Emprendimientos</button>
         <button type="button" data-tab="tfg">TFG</button>
@@ -1386,22 +1385,11 @@
         <div class="panel-head">
           <div>
             <h2>Pendientes</h2>
-            <p>Vista general de todo lo que falta por hacer.</p>
+            <p>Todo lo abierto, ordenado por Eisenhower (P1→P4) y luego por fecha.</p>
           </div>
         </div>
         <div class="kpi-grid" id="kpiGrid"></div>
         <div class="prio-legend" id="legendPendientes"></div>
-        <div class="pending-groups" id="pendingGroups"></div>
-      </section>
-
-      <section class="panel" id="panel-prioridad">
-        <div class="panel-head">
-          <div>
-            <h2>Prioridad</h2>
-            <p>Primero Eisenhower (P1→P4), luego fecha más cercana.</p>
-          </div>
-        </div>
-        <div class="prio-legend" id="legendPrioridad"></div>
         <ul class="prio-list" id="prioList"></ul>
       </section>
 
@@ -1593,10 +1581,8 @@
     }
 
     function paintLegends() {
-      ["legendPendientes", "legendPrioridad"].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = legendHtml();
-      });
+      const el = document.getElementById("legendPendientes");
+      if (el) el.innerHTML = legendHtml();
     }
 
     function priorityButtons(active) {
@@ -2104,7 +2090,6 @@
       document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("active", b === btn));
       document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + btn.dataset.tab));
       if (btn.dataset.tab === "pendientes") renderPendientes();
-      if (btn.dataset.tab === "prioridad") renderPrioridad();
       if (btn.dataset.tab === "calendario") renderCalendario();
     });
 
@@ -2137,7 +2122,6 @@
       paintLegends();
       ["emprendimientos","tfg","casa","cursos","marcas"].forEach(renderArea);
       renderPendientes();
-      renderPrioridad();
       renderCalendario();
       renderWeek();
       renderActivity();
@@ -2180,84 +2164,22 @@
         </div>
       `;
 
-      const byArea = {};
-      pending.forEach((item) => {
-        const a = item.p.area || "otros";
-        if (!byArea[a]) byArea[a] = [];
-        byArea[a].push(item);
+      const sorted = pending.slice().sort((a, b) => {
+        const pd = taskPriority(a.t) - taskPriority(b.t);
+        if (pd) return pd;
+        return (a.t.date || "9999").localeCompare(b.t.date || "9999");
       });
-
-      const root = document.getElementById("pendingGroups");
-      const areas = Object.keys(byArea);
-      if (!areas.length) {
-        root.innerHTML = `<p class="empty">No hay nada pendiente. ¡Bien!</p>`;
-        return;
-      }
-
-      root.innerHTML = areas.map((area) => {
-        const list = byArea[area]
-          .slice()
-          .sort((a, b) => {
-            const pd = taskPriority(a.t) - taskPriority(b.t);
-            if (pd) return pd;
-            return (a.t.date || "9999").localeCompare(b.t.date || "9999");
-          })
-          .map(({ p, t }) => {
-            const pr = taskPriority(t);
-            return `
-            <li class="pending-item">
-              <input class="check" type="checkbox" data-toggle="${t.id}" />
-              <div class="prio-body">
-                <strong><span class="p-badge ${PRIORITY[pr].cls}">P${pr}</span> ${escapeHtml(t.label)}</strong>
-                <div class="sub">${escapeHtml(p.title)}${t.date ? " · " + fmtDay(t.date) : " · sin fecha"} · ${PRIORITY[pr].label}</div>
-                ${t.note ? `<div class="note-snip">${escapeHtml(t.note)}</div>` : ""}
-              </div>
-              <span class="badge">${t.date ? fmtDay(t.date) : "—"}</span>
-            </li>
-          `;
-          }).join("");
-        return `
-          <div class="pending-group">
-            <h3>${AREA_LABELS[area] || area} <small>${byArea[area].length}</small></h3>
-            <ul class="pending-list">${list}</ul>
-          </div>
-        `;
-      }).join("");
-
-      root.querySelectorAll("[data-toggle]").forEach((chk) => {
-        chk.addEventListener("change", () => {
-          const meta = findTask(chk.dataset.toggle);
-          if (!meta) return;
-          meta.task.done = true;
-          meta.task.doneAt = todayISO();
-          meta.task.doneBy = currentUser.id;
-          logActivity("completar", `«${meta.task.label}» desde Pendientes`);
-          scheduleSave(true);
-          renderAll();
-        });
-      });
-    }
-
-    function renderPrioridad() {
-      const today = todayISO();
-      const dated = allTasks()
-        .filter(({ t }) => !t.done)
-        .sort((a, b) => {
-          const pd = taskPriority(a.t) - taskPriority(b.t);
-          if (pd) return pd;
-          return (a.t.date || "9999").localeCompare(b.t.date || "9999");
-        });
 
       const el = document.getElementById("prioList");
       if (!el) return;
-      if (!dated.length) {
-        el.innerHTML = `<li class="empty" style="border:none;background:transparent;display:block">No hay tareas pendientes.</li>`;
+      if (!sorted.length) {
+        el.innerHTML = `<li class="empty" style="border:none;background:transparent;display:block">No hay nada pendiente. ¡Bien!</li>`;
         return;
       }
 
-      el.innerHTML = dated.map(({ p, t }) => {
+      el.innerHTML = sorted.map(({ p, t }) => {
         const pr = taskPriority(t);
-        const overdue = t.date && t.date < today;
+        const isOverdue = t.date && t.date < today;
         const isToday = t.date === today;
         const dateBlock = t.date
           ? (() => {
@@ -2266,11 +2188,11 @@
             })()
           : `<div class="prio-date">—<span>sin fecha</span></div>`;
         return `
-          <li class="prio-item ${overdue ? "overdue" : ""} ${isToday ? "today" : ""}">
+          <li class="prio-item ${isOverdue ? "overdue" : ""} ${isToday ? "today" : ""}">
             ${dateBlock}
             <div class="prio-body">
               <strong><span class="p-badge ${PRIORITY[pr].cls}">P${pr}</span> ${escapeHtml(t.label)}</strong>
-              <div class="sub">${escapeHtml(p.title)} · ${PRIORITY[pr].label}${overdue ? " · vencida" : isToday ? " · hoy" : ""}</div>
+              <div class="sub">${escapeHtml(p.title)} · ${AREA_LABELS[p.area] || p.area} · ${PRIORITY[pr].label}${isOverdue ? " · vencida" : isToday ? " · hoy" : ""}</div>
               ${t.note ? `<div class="note-snip">${escapeHtml(t.note)}</div>` : ""}
             </div>
             <input class="check" type="checkbox" data-toggle="${t.id}" title="Completar" />
@@ -2285,7 +2207,7 @@
           meta.task.done = true;
           meta.task.doneAt = todayISO();
           meta.task.doneBy = currentUser.id;
-          logActivity("completar", `«${meta.task.label}» desde Prioridad`);
+          logActivity("completar", `«${meta.task.label}» desde Pendientes`);
           scheduleSave(true);
           renderAll();
         });
