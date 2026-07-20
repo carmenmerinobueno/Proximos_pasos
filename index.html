@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tablero · Carmen & Edgar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --bg-elev: #121214;
+      --bg-card: #161618;
+      --bg-soft: #1c1c1f;
+      --line: rgba(255,255,255,0.08);
+      --line-strong: rgba(255,255,255,0.14);
+      --text: #f4f1ea;
+      --text-soft: #b7b3aa;
+      --muted: #7d7a73;
+      --gold: #c6a35a;
+      --gold-bright: #e4c789;
+      --gold-dim: rgba(198,163,90,0.18);
+      --silver: #aeb4bc;
+      --silver-dim: rgba(174,180,188,0.14);
+      --ok: #8faf8a;
+      --danger: #c97a6a;
+      --radius: 18px;
+      --font-display: "Cormorant Garamond", Georgia, serif;
+      --font-body: "Outfit", system-ui, sans-serif;
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-t: env(safe-area-inset-top, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.45;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button, input, textarea, select { font: inherit; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+    textarea { resize: vertical; }
+
+    /* ——— GATE / LOGIN ——— */
+    #gate {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: calc(1.5rem + var(--safe-t)) 1.25rem calc(1.5rem + var(--safe-b));
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(900px 500px at 50% -10%, rgba(198,163,90,0.18), transparent 55%),
+        radial-gradient(700px 400px at 100% 100%, rgba(174,180,188,0.08), transparent 50%),
+        var(--bg);
+    }
+
+    #gate::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+      pointer-events: none;
+    }
+
+    .gate-inner {
+      position: relative;
+      width: min(520px, 100%);
+      text-align: center;
+      animation: rise 0.8s ease both;
+    }
+
+    .gate-mark {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.4rem;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      display: grid;
+      place-items: center;
+      color: var(--gold-bright);
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 0 40px rgba(198,163,90,0.25);
+    }
+
+    .gate-kicker {
+      font-size: 0.72rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 500;
+      margin-bottom: 0.85rem;
+    }
+
+    .gate-inner h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 9vw, 4rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 0.75rem;
+    }
+
+    .gate-inner h1 em {
+      font-style: italic;
+      color: var(--gold-bright);
+      font-weight: 500;
+    }
+
+    .gate-sub {
+      color: var(--text-soft);
+      font-weight: 300;
+      font-size: 0.98rem;
+      margin-bottom: 2rem;
+      max-width: 32ch;
+      margin-inline: auto;
+    }
+
+    .user-picks {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .user-card {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.9rem;
+      align-items: center;
+      text-align: left;
+      padding: 1.05rem 1.15rem;
+      border-radius: 16px;
+      border: 1px solid var(--line-strong);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      min-height: 76px;
+    }
+
+    .user-card:hover, .user-card:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--gold);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(198,163,90,0.25);
+      outline: none;
+    }
+
+    .user-card.carmen .avatar {
+      background: var(--gold-dim);
+      color: var(--gold-bright);
+      border-color: rgba(198,163,90,0.45);
+    }
+
+    .user-card.edgar .avatar {
+      background: var(--silver-dim);
+      color: var(--silver);
+      border-color: rgba(174,180,188,0.4);
+    }
+
+    .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 1px solid;
+      display: grid;
+      place-items: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+    }
+
+    .user-card strong {
+      display: block;
+      font-size: 1.02rem;
+      font-weight: 600;
+    }
+
+    .user-card span {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    .user-card .arrow {
+      color: var(--muted);
+      font-size: 1.2rem;
+    }
+
+    .sync-box {
+      margin-top: 1.5rem;
+      padding: 1rem 1.1rem;
+      border-radius: 14px;
+      border: 1px dashed rgba(198,163,90,0.35);
+      background: rgba(198,163,90,0.06);
+      text-align: left;
+      display: none;
+    }
+
+    .sync-box.show { display: block; animation: rise 0.4s ease; }
+
+    .sync-box h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      color: var(--gold-bright);
+      margin-bottom: 0.35rem;
+    }
+
+    .sync-box p {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      margin-bottom: 0.75rem;
+    }
+
+    .sync-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .field {
+      flex: 1 1 160px;
+      background: var(--bg);
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      color: var(--text);
+      min-width: 0;
+    }
+
+    .field:focus {
+      outline: 1px solid var(--gold);
+      border-color: var(--gold);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: transform 0.15s, background 0.15s, opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn-gold {
+      background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+      color: #14110c;
+    }
+    .btn-ghost {
+      border: 1px solid var(--line-strong);
+      color: var(--text-soft);
+      background: transparent;
+    }
+    .btn-ghost:hover { border-color: var(--silver); color: var(--text); }
+    .btn-silver {
+      background: linear-gradient(180deg, #d5dae0, var(--silver));
+      color: #141518;
+    }
+    .btn-danger {
+      color: var(--danger);
+      border: 1px solid rgba(201,122,106,0.35);
+    }
+
+    .code-display {
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      padding: 0.65rem 0.8rem;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--gold);
+      color: var(--gold-bright);
+      word-break: break-all;
+      margin: 0.5rem 0 0.75rem;
+    }
+
+    /* ——— APP SHELL ——— */
+    #app { display: none; min-height: 100dvh; }
+    #app.ready { display: block; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(16px);
+      background: rgba(10,10,11,0.88);
+      border-bottom: 1px solid var(--line);
+      padding: calc(0.7rem + var(--safe-t)) 1rem 0.7rem;
+    }
+
+    .topbar-inner {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand small {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+
+    .who {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .who-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.55rem 0.35rem 0.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      background: var(--bg-elev);
+      font-size: 0.78rem;
+      font-weight: 500;
+      max-width: 160px;
+    }
+
+    .who-pill .dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .who-pill.carmen .dot { background: var(--gold-dim); color: var(--gold-bright); }
+    .who-pill.edgar .dot { background: var(--silver-dim); color: var(--silver); }
+    .who-pill .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .sync-status {
+      font-size: 0.68rem;
+      color: var(--muted);
+      display: none;
+    }
+    @media (min-width: 720px) {
+      .sync-status { display: block; }
+      .who-pill { max-width: 220px; }
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 1.5rem));
+      margin: 0 auto;
+      padding: 1.25rem 0 calc(5.5rem + var(--safe-b));
+    }
+
+    @media (min-width: 768px) {
+      .wrap { width: min(1120px, calc(100% - 2.5rem)); padding-top: 1.75rem; }
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.35rem;
+      overflow-x: auto;
+      padding: 0.25rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--bg-elev);
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tabs button {
+      flex: 0 0 auto;
+      padding: 0.55rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-soft);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .tabs button.active {
+      background: linear-gradient(180deg, rgba(228,199,137,0.95), var(--gold));
+      color: #14110c;
+    }
+
+    .panel { display: none; animation: rise 0.35s ease; }
+    .panel.active { display: block; }
+
+    .panel-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.1rem);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .panel-head p {
+      color: var(--muted);
+      font-size: 0.85rem;
+      max-width: 36ch;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 760px) {
+      .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+      .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent 40%),
+        var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 0.6rem;
+    }
+
+    .card-id {
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .card h3 {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(198,163,90,0.4);
+      color: var(--gold-bright);
+      background: var(--gold-dim);
+      white-space: nowrap;
+    }
+
+    .badge.silver {
+      border-color: rgba(174,180,188,0.4);
+      color: var(--silver);
+      background: var(--silver-dim);
+    }
+
+    .lede {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      font-weight: 300;
+    }
+
+    .step {
+      border-left: 2px solid var(--gold);
+      padding-left: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .step-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    .step-num {
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #14110c;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--silver); }
+
+    .task {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--bg-soft);
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .task.done { opacity: 0.65; }
+    .task.done .task-label { text-decoration: line-through; color: var(--muted); }
+
+    .task-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.6rem;
+      align-items: start;
+    }
+
+    .check {
+      width: 1.2rem;
+      height: 1.2rem;
+      margin-top: 0.1rem;
+      appearance: none;
+      border: 1.5px solid var(--silver);
+      border-radius: 5px;
+      background: transparent;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .check:checked {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+    .check:checked::after {
+      content: "";
+      position: absolute;
+      left: 4px; top: 1px;
+      width: 4px; height: 8px;
+      border: solid #14110c;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .task-label {
+      font-size: 0.92rem;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .task-label[contenteditable="true"]:focus {
+      outline: 1px dashed var(--gold);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+      margin-top: 0.6rem;
+      padding-left: 1.8rem;
+    }
+
+    .task-meta label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-weight: 500;
+    }
+
+    .task-meta input[type="date"] {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.28rem 0.4rem;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      max-width: 10.5rem;
+      color-scheme: dark;
+    }
+
+    .mini {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.3rem 0.55rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      color: var(--text-soft);
+      background: var(--bg);
+    }
+    .mini.on {
+      border-color: transparent;
+      background: var(--gold-dim);
+      color: var(--gold-bright);
+    }
+
+    .task-note {
+      display: none;
+      margin-top: 0.55rem;
+      padding-left: 1.8rem;
+    }
+    .task-note.open { display: block; }
+
+    .task-note textarea,
+    .project-note textarea,
+    .week-note textarea,
+    .modal textarea,
+    .modal input[type="text"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.7rem 0.8rem;
+      color: var(--text);
+      font-size: 0.88rem;
+      min-height: 72px;
+    }
+
+    .task-note textarea:focus,
+    .project-note textarea:focus,
+    .week-note textarea:focus,
+    .modal textarea:focus,
+    .modal input:focus {
+      outline: 1px solid var(--gold);
+      border-color: var(--gold);
+    }
+
+    .project-note label,
+    .week-note label,
+    .modal label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding-top: 0.35rem;
+      border-top: 1px dashed var(--line);
+    }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+    .progress-bar {
+      flex: 1;
+      height: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-bar > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--silver), var(--gold-bright));
+      transition: width 0.35s ease;
+    }
+    .progress span {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      min-width: 2.5rem;
+      text-align: right;
+    }
+
+    .byline {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .byline.carmen { color: var(--gold); }
+    .byline.edgar { color: var(--silver); }
+
+    /* Activity */
+    .activity-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      max-height: 70vh;
+      overflow: auto;
+    }
+    .activity-list li {
+      padding: 0.85rem 0.95rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--bg-card);
+    }
+    .activity-list .when {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    .activity-list .who-tag {
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+    .activity-list .who-tag.carmen { color: var(--gold-bright); }
+    .activity-list .who-tag.edgar { color: var(--silver); }
+    .activity-list .what {
+      font-size: 0.88rem;
+      color: var(--text-soft);
+      margin-top: 0.2rem;
+    }
+
+    /* Week */
+    .week-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .week-range {
+      flex: 1;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--gold-bright);
+      min-width: 140px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+    }
+    @media (min-width: 520px) {
+      .stats { grid-template-columns: repeat(4, 1fr); }
+    }
+    .stat {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.85rem;
+      text-align: center;
+    }
+    .stat strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--gold-bright);
+      line-height: 1;
+    }
+    .stat span {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .week-block {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 0.85rem;
+    }
+    .week-block h4 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      margin-bottom: 0.65rem;
+      color: var(--text);
+    }
+    .week-list { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+    .week-list li {
+      padding: 0.7rem 0.8rem;
+      border-radius: 10px;
+      background: var(--bg-soft);
+      border-left: 2px solid var(--gold);
+      font-size: 0.88rem;
+      color: var(--text-soft);
+    }
+    .week-list li .meta {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .empty { color: var(--muted); font-size: 0.88rem; padding: 0.4rem 0; }
+
+    /* FAB / bottom bar mobile */
+    .fab-bar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 45;
+      padding: 0.65rem 1rem calc(0.65rem + var(--safe-b));
+      background: linear-gradient(180deg, transparent, rgba(10,10,11,0.95) 30%);
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+    .fab-bar > * { pointer-events: auto; }
+    .fab {
+      padding: 0.85rem 1.2rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(6px);
+      z-index: 60;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.open { display: flex; }
+    @media (min-width: 640px) {
+      .modal-backdrop { align-items: center; }
+    }
+    .modal {
+      width: min(440px, 100%);
+      background: var(--bg-elev);
+      border: 1px solid var(--line-strong);
+      border-radius: 20px 20px 16px 16px;
+      padding: 1.25rem;
+      animation: rise 0.3s ease;
+      max-height: min(90dvh, 640px);
+      overflow: auto;
+    }
+    .modal h3 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .modal .row { margin-bottom: 0.85rem; }
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 0.5rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: calc(5rem + var(--safe-b));
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--text);
+      color: var(--bg);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 70;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN -->
+  <div id="gate">
+    <div class="gate-inner">
+      <div class="gate-mark">C&amp;E</div>
+      <div class="gate-kicker">Espacio compartido</div>
+      <h1>Tablero <em>de proyectos</em></h1>
+      <p class="gate-sub">Elige quién eres. Entráis al mismo panel; todo queda registrado para el otro.</p>
+      <div class="user-picks">
+        <button type="button" class="user-card carmen" data-user="carmen">
+          <div class="avatar">CM</div>
+          <div>
+            <strong>Carmen Merino Bueno</strong>
+            <span>Entrar como Carmen · tono dorado</span>
+          </div>
+          <span class="arrow">→</span>
+        </button>
+        <button type="button" class="user-card edgar" data-user="edgar">
+          <div class="avatar">EG</div>
+          <div>
+            <strong>Edgar Gabriel Pablo Ramos</strong>
+            <span>Entrar como Edgar · tono plateado</span>
+          </div>
+          <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">C&amp;E</div>
+          <div>
+            <h1>Tablero</h1>
+            <small id="syncLabel">Local</small>
+          </div>
+        </div>
+        <div class="who">
+          <span class="sync-status" id="syncStatus">—</span>
+          <div class="who-pill" id="whoPill">
+            <span class="dot" id="whoDot">—</span>
+            <span class="name" id="whoName">—</span>
+          </div>
+          <button type="button" class="icon-btn" id="btnLogout" title="Cambiar usuario">⇄</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <nav class="tabs" id="tabs">
+        <button type="button" data-tab="emprendimientos" class="active">Emprendimientos</button>
+        <button type="button" data-tab="tfg">TFG</button>
+        <button type="button" data-tab="casa">Casa</button>
+        <button type="button" data-tab="cursos">Cursos</button>
+        <button type="button" data-tab="marcas">Marcas</button>
+        <button type="button" data-tab="resumen">Semana</button>
+        <button type="button" data-tab="actividad">Actividad</button>
+      </nav>
+
+      <section class="panel active" id="panel-emprendimientos">
+        <div class="panel-head">
+          <div>
+            <h2>Emprendimientos</h2>
+            <p>App y Replay — independientes. Añade proyectos, pasos y tareas.</p>
+          </div>
+          <button type="button" class="btn btn-gold" data-add-project="emprendimientos">+ Proyecto</button>
+        </div>
+        <div class="grid cols-2" data-area="emprendimientos"></div>
+      </section>
+
+      <section class="panel" id="panel-tfg">
+        <div class="panel-head">
+          <div>
+            <h2>TFG Edgar</h2>
+            <p>Hasta la exposición.</p>
+          </div>
+          <button type="button" class="btn btn-gold" data-add-project="tfg">+ Proyecto</button>
+        </div>
+        <div class="grid" data-area="tfg"></div>
+      </section>
+
+      <section class="panel" id="panel-casa">
+        <div class="panel-head">
+          <div>
+            <h2>Casa · Enero</h2>
+            <p>Papeles, banco y búsqueda.</p>
+          </div>
+          <button type="button" class="btn btn-gold" data-add-project="casa">+ Proyecto</button>
+        </div>
+        <div class="grid" data-area="casa"></div>
+      </section>
+
+      <section class="panel" id="panel-cursos">
+        <div class="panel-head">
+          <div>
+            <h2>Cursos</h2>
+            <p>Formación conjunta.</p>
+          </div>
+          <button type="button" class="btn btn-gold" data-add-project="cursos">+ Proyecto</button>
+        </div>
+        <div class="grid" data-area="cursos"></div>
+      </section>
+
+      <section class="panel" id="panel-marcas">
+        <div class="panel-head">
+          <div>
+            <h2>Marcas personales</h2>
+            <p>Pareja, Carmen y Edgar.</p>
+          </div>
+          <button type="button" class="btn btn-gold" data-add-project="marcas">+ Proyecto</button>
+        </div>
+        <div class="grid cols-3" data-area="marcas"></div>
+      </section>
+
+      <section class="panel" id="panel-resumen">
+        <div class="panel-head">
+          <div>
+            <h2>Resumen semanal</h2>
+            <p>Hecho, agenda y notas de la semana.</p>
+          </div>
+        </div>
+        <div class="week-controls">
+          <button type="button" class="btn btn-ghost" id="prevWeek">‹</button>
+          <div class="week-range" id="weekRange">—</div>
+          <button type="button" class="btn btn-ghost" id="nextWeek">›</button>
+          <button type="button" class="btn btn-ghost" id="thisWeek">Hoy</button>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong id="statDone">0</strong><span>Hechas</span></div>
+          <div class="stat"><strong id="statDue">0</strong><span>Con fecha</span></div>
+          <div class="stat"><strong id="statNotes">0</strong><span>Con nota</span></div>
+          <div class="stat"><strong id="statOpen">0</strong><span>Abiertas</span></div>
+        </div>
+        <div class="week-block">
+          <h4>Completadas</h4>
+          <ul class="week-list" id="weekDone"></ul>
+        </div>
+        <div class="week-block">
+          <h4>Con fecha esta semana</h4>
+          <ul class="week-list" id="weekDue"></ul>
+        </div>
+        <div class="week-block week-note">
+          <label for="weekSummary">Resumen libre</label>
+          <textarea id="weekSummary" placeholder="¿Qué ha ido bien? ¿Qué bloquea? ¿Prioridad próxima?"></textarea>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-actividad">
+        <div class="panel-head">
+          <div>
+            <h2>Actividad</h2>
+            <p>Registro de lo que hace cada uno — también desde otros móviles.</p>
+          </div>
+        </div>
+        <ul class="activity-list" id="activityList"></ul>
+      </section>
+    </div>
+
+    <div class="fab-bar">
+      <button type="button" class="btn btn-gold fab" id="fabAdd">+ Añadir</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" id="modalBody"></div>
+  </div>
+  <div class="toast" id="toast">Guardado</div>
+
+  <script>
+    const USERS = {
+      carmen: { id: "carmen", name: "Carmen Merino Bueno", short: "Carmen", initials: "CM", tone: "carmen" },
+      edgar: { id: "edgar", name: "Edgar Gabriel Pablo Ramos", short: "Edgar", initials: "EG", tone: "edgar" }
+    };
+
+    const LOCAL_KEY = "ce-tablero-v3-shared";
+    const SESSION_KEY = "ce-tablero-session";
+    const SPACE_KEY = "ce-tablero-space-id";
+    const BASKET = "tablero";
+    const PANTRY = "https://getpantry.cloud/apiv1";
+    /* Mismo espacio para los dos — sin códigos de entrada */
+    const FIXED_ROOM = "tablero-carmen-edgar-compartido";
+
+    const DEFAULT_SEED = () => ({
+      version: 3,
+      updatedAt: Date.now(),
+      projects: [
+        {
+          id: "emp-app-edicion",
+          area: "emprendimientos",
+          title: "App → Edición de videos",
+          badge: "En producción",
+          lede: "Flujo usable: cortes, subtítulos, clips; luego IA.",
+          note: "",
+          steps: [
+            {
+              id: "step-app-1",
+              title: "Hacerla funcional",
+              tasks: [
+                { id: "emp-app-cortes", label: "Cortes de silencios", date: "2026-07-20", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-app-subtitulos", label: "Subtítulos", date: "2026-07-20", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-app-mejores-clips", label: "Mejores clips", date: "2026-07-21", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-app-conjunto-clips", label: "Conjunto de clips", date: "2026-07-22", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            },
+            {
+              id: "step-app-2",
+              title: "¿Qué IA?",
+              tasks: [
+                { id: "emp-app-investigar-ia", label: "Investigar IA", date: "2026-07-23", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-app-probar-ia", label: "Probar IA", date: "2026-07-23", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            },
+            {
+              id: "step-app-3",
+              title: "Testear y dar forma",
+              tasks: [
+                { id: "emp-app-test", label: "Probar con muchos vídeos", date: "2026-07-24", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-app-ui", label: "Lavado de cara APP", date: "2026-07-25", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-app-deploy", label: "Desplegarla", date: "2026-07-26", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            }
+          ]
+        },
+        {
+          id: "emp-replay",
+          area: "emprendimientos",
+          title: "Replay",
+          badge: "Aterrizando",
+          lede: "MVP claro → piloto → venta.",
+          note: "",
+          steps: [
+            {
+              id: "step-replay-1",
+              title: "Aterrizar la idea",
+              tasks: [
+                { id: "emp-replay-tenemos", label: "¿Qué tenemos?", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-quedamos", label: "¿Con qué nos quedamos?", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-anadimos", label: "¿Qué añadimos?", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-mvp", label: "MVP vs competencia", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-materiales", label: "Estudiar materiales y herramientas", date: "", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            },
+            {
+              id: "step-replay-2",
+              title: "Montaje caso piloto",
+              tasks: [
+                { id: "emp-replay-web", label: "Montar página web", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-rass", label: "¿RASS?", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-camaras", label: "Montaje cámaras + software", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-prueba", label: "Prueba", date: "", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            },
+            {
+              id: "step-replay-3",
+              title: "Venta",
+              tasks: [
+                { id: "emp-replay-oferta", label: "Oferta clara", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-clientes", label: "Primeros clientes", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "emp-replay-cierre", label: "Cierre", date: "", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            }
+          ]
+        },
+        {
+          id: "tfg-edgar",
+          area: "tfg",
+          title: "Checklist TFG",
+          badge: "Académico",
+          lede: "Código → REU → memoria → REU → exposición.",
+          note: "",
+          steps: [{
+            id: "step-tfg-1",
+            title: "Camino a la defensa",
+            tasks: [
+              { id: "tfg-1", label: "Validar código", date: "", note: "", done: false, doneAt: null, doneBy: null },
+              { id: "tfg-2", label: "REU Luis", date: "", note: "", done: false, doneAt: null, doneBy: null },
+              { id: "tfg-3", label: "Terminar memoria", date: "", note: "", done: false, doneAt: null, doneBy: null },
+              { id: "tfg-4", label: "REU Luis (2ª)", date: "", note: "", done: false, doneAt: null, doneBy: null },
+              { id: "tfg-5", label: "Exposición", date: "", note: "", done: false, doneAt: null, doneBy: null }
+            ]
+          }]
+        },
+        {
+          id: "casa-enero",
+          area: "casa",
+          title: "Camino a la casa",
+          badge: "Enero",
+          lede: "Nóminas y estudio de banco / zonas.",
+          note: "",
+          steps: [
+            {
+              id: "step-casa-1",
+              title: "Nóminas",
+              tasks: [
+                { id: "casa-1", label: "3 nóminas Carmen", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "casa-2", label: "3 nóminas Edgar", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "casa-3", label: "Carpeta compartida (IRPF, contratos…)", date: "", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            },
+            {
+              id: "step-casa-2",
+              title: "Estudiar",
+              tasks: [
+                { id: "casa-4", label: "Condiciones del banco", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "casa-5", label: "Ayudas del Estado", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "casa-6", label: "Mejores zonas", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "casa-7", label: "Pisos — shortlist", date: "", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            }
+          ]
+        },
+        {
+          id: "cursos-plan",
+          area: "cursos",
+          title: "Plan de formación",
+          badge: "A decidir",
+          lede: "Elegir cursos y horas semanales.",
+          note: "",
+          steps: [
+            {
+              id: "step-cursos-1",
+              title: "Decidir y organizar",
+              tasks: [
+                { id: "cur-1", label: "¿Qué cursos hay?", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "cur-2", label: "¿Cuáles hacemos juntos?", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "cur-3", label: "¿Cuántas horas / semana?", date: "", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            },
+            {
+              id: "step-cursos-2",
+              title: "Organización",
+              tasks: [
+                { id: "cur-4", label: "Ritual semanal de revisión", date: "", note: "", done: false, doneAt: null, doneBy: null },
+                { id: "cur-5", label: "Aplicar lo aprendido a App o Replay", date: "", note: "", done: false, doneAt: null, doneBy: null }
+              ]
+            }
+          ]
+        },
+        {
+          id: "marca-pareja",
+          area: "marcas",
+          title: "Pareja",
+          badge: "Prioridad",
+          lede: "Aterrizar marca conjunta.",
+          note: "",
+          steps: [{
+            id: "step-mp-1",
+            title: "Aterrizar ideas",
+            tasks: [
+              { id: "mp-1", label: "¿MP Pareja?", date: "", note: "", done: false, doneAt: null, doneBy: null },
+              { id: "mp-2", label: "¿MP App / Replay / conjunto?", date: "", note: "", done: false, doneAt: null, doneBy: null },
+              { id: "mp-3", label: "Propuesta en 1 página", date: "", note: "", done: false, doneAt: null, doneBy: null }
+            ]
+          }]
+        },
+        {
+          id: "marca-carmen",
+          area: "marcas",
+          title: "Carmen",
+          badge: "Por definir",
+          lede: "Marca personal de Carmen.",
+          note: "",
+          steps: [{
+            id: "step-mc-1",
+            title: "Definir",
+            tasks: [
+              { id: "mc-1", label: "Skills + historia", date: "", note: "", done: false, doneAt: null, doneBy: null },
+              { id: "mc-2", label: "1 canal principal", date: "", note: "", done: false, doneAt: null, doneBy: null }
+            ]
+          }]
+        },
+        {
+          id: "marca-edgar",
+          area: "marcas",
+          title: "Edgar",
+          badge: "Por definir",
+          lede: "Marca personal de Edgar.",
+          note: "",
+          steps: [{
+            id: "step-me-1",
+            title: "Definir",
+            tasks: [
+              { id: "me-1", label: "Skills + historia", date: "", note: "", done: false, doneAt: null, doneBy: null },
+              { id: "me-2", label: "1 canal principal", date: "", note: "", done: false, doneAt: null, doneBy: null }
+            ]
+          }]
+        }
+      ],
+      activity: [],
+      weeks: {}
+    });
+
+    let state = null;
+    let currentUser = null;
+    let spaceId = localStorage.getItem(SPACE_KEY) || FIXED_ROOM;
+    let weekMonday = startOfWeek(new Date());
+    let saveTimer = null;
+    let pollTimer = null;
+
+    function uid(prefix) {
+      return prefix + "-" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+    }
+
+    function todayISO() {
+      const n = new Date();
+      return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
+    }
+
+    function startOfWeek(date) {
+      const d = new Date(date);
+      d.setHours(12,0,0,0);
+      const day = (d.getDay() + 6) % 7;
+      d.setDate(d.getDate() - day);
+      return d;
+    }
+
+    function addDays(date, n) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + n);
+      return d;
+    }
+
+    function toISO(date) {
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+    }
+
+    function fmtDay(iso) {
+      if (!iso) return "";
+      const [, m, d] = iso.split("-");
+      return `${d}/${m}`;
+    }
+
+    function fmtWhen(ts) {
+      const d = new Date(ts);
+      return d.toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => t.classList.remove("show"), 1400);
+    }
+
+    function setSyncStatus(text) {
+      document.getElementById("syncStatus").textContent = text;
+      document.getElementById("syncLabel").textContent = "Panel compartido";
+    }
+
+    function logActivity(action, detail) {
+      if (!currentUser || !state) return;
+      state.activity.unshift({
+        id: uid("act"),
+        userId: currentUser.id,
+        userName: currentUser.name,
+        action,
+        detail,
+        at: Date.now()
+      });
+      state.activity = state.activity.slice(0, 200);
+    }
+
+    function loadLocal() {
+      try {
+        const raw = localStorage.getItem(LOCAL_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch {}
+      return null;
+    }
+
+    function saveLocal() {
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
+    }
+
+    async function pantryCreate() {
+      const res = await fetch(`${PANTRY}/pantry/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "Tablero Carmen Edgar",
+          description: "Espacio fijo compartido sin codigos",
+          contactEmail: "tablero@local.dev"
+        })
+      });
+      if (!res.ok) {
+        // fallback old path
+        const res2 = await fetch(`${PANTRY}/pantry`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: "Tablero Carmen Edgar",
+            description: "Espacio fijo compartido",
+            contactEmail: "tablero@local.dev"
+          })
+        });
+        if (!res2.ok) throw new Error("No se pudo crear el espacio");
+        const text2 = (await res2.text()).trim();
+        try {
+          const j = JSON.parse(text2);
+          return j.pantryId || j.id || text2;
+        } catch {
+          return text2.replace(/^"|"$/g, "");
+        }
+      }
+      const text = (await res.text()).trim();
+      try {
+        const j = JSON.parse(text);
+        return j.pantryId || j.id || text;
+      } catch {
+        return text.replace(/^"|"$/g, "");
+      }
+    }
+
+    function isPantryId(id) {
+      return !!(id && /^[0-9a-f-]{20,}$/i.test(id) && !id.startsWith("local-") && id !== FIXED_ROOM);
+    }
+
+    async function ensureCloudSpace() {
+      /* Sin códigos: los dos usan siempre el mismo almacén local compartido.
+         Si ya hay un id de nube guardado en este navegador, se reutiliza. */
+      const saved = localStorage.getItem(SPACE_KEY);
+      if (isPantryId(saved)) {
+        spaceId = saved;
+        return spaceId;
+      }
+      spaceId = FIXED_ROOM;
+      return null;
+    }
+
+    async function pantryGet(id) {
+      if (!isPantryId(id)) return null;
+      const res = await fetch(`${PANTRY}/pantry/${id}/basket/${BASKET}`);
+      if (res.status === 400 || res.status === 404) return null;
+      if (!res.ok) throw new Error("Error al leer");
+      return await res.json();
+    }
+
+    async function pantryPut(id, data) {
+      if (!isPantryId(id)) return;
+      let res = await fetch(`${PANTRY}/pantry/${id}/basket/${BASKET}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (res.status === 400 || res.status === 404) {
+        res = await fetch(`${PANTRY}/pantry/${id}/basket/${BASKET}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+      }
+      if (!res.ok) throw new Error("Error al guardar en la nube");
+    }
+
+    async function pullCloud() {
+      if (!isPantryId(spaceId)) return false;
+      try {
+        setSyncStatus("Sincronizando…");
+        const remote = await pantryGet(spaceId);
+        if (remote && remote.version && remote.projects) {
+          if (!state || (remote.updatedAt || 0) >= (state.updatedAt || 0)) {
+            state = remote;
+            saveLocal();
+          }
+        } else if (state) {
+          await pantryPut(spaceId, state);
+        }
+        setSyncStatus("Sincronizado");
+        return true;
+      } catch (e) {
+        setSyncStatus("Local");
+        console.warn(e);
+        return false;
+      }
+    }
+
+    async function pushCloud() {
+      if (!state) return;
+      state.updatedAt = Date.now();
+      saveLocal();
+      if (!isPantryId(spaceId)) {
+        setSyncStatus("Panel compartido");
+        return;
+      }
+      try {
+        await pantryPut(spaceId, state);
+        setSyncStatus("Sincronizado");
+      } catch (e) {
+        setSyncStatus("Guardado local");
+        console.warn(e);
+      }
+    }
+
+    function scheduleSave(showToast) {
+      state.updatedAt = Date.now();
+      saveLocal();
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        await pushCloud();
+        if (showToast) toast("Guardado");
+      }, 450);
+    }
+
+    /* ——— Auth flow: elegir usuario → mismo panel (sin códigos) ——— */
+    document.querySelectorAll(".user-card").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        enterApp(USERS[btn.dataset.user]);
+      });
+    });
+
+    async function enterApp(user) {
+      if (!user) return;
+      currentUser = user;
+      sessionStorage.setItem(SESSION_KEY, currentUser.id);
+      state = loadLocal() || DEFAULT_SEED();
+      setSyncStatus("Entrando…");
+      await ensureCloudSpace();
+      await pullCloud();
+      document.getElementById("gate").style.display = "none";
+      document.getElementById("app").classList.add("ready");
+      paintWho();
+      renderAll();
+      logActivity("entrada", "Ha entrado al tablero");
+      scheduleSave(false);
+      startPolling();
+    }
+
+    function paintWho() {
+      const pill = document.getElementById("whoPill");
+      pill.className = "who-pill " + currentUser.tone;
+      document.getElementById("whoDot").textContent = currentUser.initials;
+      document.getElementById("whoName").textContent = currentUser.short;
+      setSyncStatus(isPantryId(spaceId) ? "Sincronizado" : "Panel compartido");
+    }
+
+    document.getElementById("btnLogout").addEventListener("click", () => {
+      sessionStorage.removeItem(SESSION_KEY);
+      stopPolling();
+      location.reload();
+    });
+
+    function startPolling() {
+      stopPolling();
+      if (!isPantryId(spaceId)) return;
+      pollTimer = setInterval(async () => {
+        const before = state?.updatedAt || 0;
+        await pullCloud();
+        if ((state?.updatedAt || 0) > before) renderAll();
+      }, 12000);
+    }
+    function stopPolling() {
+      if (pollTimer) clearInterval(pollTimer);
+    }
+
+    /* ——— Tabs ——— */
+    document.getElementById("tabs").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-tab]");
+      if (!btn) return;
+      document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("active", b === btn));
+      document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + btn.dataset.tab));
+    });
+
+    /* ——— Render ——— */
+    function findTask(taskId) {
+      for (const p of state.projects) {
+        for (const s of p.steps) {
+          for (const t of s.tasks) {
+            if (t.id === taskId) return { project: p, step: s, task: t };
+          }
+        }
+      }
+      return null;
+    }
+
+    function projectProgress(p) {
+      const tasks = p.steps.flatMap((s) => s.tasks);
+      if (!tasks.length) return 0;
+      return Math.round(tasks.filter((t) => t.done).length / tasks.length * 100);
+    }
+
+    function renderAll() {
+      ["emprendimientos","tfg","casa","cursos","marcas"].forEach(renderArea);
+      renderWeek();
+      renderActivity();
+    }
+
+    function renderArea(area) {
+      const root = document.querySelector(`[data-area="${area}"]`);
+      root.innerHTML = "";
+      state.projects.filter((p) => p.area === area).forEach((p) => root.appendChild(renderCard(p)));
+      if (!root.children.length) {
+        root.innerHTML = `<p class="empty">Aún no hay proyectos. Pulsa «+ Proyecto».</p>`;
+      }
+    }
+
+    function renderCard(p) {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.dataset.projectId = p.id;
+      const pct = projectProgress(p);
+
+      card.innerHTML = `
+        <div class="card-top">
+          <div>
+            <div class="card-id">${p.id}</div>
+            <h3 contenteditable="true" data-edit="title">${escapeHtml(p.title)}</h3>
+          </div>
+          <span class="badge ${p.area === "emprendimientos" && p.id.includes("replay") ? "silver" : ""}">${escapeHtml(p.badge || "Proyecto")}</span>
+        </div>
+        <p class="lede" contenteditable="true" data-edit="lede">${escapeHtml(p.lede || "")}</p>
+        <div class="steps"></div>
+        <div class="project-note">
+          <label>Notas del proyecto</label>
+          <textarea data-role="project-note" placeholder="Apuntes solo de este proyecto…">${escapeHtml(p.note || "")}</textarea>
+        </div>
+        <div class="progress"><div class="progress-bar"><i style="width:${pct}%"></i></div><span>${pct}%</span></div>
+        <div class="card-actions">
+          <button type="button" class="mini" data-act="add-step">+ Paso</button>
+          <button type="button" class="mini" data-act="add-task-quick">+ Tarea</button>
+          <button type="button" class="mini" data-act="del-project" style="margin-left:auto;color:var(--danger)">Eliminar</button>
+        </div>
+      `;
+
+      const stepsRoot = card.querySelector(".steps");
+      p.steps.forEach((step, si) => stepsRoot.appendChild(renderStep(p, step, si)));
+
+      card.querySelector('[data-edit="title"]').addEventListener("blur", (e) => {
+        const v = e.target.textContent.trim();
+        if (v && v !== p.title) {
+          p.title = v;
+          logActivity("editar", `Renombró proyecto a «${v}»`);
+          scheduleSave(true);
+        }
+      });
+      card.querySelector('[data-edit="lede"]').addEventListener("blur", (e) => {
+        p.lede = e.target.textContent.trim();
+        scheduleSave(true);
+      });
+      card.querySelector('[data-role="project-note"]').addEventListener("change", (e) => {
+        p.note = e.target.value;
+        logActivity("nota", `Nota en «${p.title}»`);
+        scheduleSave(true);
+      });
+
+      card.querySelector('[data-act="add-step"]').addEventListener("click", () => openAddStep(p.id));
+      card.querySelector('[data-act="add-task-quick"]').addEventListener("click", () => {
+        if (!p.steps.length) return openAddStep(p.id);
+        openAddTask(p.id, p.steps[p.steps.length - 1].id);
+      });
+      card.querySelector('[data-act="del-project"]').addEventListener("click", () => {
+        if (!confirm(`¿Eliminar «${p.title}»?`)) return;
+        state.projects = state.projects.filter((x) => x.id !== p.id);
+        logActivity("eliminar", `Eliminó el proyecto «${p.title}»`);
+        scheduleSave(true);
+        renderAll();
+      });
+
+      return card;
+    }
+
+    function renderStep(p, step, si) {
+      const el = document.createElement("div");
+      el.className = "step";
+      el.innerHTML = `
+        <div class="step-head">
+          <div class="step-title">
+            <span class="step-num">${si + 1}</span>
+            <span contenteditable="true" data-edit="step">${escapeHtml(step.title)}</span>
+          </div>
+          <div style="display:flex;gap:0.25rem">
+            <button type="button" class="icon-btn" data-act="add-task" title="Añadir tarea">+</button>
+            <button type="button" class="icon-btn" data-act="del-step" title="Eliminar paso">×</button>
+          </div>
+        </div>
+        <div class="tasks"></div>
+      `;
+      const tasksRoot = el.querySelector(".tasks");
+      step.tasks.forEach((t) => tasksRoot.appendChild(renderTask(p, step, t)));
+
+      el.querySelector('[data-edit="step"]').addEventListener("blur", (e) => {
+        const v = e.target.textContent.trim();
+        if (v) { step.title = v; scheduleSave(true); }
+      });
+      el.querySelector('[data-act="add-task"]').addEventListener("click", () => openAddTask(p.id, step.id));
+      el.querySelector('[data-act="del-step"]').addEventListener("click", () => {
+        if (!confirm("¿Eliminar este paso y sus tareas?")) return;
+        p.steps = p.steps.filter((s) => s.id !== step.id);
+        logActivity("eliminar", `Eliminó un paso en «${p.title}»`);
+        scheduleSave(true);
+        renderAll();
+      });
+      return el;
+    }
+
+    function renderTask(p, step, t) {
+      const el = document.createElement("div");
+      el.className = "task" + (t.done ? " done" : "");
+      const hasNote = !!(t.note && t.note.trim());
+      el.innerHTML = `
+        <div class="task-row">
+          <input class="check" type="checkbox" ${t.done ? "checked" : ""} />
+          <div>
+            <div class="task-label" contenteditable="true">${escapeHtml(t.label)}</div>
+            ${t.doneBy ? `<div class="byline ${t.doneBy}">Hecho por ${USERS[t.doneBy]?.short || t.doneBy}${t.doneAt ? " · " + fmtDay(t.doneAt) : ""}</div>` : ""}
+          </div>
+          <button type="button" class="icon-btn" data-act="del-task" title="Eliminar">×</button>
+        </div>
+        <div class="task-meta">
+          <label>Fecha <input type="date" value="${t.date || ""}" /></label>
+          <button type="button" class="mini ${hasNote ? "on" : ""}" data-act="note">Nota</button>
+        </div>
+        <div class="task-note ${hasNote ? "open" : ""}">
+          <textarea placeholder="Apunta lo que quieras…">${escapeHtml(t.note || "")}</textarea>
+        </div>
+      `;
+
+      const check = el.querySelector(".check");
+      check.addEventListener("change", () => {
+        t.done = check.checked;
+        t.doneAt = check.checked ? todayISO() : null;
+        t.doneBy = check.checked ? currentUser.id : null;
+        el.classList.toggle("done", t.done);
+        logActivity(check.checked ? "completar" : "reabrir", `«${t.label}» en ${p.title}`);
+        scheduleSave(true);
+        renderAll();
+      });
+
+      el.querySelector(".task-label").addEventListener("blur", (e) => {
+        const v = e.target.textContent.trim();
+        if (v && v !== t.label) {
+          t.label = v;
+          logActivity("editar", `Tarea → «${v}»`);
+          scheduleSave(true);
+        }
+      });
+
+      el.querySelector('input[type="date"]').addEventListener("change", (e) => {
+        t.date = e.target.value || "";
+        logActivity("fecha", `Fecha en «${t.label}»: ${t.date ? fmtDay(t.date) : "sin fecha"}`);
+        scheduleSave(true);
+        renderWeek();
+      });
+
+      const noteBtn = el.querySelector('[data-act="note"]');
+      const noteWrap = el.querySelector(".task-note");
+      const noteArea = noteWrap.querySelector("textarea");
+      noteBtn.addEventListener("click", () => {
+        noteWrap.classList.toggle("open");
+        if (noteWrap.classList.contains("open")) noteArea.focus();
+      });
+      noteArea.addEventListener("change", () => {
+        t.note = noteArea.value;
+        noteBtn.classList.toggle("on", !!(t.note || "").trim());
+        logActivity("nota", `Nota en tarea «${t.label}»`);
+        scheduleSave(true);
+        renderWeek();
+      });
+
+      el.querySelector('[data-act="del-task"]').addEventListener("click", () => {
+        step.tasks = step.tasks.filter((x) => x.id !== t.id);
+        logActivity("eliminar", `Eliminó tarea «${t.label}»`);
+        scheduleSave(true);
+        renderAll();
+      });
+
+      return el;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /* ——— Week ——— */
+    function inWeek(iso, monday) {
+      if (!iso) return false;
+      const a = toISO(monday);
+      const b = toISO(addDays(monday, 6));
+      return iso >= a && iso <= b;
+    }
+
+    function allTasks() {
+      const out = [];
+      state.projects.forEach((p) => p.steps.forEach((s) => s.tasks.forEach((t) => out.push({ p, s, t }))));
+      return out;
+    }
+
+    function renderWeek() {
+      const mon = weekMonday;
+      document.getElementById("weekRange").textContent =
+        `${fmtDay(toISO(mon))} – ${fmtDay(toISO(addDays(mon, 6)))}`;
+
+      const items = allTasks();
+      const done = items.filter(({ t }) => t.done && t.doneAt && inWeek(t.doneAt, mon));
+      const due = items.filter(({ t }) => t.date && inWeek(t.date, mon));
+      const notes = items.filter(({ t }) => (t.note || "").trim() && ((t.date && inWeek(t.date, mon)) || (t.doneAt && inWeek(t.doneAt, mon))));
+
+      document.getElementById("statDone").textContent = done.length;
+      document.getElementById("statDue").textContent = due.length;
+      document.getElementById("statNotes").textContent = notes.length;
+      document.getElementById("statOpen").textContent = due.filter(({ t }) => !t.done).length;
+
+      fillWeekList("weekDone", done, "Nada completado esta semana.");
+      fillWeekList("weekDue", due, "Sin tareas con fecha esta semana.");
+
+      const key = toISO(mon);
+      if (!state.weeks[key]) state.weeks[key] = { summary: "" };
+      const ta = document.getElementById("weekSummary");
+      if (ta.dataset.key !== key) {
+        ta.dataset.key = key;
+        ta.value = state.weeks[key].summary || "";
+      }
+    }
+
+    function fillWeekList(id, arr, empty) {
+      const el = document.getElementById(id);
+      if (!arr.length) {
+        el.innerHTML = `<li class="empty" style="border:none;background:transparent">${empty}</li>`;
+        return;
+      }
+      el.innerHTML = arr.map(({ p, t }) => `
+        <li>
+          <strong>${escapeHtml(p.title)}</strong> · ${escapeHtml(t.label)}
+          <div class="meta">
+            ${t.date ? "fecha " + fmtDay(t.date) : ""}
+            ${t.doneBy ? " · " + (USERS[t.doneBy]?.short || t.doneBy) : ""}
+            ${t.note ? " · tiene nota" : ""}
+          </div>
+        </li>
+      `).join("");
+    }
+
+    document.getElementById("prevWeek").onclick = () => { weekMonday = addDays(weekMonday, -7); renderWeek(); };
+    document.getElementById("nextWeek").onclick = () => { weekMonday = addDays(weekMonday, 7); renderWeek(); };
+    document.getElementById("thisWeek").onclick = () => { weekMonday = startOfWeek(new Date()); renderWeek(); };
+    document.getElementById("weekSummary").addEventListener("change", (e) => {
+      const key = toISO(weekMonday);
+      state.weeks[key] = {
+        summary: e.target.value,
+        updatedBy: currentUser.id,
+        updatedAt: Date.now()
+      };
+      logActivity("resumen", "Actualizó el resumen semanal");
+      scheduleSave(true);
+    });
+
+    function renderActivity() {
+      const el = document.getElementById("activityList");
+      if (!state.activity.length) {
+        el.innerHTML = `<li class="empty">Aún no hay actividad.</li>`;
+        return;
+      }
+      el.innerHTML = state.activity.slice(0, 80).map((a) => `
+        <li>
+          <div class="when">${fmtWhen(a.at)}</div>
+          <div class="who-tag ${a.userId}">${escapeHtml(a.userName)}</div>
+          <div class="what"><strong>${escapeHtml(a.action)}</strong> — ${escapeHtml(a.detail)}</div>
+        </li>
+      `).join("");
+    }
+
+    /* ——— Modals / Add ——— */
+    const modal = document.getElementById("modal");
+    const modalBody = document.getElementById("modalBody");
+
+    function openModal(html) {
+      modalBody.innerHTML = html;
+      modal.classList.add("open");
+    }
+    function closeModal() { modal.classList.remove("open"); }
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+    function openAddProject(area) {
+      openModal(`
+        <h3>Nuevo proyecto</h3>
+        <div class="row"><label>Título</label><input type="text" id="mTitle" placeholder="Nombre del proyecto" /></div>
+        <div class="row"><label>Descripción</label><textarea id="mLede" placeholder="De qué va…"></textarea></div>
+        <div class="row"><label>Etiqueta</label><input type="text" id="mBadge" placeholder="Ej. En producción" /></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="mCancel">Cancelar</button>
+          <button type="button" class="btn btn-gold" id="mOk">Crear</button>
+        </div>
+      `);
+      modalBody.querySelector("#mCancel").onclick = closeModal;
+      modalBody.querySelector("#mOk").onclick = () => {
+        const title = modalBody.querySelector("#mTitle").value.trim();
+        if (!title) return toast("Pon un título");
+        const project = {
+          id: uid(area.slice(0, 3)),
+          area,
+          title,
+          badge: modalBody.querySelector("#mBadge").value.trim() || "Nuevo",
+          lede: modalBody.querySelector("#mLede").value.trim(),
+          note: "",
+          steps: [{ id: uid("step"), title: "Paso 1", tasks: [] }]
+        };
+        state.projects.push(project);
+        logActivity("crear", `Creó el proyecto «${title}»`);
+        scheduleSave(true);
+        closeModal();
+        renderAll();
+        document.querySelector(`#tabs [data-tab="${area}"]`)?.click();
+      };
+    }
+
+    function openAddStep(projectId) {
+      const p = state.projects.find((x) => x.id === projectId);
+      openModal(`
+        <h3>Nuevo paso en «${escapeHtml(p.title)}»</h3>
+        <div class="row"><label>Nombre del paso</label><input type="text" id="mTitle" placeholder="Ej. PASO 4" /></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="mCancel">Cancelar</button>
+          <button type="button" class="btn btn-gold" id="mOk">Añadir</button>
+        </div>
+      `);
+      modalBody.querySelector("#mCancel").onclick = closeModal;
+      modalBody.querySelector("#mOk").onclick = () => {
+        const title = modalBody.querySelector("#mTitle").value.trim() || `Paso ${p.steps.length + 1}`;
+        p.steps.push({ id: uid("step"), title, tasks: [] });
+        logActivity("crear", `Añadió paso «${title}» en ${p.title}`);
+        scheduleSave(true);
+        closeModal();
+        renderAll();
+      };
+    }
+
+    function openAddTask(projectId, stepId) {
+      const p = state.projects.find((x) => x.id === projectId);
+      const step = p.steps.find((s) => s.id === stepId);
+      openModal(`
+        <h3>Nueva tarea</h3>
+        <div class="row"><label>Qué hay que hacer</label><input type="text" id="mTitle" placeholder="Descripción de la tarea" /></div>
+        <div class="row"><label>Fecha (opcional)</label><input type="date" id="mDate" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0.7rem;color-scheme:dark" /></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="mCancel">Cancelar</button>
+          <button type="button" class="btn btn-gold" id="mOk">Añadir</button>
+        </div>
+      `);
+      modalBody.querySelector("#mCancel").onclick = closeModal;
+      modalBody.querySelector("#mOk").onclick = () => {
+        const label = modalBody.querySelector("#mTitle").value.trim();
+        if (!label) return toast("Escribe la tarea");
+        step.tasks.push({
+          id: uid("task"),
+          label,
+          date: modalBody.querySelector("#mDate").value || "",
+          note: "",
+          done: false,
+          doneAt: null,
+          doneBy: null
+        });
+        logActivity("crear", `Añadió tarea «${label}»`);
+        scheduleSave(true);
+        closeModal();
+        renderAll();
+      };
+    }
+
+    document.querySelectorAll("[data-add-project]").forEach((btn) => {
+      btn.addEventListener("click", () => openAddProject(btn.dataset.addProject));
+    });
+
+    document.getElementById("fabAdd").addEventListener("click", () => {
+      const active = document.querySelector("#tabs button.active");
+      const tab = active?.dataset.tab;
+      if (tab === "actividad" || tab === "resumen") {
+        openAddProject("emprendimientos");
+      } else {
+        openAddProject(tab || "emprendimientos");
+      }
+    });
+
+    /* ——— Boot ——— */
+    (async function boot() {
+      const sid = sessionStorage.getItem(SESSION_KEY);
+      if (sid && USERS[sid]) {
+        await enterApp(USERS[sid]);
+      }
+    })();
+  </script>
+</body>
+</html>
