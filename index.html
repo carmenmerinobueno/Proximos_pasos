@@ -4,11 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Tablero · Carmen & Edgar</title>
+  <script>
+    (function () {
+      var t = localStorage.getItem("ce-tablero-theme");
+      if (t !== "light" && t !== "dark") t = "dark";
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    :root {
+    :root, [data-theme="dark"] {
       --bg: #0a0a0b;
       --bg-elev: #121214;
       --bg-card: #161618;
@@ -30,10 +37,49 @@
       --font-body: "Outfit", system-ui, sans-serif;
       --safe-b: env(safe-area-inset-bottom, 0px);
       --safe-t: env(safe-area-inset-top, 0px);
+      --topbar-bg: rgba(10,10,11,0.88);
+      --gate-grid: rgba(255,255,255,0.03);
+      --gate-rad-gold: rgba(198,163,90,0.18);
+      --gate-rad-silver: rgba(174,180,188,0.08);
+      --shadow-card: 0 20px 50px rgba(0,0,0,0.25);
+      --toast-bg: #f4f1ea;
+      --toast-fg: #0a0a0b;
+      --scheme: dark;
+      --check-mark: #14110c;
+      --input-bg: #0a0a0b;
+    }
+
+    [data-theme="light"] {
+      --bg: #f6f3ec;
+      --bg-elev: #ffffff;
+      --bg-card: #ffffff;
+      --bg-soft: #f0ebe3;
+      --line: rgba(26,24,20,0.1);
+      --line-strong: rgba(26,24,20,0.16);
+      --text: #1a1814;
+      --text-soft: #4a453c;
+      --muted: #7a7368;
+      --gold: #a8843a;
+      --gold-bright: #8f6f2e;
+      --gold-dim: rgba(168,132,58,0.14);
+      --silver: #6d757e;
+      --silver-dim: rgba(109,117,126,0.12);
+      --ok: #2f6b4f;
+      --danger: #b05445;
+      --topbar-bg: rgba(246,243,236,0.92);
+      --gate-grid: rgba(26,24,20,0.04);
+      --gate-rad-gold: rgba(168,132,58,0.16);
+      --gate-rad-silver: rgba(109,117,126,0.08);
+      --shadow-card: 0 16px 40px rgba(26,24,20,0.08);
+      --toast-bg: #1a1814;
+      --toast-fg: #f6f3ec;
+      --scheme: light;
+      --check-mark: #ffffff;
+      --input-bg: #ffffff;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; color-scheme: var(--scheme); }
     body {
       font-family: var(--font-body);
       background: var(--bg);
@@ -41,6 +87,7 @@
       min-height: 100dvh;
       line-height: 1.45;
       -webkit-tap-highlight-color: transparent;
+      transition: background 0.25s ease, color 0.25s ease;
     }
 
     button, input, textarea, select { font: inherit; color: inherit; }
@@ -56,8 +103,8 @@
       position: relative;
       overflow: hidden;
       background:
-        radial-gradient(900px 500px at 50% -10%, rgba(198,163,90,0.18), transparent 55%),
-        radial-gradient(700px 400px at 100% 100%, rgba(174,180,188,0.08), transparent 50%),
+        radial-gradient(900px 500px at 50% -10%, var(--gate-rad-gold), transparent 55%),
+        radial-gradient(700px 400px at 100% 100%, var(--gate-rad-silver), transparent 50%),
         var(--bg);
     }
 
@@ -66,12 +113,31 @@
       position: absolute;
       inset: 0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        linear-gradient(var(--gate-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--gate-grid) 1px, transparent 1px);
       background-size: 48px 48px;
       mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
       pointer-events: none;
     }
+
+    .theme-fab {
+      position: absolute;
+      top: calc(1rem + var(--safe-t));
+      right: 1rem;
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      background: var(--bg-elev);
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-card);
+    }
+    .theme-fab:hover { border-color: var(--gold); color: var(--text); }
 
     .gate-inner {
       position: relative;
@@ -297,7 +363,7 @@
       top: 0;
       z-index: 40;
       backdrop-filter: blur(16px);
-      background: rgba(10,10,11,0.88);
+      background: var(--topbar-bg);
       border-bottom: 1px solid var(--line);
       padding: calc(0.7rem + var(--safe-t)) 1rem 0.7rem;
     }
@@ -482,7 +548,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.9rem;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      box-shadow: var(--shadow-card);
     }
 
     .card-top {
@@ -618,7 +684,7 @@
       position: absolute;
       left: 4px; top: 1px;
       width: 4px; height: 8px;
-      border: solid #14110c;
+      border: solid var(--check-mark);
       border-width: 0 2px 2px 0;
       transform: rotate(45deg);
     }
@@ -661,7 +727,8 @@
       font-size: 0.78rem;
       color: var(--text-soft);
       max-width: 10.5rem;
-      color-scheme: dark;
+      color-scheme: var(--scheme);
+      background: var(--input-bg);
     }
 
     .mini {
@@ -1294,8 +1361,8 @@
       bottom: calc(5rem + var(--safe-b));
       left: 50%;
       transform: translateX(-50%) translateY(12px);
-      background: var(--text);
-      color: var(--bg);
+      background: var(--toast-bg);
+      color: var(--toast-fg);
       font-size: 0.82rem;
       font-weight: 600;
       padding: 0.65rem 1rem;
@@ -1320,6 +1387,7 @@
 <body>
   <!-- LOGIN -->
   <div id="gate">
+    <button type="button" class="theme-fab" id="themeToggleGate" title="Cambiar tema">☾ Oscuro</button>
     <div class="gate-inner">
       <div class="gate-mark">C&amp;E</div>
       <div class="gate-kicker">Espacio compartido</div>
@@ -1363,6 +1431,7 @@
             <span class="dot" id="whoDot">—</span>
             <span class="name" id="whoName">—</span>
           </div>
+          <button type="button" class="icon-btn" id="themeToggleApp" title="Cambiar tema">☾</button>
           <button type="button" class="icon-btn" id="btnLogout" title="Cambiar usuario">⇄</button>
         </div>
       </div>
@@ -1594,10 +1663,42 @@
     const LOCAL_KEY = "ce-tablero-v3-shared";
     const SESSION_KEY = "ce-tablero-session";
     const SPACE_KEY = "ce-tablero-space-id";
+    const THEME_KEY = "ce-tablero-theme";
     const BASKET = "tablero";
     const PANTRY = "https://getpantry.cloud/apiv1";
     /* Mismo espacio para los dos — sin códigos de entrada */
     const FIXED_ROOM = "tablero-carmen-edgar-compartido";
+
+    function getTheme() {
+      const t = document.documentElement.getAttribute("data-theme");
+      return t === "light" ? "light" : "dark";
+    }
+
+    function paintThemeButtons() {
+      const theme = getTheme();
+      const gate = document.getElementById("themeToggleGate");
+      const app = document.getElementById("themeToggleApp");
+      if (gate) gate.textContent = theme === "dark" ? "☀ Claro" : "☾ Oscuro";
+      if (app) {
+        app.textContent = theme === "dark" ? "☀" : "☾";
+        app.title = theme === "dark" ? "Modo claro" : "Modo oscuro";
+      }
+    }
+
+    function setTheme(theme) {
+      const next = theme === "light" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem(THEME_KEY, next);
+      paintThemeButtons();
+    }
+
+    function toggleTheme() {
+      setTheme(getTheme() === "dark" ? "light" : "dark");
+    }
+
+    document.getElementById("themeToggleGate")?.addEventListener("click", toggleTheme);
+    document.getElementById("themeToggleApp")?.addEventListener("click", toggleTheme);
+    paintThemeButtons();
 
     const DEFAULT_SEED = () => ({
       version: 3,
@@ -2698,7 +2799,7 @@
       openModal(`
         <h3>Nueva tarea</h3>
         <div class="row"><label>Qué hay que hacer</label><input type="text" id="mTitle" placeholder="Descripción de la tarea" /></div>
-        <div class="row"><label>Fecha (opcional)</label><input type="date" id="mDate" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0.7rem;color-scheme:dark" /></div>
+        <div class="row"><label>Fecha (opcional)</label><input type="date" id="mDate" style="width:100%;background:var(--input-bg);border:1px solid var(--line);border-radius:10px;padding:0.7rem;color-scheme:var(--scheme)" /></div>
         <div class="row">
           <label>Prioridad Eisenhower</label>
           <div class="p-select" id="mPrio">${priorityButtons(2)}</div>
