@@ -1192,6 +1192,103 @@
     .cal-day-row strong { font-size: 0.95rem; }
     .cal-day-row .meta { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
 
+    /* Eisenhower priority */
+    .prio-legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+      padding: 0.85rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--bg-card);
+    }
+    .prio-legend-title {
+      grid-column: 1 / -1;
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      margin-bottom: 0.15rem;
+      color: var(--gold-bright);
+    }
+    .prio-legend-sub {
+      grid-column: 1 / -1;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    .eisen-cell {
+      border-radius: 12px;
+      padding: 0.7rem 0.75rem;
+      border: 1px solid var(--line);
+      min-height: 72px;
+    }
+    .eisen-cell .lvl {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .eisen-cell strong {
+      display: block;
+      font-size: 0.82rem;
+      margin-bottom: 0.15rem;
+    }
+    .eisen-cell span {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      line-height: 1.35;
+    }
+    .eisen-cell.p1 { background: rgba(174,180,188,0.12); border-color: rgba(174,180,188,0.35); }
+    .eisen-cell.p1 .lvl { background: var(--silver); color: #141518; }
+    .eisen-cell.p2 { background: rgba(198,163,90,0.14); border-color: rgba(198,163,90,0.4); }
+    .eisen-cell.p2 .lvl { background: var(--gold); color: #14110c; }
+    .eisen-cell.p3 { background: rgba(120,160,190,0.12); border-color: rgba(120,160,190,0.35); }
+    .eisen-cell.p3 .lvl { background: #7aa0be; color: #0e1418; }
+    .eisen-cell.p4 { background: rgba(200,180,90,0.1); border-color: rgba(200,180,90,0.3); }
+    .eisen-cell.p4 .lvl { background: #c4b06a; color: #14110c; }
+
+    .p-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.7rem;
+      height: 1.45rem;
+      padding: 0 0.35rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .p-badge.p1 { background: var(--silver); color: #141518; }
+    .p-badge.p2 { background: var(--gold); color: #14110c; }
+    .p-badge.p3 { background: #7aa0be; color: #0e1418; }
+    .p-badge.p4 { background: #c4b06a; color: #14110c; }
+
+    .p-select {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+    .p-select button {
+      min-width: 2rem;
+      height: 1.7rem;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: var(--bg);
+    }
+    .p-select button.active.p1 { background: var(--silver); color: #141518; border-color: transparent; }
+    .p-select button.active.p2 { background: var(--gold); color: #14110c; border-color: transparent; }
+    .p-select button.active.p3 { background: #7aa0be; color: #0e1418; border-color: transparent; }
+    .p-select button.active.p4 { background: #c4b06a; color: #14110c; border-color: transparent; }
+
     .toast {
       position: fixed;
       bottom: calc(5rem + var(--safe-b));
@@ -1293,16 +1390,18 @@
           </div>
         </div>
         <div class="kpi-grid" id="kpiGrid"></div>
+        <div class="prio-legend" id="legendPendientes"></div>
         <div class="pending-groups" id="pendingGroups"></div>
       </section>
 
       <section class="panel" id="panel-prioridad">
         <div class="panel-head">
           <div>
-            <h2>Prioridad por fecha</h2>
-            <p>Tareas con fecha, de la más urgente a la más lejana.</p>
+            <h2>Prioridad</h2>
+            <p>Primero Eisenhower (P1→P4), luego fecha más cercana.</p>
           </div>
         </div>
+        <div class="prio-legend" id="legendPrioridad"></div>
         <ul class="prio-list" id="prioList"></ul>
       </section>
 
@@ -1441,6 +1540,70 @@
       carmen: { id: "carmen", name: "Carmen Merino Bueno", short: "Carmen", initials: "CM", tone: "carmen" },
       edgar: { id: "edgar", name: "Edgar Gabriel Pablo Ramos", short: "Edgar", initials: "EG", tone: "edgar" }
     };
+
+    const PRIORITY = {
+      1: { label: "Importante y urgente", hint: "Hacer ya", cls: "p1" },
+      2: { label: "Importante y NO urgente", hint: "Planificar", cls: "p2" },
+      3: { label: "NO importante y urgente", hint: "Delegar o acotar", cls: "p3" },
+      4: { label: "NO importante y NO urgente", hint: "Aparcar o eliminar", cls: "p4" }
+    };
+
+    function taskPriority(t) {
+      const n = Number(t?.priority);
+      return n >= 1 && n <= 4 ? n : 2;
+    }
+
+    function normalizeState(s) {
+      if (!s?.projects) return s;
+      s.projects.forEach((p) => {
+        (p.steps || []).forEach((st) => {
+          (st.tasks || []).forEach((t) => {
+            t.priority = taskPriority(t);
+          });
+        });
+      });
+      return s;
+    }
+
+    function legendHtml() {
+      return `
+        <div class="prio-legend-title">Cuadrante de Eisenhower</div>
+        <div class="prio-legend-sub">Lo importante ↑ · Lo urgente → · Elige P1–P4 en cada tarea</div>
+        <div class="eisen-cell p2">
+          <div class="lvl">P2</div>
+          <strong>${PRIORITY[2].label}</strong>
+          <span>${PRIORITY[2].hint}</span>
+        </div>
+        <div class="eisen-cell p1">
+          <div class="lvl">P1</div>
+          <strong>${PRIORITY[1].label}</strong>
+          <span>${PRIORITY[1].hint}</span>
+        </div>
+        <div class="eisen-cell p4">
+          <div class="lvl">P4</div>
+          <strong>${PRIORITY[4].label}</strong>
+          <span>${PRIORITY[4].hint}</span>
+        </div>
+        <div class="eisen-cell p3">
+          <div class="lvl">P3</div>
+          <strong>${PRIORITY[3].label}</strong>
+          <span>${PRIORITY[3].hint}</span>
+        </div>
+      `;
+    }
+
+    function paintLegends() {
+      ["legendPendientes", "legendPrioridad"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = legendHtml();
+      });
+    }
+
+    function priorityButtons(active) {
+      return [1, 2, 3, 4].map((n) =>
+        `<button type="button" class="${PRIORITY[n].cls} ${active === n ? "active" : ""}" data-prio="${n}" title="${PRIORITY[n].label}">P${n}</button>`
+      ).join("");
+    }
 
     const LOCAL_KEY = "ce-tablero-v3-shared";
     const SESSION_KEY = "ce-tablero-session";
@@ -1744,7 +1907,7 @@
     function loadLocal() {
       try {
         const raw = localStorage.getItem(LOCAL_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) return normalizeState(JSON.parse(raw));
       } catch {}
       return null;
     }
@@ -1840,7 +2003,7 @@
         const remote = await pantryGet(spaceId);
         if (remote && remote.version && remote.projects) {
           if (!state || (remote.updatedAt || 0) >= (state.updatedAt || 0)) {
-            state = remote;
+            state = normalizeState(remote);
             saveLocal();
           }
         } else if (state) {
@@ -1893,8 +2056,9 @@
       if (!user) return;
       currentUser = user;
       sessionStorage.setItem(SESSION_KEY, currentUser.id);
-      state = loadLocal() || DEFAULT_SEED();
+      state = normalizeState(loadLocal() || DEFAULT_SEED());
       setSyncStatus("Entrando…");
+      paintLegends();
       await ensureCloudSpace();
       await pullCloud();
       document.getElementById("gate").style.display = "none";
@@ -1970,6 +2134,7 @@
     }
 
     function renderAll() {
+      paintLegends();
       ["emprendimientos","tfg","casa","cursos","marcas"].forEach(renderArea);
       renderPendientes();
       renderPrioridad();
@@ -1982,10 +2147,10 @@
       const items = allTasks();
       const pending = items.filter(({ t }) => !t.done);
       const withDate = pending.filter(({ t }) => t.date);
-      const noDate = pending.filter(({ t }) => !t.date);
       const today = todayISO();
       const overdue = withDate.filter(({ t }) => t.date < today);
       const dueToday = withDate.filter(({ t }) => t.date === today);
+      const p1 = pending.filter(({ t }) => taskPriority(t) === 1).length;
       const done = items.filter(({ t }) => t.done).length;
       const total = items.length;
       const pct = total ? Math.round((done / total) * 100) : 0;
@@ -1999,14 +2164,14 @@
           <div class="kpi-hint">de ${total} tareas totales</div>
         </div>
         <div class="kpi alert">
-          <div class="kpi-label">Vencidas</div>
-          <div class="kpi-value">${overdue.length}</div>
-          <div class="kpi-hint">pasaron su fecha</div>
+          <div class="kpi-label">P1 abiertas</div>
+          <div class="kpi-value">${p1}</div>
+          <div class="kpi-hint">importante y urgente</div>
         </div>
         <div class="kpi">
-          <div class="kpi-label">Hoy</div>
-          <div class="kpi-value">${dueToday.length}</div>
-          <div class="kpi-hint">con fecha de hoy</div>
+          <div class="kpi-label">Hoy / vencidas</div>
+          <div class="kpi-value">${dueToday.length + overdue.length}</div>
+          <div class="kpi-hint">${dueToday.length} hoy · ${overdue.length} vencidas</div>
         </div>
         <div class="kpi silver-tone">
           <div class="kpi-label">Avance</div>
@@ -2032,18 +2197,25 @@
       root.innerHTML = areas.map((area) => {
         const list = byArea[area]
           .slice()
-          .sort((a, b) => (a.t.date || "9999").localeCompare(b.t.date || "9999"))
-          .map(({ p, t }) => `
+          .sort((a, b) => {
+            const pd = taskPriority(a.t) - taskPriority(b.t);
+            if (pd) return pd;
+            return (a.t.date || "9999").localeCompare(b.t.date || "9999");
+          })
+          .map(({ p, t }) => {
+            const pr = taskPriority(t);
+            return `
             <li class="pending-item">
               <input class="check" type="checkbox" data-toggle="${t.id}" />
               <div class="prio-body">
-                <strong>${escapeHtml(t.label)}</strong>
-                <div class="sub">${escapeHtml(p.title)}${t.date ? " · " + fmtDay(t.date) : " · sin fecha"}</div>
+                <strong><span class="p-badge ${PRIORITY[pr].cls}">P${pr}</span> ${escapeHtml(t.label)}</strong>
+                <div class="sub">${escapeHtml(p.title)}${t.date ? " · " + fmtDay(t.date) : " · sin fecha"} · ${PRIORITY[pr].label}</div>
                 ${t.note ? `<div class="note-snip">${escapeHtml(t.note)}</div>` : ""}
               </div>
               <span class="badge">${t.date ? fmtDay(t.date) : "—"}</span>
             </li>
-          `).join("");
+          `;
+          }).join("");
         return `
           <div class="pending-group">
             <h3>${AREA_LABELS[area] || area} <small>${byArea[area].length}</small></h3>
@@ -2069,26 +2241,36 @@
     function renderPrioridad() {
       const today = todayISO();
       const dated = allTasks()
-        .filter(({ t }) => !t.done && t.date)
-        .sort((a, b) => a.t.date.localeCompare(b.t.date));
+        .filter(({ t }) => !t.done)
+        .sort((a, b) => {
+          const pd = taskPriority(a.t) - taskPriority(b.t);
+          if (pd) return pd;
+          return (a.t.date || "9999").localeCompare(b.t.date || "9999");
+        });
 
       const el = document.getElementById("prioList");
       if (!el) return;
       if (!dated.length) {
-        el.innerHTML = `<li class="empty" style="border:none;background:transparent;display:block">No hay tareas con fecha. Pon fechas en las tareas para ver la prioridad aquí.</li>`;
+        el.innerHTML = `<li class="empty" style="border:none;background:transparent;display:block">No hay tareas pendientes.</li>`;
         return;
       }
 
       el.innerHTML = dated.map(({ p, t }) => {
-        const overdue = t.date < today;
+        const pr = taskPriority(t);
+        const overdue = t.date && t.date < today;
         const isToday = t.date === today;
-        const d = t.date.split("-");
+        const dateBlock = t.date
+          ? (() => {
+              const d = t.date.split("-");
+              return `<div class="prio-date">${d[2]}<span>${d[1]}/${d[0].slice(2)}</span></div>`;
+            })()
+          : `<div class="prio-date">—<span>sin fecha</span></div>`;
         return `
           <li class="prio-item ${overdue ? "overdue" : ""} ${isToday ? "today" : ""}">
-            <div class="prio-date">${d[2]}<span>${d[1]}/${d[0].slice(2)}</span></div>
+            ${dateBlock}
             <div class="prio-body">
-              <strong>${escapeHtml(t.label)}</strong>
-              <div class="sub">${escapeHtml(p.title)} · ${AREA_LABELS[p.area] || p.area}${overdue ? " · vencida" : isToday ? " · hoy" : ""}</div>
+              <strong><span class="p-badge ${PRIORITY[pr].cls}">P${pr}</span> ${escapeHtml(t.label)}</strong>
+              <div class="sub">${escapeHtml(p.title)} · ${PRIORITY[pr].label}${overdue ? " · vencida" : isToday ? " · hoy" : ""}</div>
               ${t.note ? `<div class="note-snip">${escapeHtml(t.note)}</div>` : ""}
             </div>
             <input class="check" type="checkbox" data-toggle="${t.id}" title="Completar" />
@@ -2160,7 +2342,7 @@
         const isToday = iso === todayISO();
         const tasks = tasksOnDate(iso);
         const chips = tasks.slice(0, 3).map(({ t }) =>
-          `<span class="cal-chip ${t.done ? "done" : ""}">${escapeHtml(t.label)}</span>`
+          `<span class="cal-chip ${t.done ? "done" : ""}">P${taskPriority(t)} ${escapeHtml(t.label)}</span>`
         ).join("");
         const more = tasks.length > 3 ? `<div class="cal-more">+${tasks.length - 3}</div>` : "";
         html += `
@@ -2187,6 +2369,7 @@
             <div class="cal-week-head">${names[i]} ${fmtDay(iso)}</div>
             ${tasks.length ? tasks.map(({ p, t }) => `
               <div class="cal-week-task ${t.done ? "done" : ""}">
+                <span class="p-badge ${PRIORITY[taskPriority(t)].cls}">P${taskPriority(t)}</span>
                 ${escapeHtml(t.label)}
                 <span class="proj">${escapeHtml(p.title)}</span>
               </div>
@@ -2206,8 +2389,8 @@
       return `<div class="cal-day-view">${tasks.map(({ p, t }) => `
         <div class="cal-day-row">
           <div>
-            <strong>${t.done ? "✓ " : ""}${escapeHtml(t.label)}</strong>
-            <div class="meta">${escapeHtml(p.title)} · ${AREA_LABELS[p.area] || p.area}${t.note ? " · tiene nota" : ""}</div>
+            <strong><span class="p-badge ${PRIORITY[taskPriority(t)].cls}">P${taskPriority(t)}</span> ${t.done ? "✓ " : ""}${escapeHtml(t.label)}</strong>
+            <div class="meta">${escapeHtml(p.title)} · ${PRIORITY[taskPriority(t)].label}${t.note ? " · tiene nota" : ""}</div>
           </div>
         </div>
       `).join("")}</div>`;
@@ -2350,6 +2533,7 @@
       const el = document.createElement("div");
       el.className = "task" + (t.done ? " done" : "");
       const hasNote = !!(t.note && t.note.trim());
+      const pr = taskPriority(t);
       el.innerHTML = `
         <div class="task-row">
           <input class="check" type="checkbox" ${t.done ? "checked" : ""} />
@@ -2361,6 +2545,7 @@
         </div>
         <div class="task-meta">
           <label>Fecha <input type="date" value="${t.date || ""}" /></label>
+          <div class="p-select" title="Prioridad Eisenhower">${priorityButtons(pr)}</div>
           <button type="button" class="mini ${hasNote ? "on" : ""}" data-act="note">Nota</button>
         </div>
         <div class="task-note ${hasNote ? "open" : ""}">
@@ -2392,7 +2577,17 @@
         t.date = e.target.value || "";
         logActivity("fecha", `Fecha en «${t.label}»: ${t.date ? fmtDay(t.date) : "sin fecha"}`);
         scheduleSave(true);
-        renderWeek();
+        renderAll();
+      });
+
+      el.querySelectorAll("[data-prio]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const n = Number(btn.dataset.prio);
+          t.priority = n;
+          logActivity("prioridad", `«${t.label}» → P${n} (${PRIORITY[n].label})`);
+          scheduleSave(true);
+          renderAll();
+        });
       });
 
       const noteBtn = el.querySelector('[data-act="note"]');
@@ -2582,11 +2777,25 @@
         <h3>Nueva tarea</h3>
         <div class="row"><label>Qué hay que hacer</label><input type="text" id="mTitle" placeholder="Descripción de la tarea" /></div>
         <div class="row"><label>Fecha (opcional)</label><input type="date" id="mDate" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0.7rem;color-scheme:dark" /></div>
+        <div class="row">
+          <label>Prioridad Eisenhower</label>
+          <div class="p-select" id="mPrio">${priorityButtons(2)}</div>
+          <p class="hint" style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted)">Por defecto P2 · importante y no urgente</p>
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" id="mCancel">Cancelar</button>
           <button type="button" class="btn btn-gold" id="mOk">Añadir</button>
         </div>
       `);
+      let chosen = 2;
+      const prioBox = modalBody.querySelector("#mPrio");
+      prioBox.onclick = (e) => {
+        const b = e.target.closest("[data-prio]");
+        if (!b) return;
+        chosen = Number(b.dataset.prio);
+        prioBox.innerHTML = priorityButtons(chosen);
+      };
+
       modalBody.querySelector("#mCancel").onclick = closeModal;
       modalBody.querySelector("#mOk").onclick = () => {
         const label = modalBody.querySelector("#mTitle").value.trim();
@@ -2596,11 +2805,12 @@
           label,
           date: modalBody.querySelector("#mDate").value || "",
           note: "",
+          priority: chosen,
           done: false,
           doneAt: null,
           doneBy: null
         });
-        logActivity("crear", `Añadió tarea «${label}»`);
+        logActivity("crear", `Añadió tarea «${label}» (P${chosen})`);
         scheduleSave(true);
         closeModal();
         renderAll();
