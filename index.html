@@ -1817,18 +1817,86 @@
       color: var(--text-soft);
     }
     .cal-week-task.done { opacity: 0.5; text-decoration: line-through; }
-    .cal-week-task .proj { display: block; font-size: 0.64rem; color: var(--muted); margin-top: 0.15rem; }
-    .cal-day-view { display: flex; flex-direction: column; gap: 0.55rem; }
+    .cal-day-view { display: flex; flex-direction: column; gap: 1rem; }
+    .cal-proj-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 0.75rem 0.8rem 0.85rem;
+      border-radius: var(--radius);
+      background: rgba(0,0,0,0.22);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--proj-accent, var(--line-strong));
+    }
+    .cal-proj-group.compact {
+      padding: 0.35rem 0.35rem 0.2rem;
+      gap: 0.25rem;
+      margin-bottom: 0.4rem;
+      background: rgba(255,255,255,0.02);
+    }
+    .cal-proj-head {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin: 0 0 0.15rem;
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+    .cal-proj-group.compact .cal-proj-head {
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--proj-accent, var(--gold-bright));
+      margin-bottom: 0.1rem;
+    }
+    .cal-proj-count {
+      margin-left: auto;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      font-family: var(--font-body);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .cal-proj-mini {
+      margin-bottom: 0.28rem;
+      padding-bottom: 0.15rem;
+      border-left: 2px solid var(--proj-accent, var(--line));
+      padding-left: 0.28rem;
+    }
+    .cal-proj-mini-name {
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--proj-accent, var(--muted));
+      margin-bottom: 0.12rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .cal-day-row {
       display: grid;
       gap: 0.45rem;
-      padding: 0.9rem;
-      border-radius: var(--radius);
-      background: rgba(0,0,0,0.35);
+      padding: 0.75rem 0.85rem;
+      border-radius: var(--radius-sm);
+      background: rgba(0,0,0,0.28);
       border: 1px solid var(--line);
     }
-    .cal-day-row strong { font-size: 0.95rem; }
+    .cal-day-row strong { font-size: 0.92rem; }
     .cal-day-row .meta { font-size: 0.74rem; color: var(--muted); margin-top: 0.2rem; }
+    [data-theme="light"] .cal-proj-group {
+      background: rgba(255,255,255,0.55);
+    }
+    [data-theme="light"] .cal-proj-group.compact {
+      background: rgba(0,0,0,0.02);
+    }
+    [data-theme="light"] .cal-day-row {
+      background: rgba(255,255,255,0.7);
+    }
 
     /* Week / activity */
     .week-controls {
@@ -3525,7 +3593,7 @@
         <section class="panel" id="panel-calendario">
           <div class="panel-head">
             <div>
-              <p>Todas las tareas con fecha · vista diaria, semanal o mensual.</p>
+              <p>Tareas con fecha agrupadas por proyecto · día, semana o mes.</p>
             </div>
           </div>
           <div class="cal-toolbar">
@@ -5397,6 +5465,34 @@
       return allTasks().filter(({ t, p }) => t.date === iso && taskVisible(t, p) && !p.archived);
     }
 
+    function projectAccent(id) {
+      const accents = ["#7eb8da", "#c9a87c", "#9bb89a", "#c4a0b8", "#a8b0c0", "#d4b896", "#8eb5a8", "#b9a8d4"];
+      const key = String(id || "");
+      let h = 0;
+      for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+      return accents[h % accents.length];
+    }
+
+    function shortProjectTitle(title, max = 14) {
+      const t = String(title || "Proyecto").trim();
+      return t.length > max ? t.slice(0, max - 1) + "…" : t;
+    }
+
+    function groupTasksByProject(items) {
+      const map = new Map();
+      for (const item of items) {
+        const id = item.p?.id || "_";
+        if (!map.has(id)) map.set(id, { p: item.p, items: [] });
+        map.get(id).items.push(item);
+      }
+      const order = (state.projects || []).map((p) => p.id);
+      return [...map.values()].sort((a, b) => {
+        const ia = order.indexOf(a.p?.id);
+        const ib = order.indexOf(b.p?.id);
+        return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || String(a.p?.title || "").localeCompare(String(b.p?.title || ""), "es");
+      });
+    }
+
     function monthLabel(date) {
       return date.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
     }
@@ -5442,14 +5538,27 @@
         const inMonth = day.getMonth() === m;
         const isToday = iso === todayISO();
         const tasks = tasksOnDate(iso);
-        const chips = tasks.slice(0, 3).map(({ t }) =>
-          `<span class="cal-chip ${t.done ? "done" : ""} tone-p${taskPriority(t)}">${priorityDot(taskPriority(t), t.done)}${escapeHtml(t.label)}</span>`
-        ).join("");
-        const more = tasks.length > 3 ? `<div class="cal-more">+${tasks.length - 3}</div>` : "";
+        const groups = groupTasksByProject(tasks);
+        let shown = 0;
+        const maxChips = 4;
+        let body = "";
+        for (const { p, items } of groups) {
+          if (shown >= maxChips) break;
+          const room = maxChips - shown;
+          const slice = items.slice(0, room);
+          body += `<div class="cal-proj-mini" style="--proj-accent:${projectAccent(p.id)}">
+            <div class="cal-proj-mini-name">${escapeHtml(shortProjectTitle(p.title, 12))}</div>
+            ${slice.map(({ t }) =>
+              `<span class="cal-chip ${t.done ? "done" : ""} tone-p${taskPriority(t)}">${priorityDot(taskPriority(t), t.done)}${escapeHtml(t.label)}</span>`
+            ).join("")}
+          </div>`;
+          shown += slice.length;
+        }
+        const more = tasks.length > shown ? `<div class="cal-more">+${tasks.length - shown}</div>` : "";
         html += `
           <div class="cal-day ${inMonth ? "" : "out"} ${isToday ? "today" : ""}" data-jump="${iso}">
             <div class="cal-day-num">${day.getDate()}</div>
-            ${chips}${more}
+            ${body}${more}
           </div>
         `;
       }
@@ -5464,15 +5573,20 @@
         const day = addDays(monday, i);
         const iso = toISO(day);
         const tasks = tasksOnDate(iso);
+        const groups = groupTasksByProject(tasks);
         const isToday = iso === todayISO();
         html += `
           <div class="cal-week-col ${isToday ? "today" : ""}" data-jump="${iso}">
             <div class="cal-week-head">${names[i]} ${fmtDay(iso)}</div>
-            ${tasks.length ? tasks.map(({ p, t }) => `
-              <div class="cal-week-task ${t.done ? "done" : ""} tone-p${taskPriority(t)}">
-                ${priorityDot(taskPriority(t), t.done)}
-                <span>${escapeHtml(t.label)}</span>
-                <span class="proj">${escapeHtml(p.title)}</span>
+            ${groups.length ? groups.map(({ p, items }) => `
+              <div class="cal-proj-group compact" style="--proj-accent:${projectAccent(p.id)}">
+                <div class="cal-proj-head">${escapeHtml(shortProjectTitle(p.title, 18))}<span class="cal-proj-count">${items.length}</span></div>
+                ${items.map(({ t }) => `
+                  <div class="cal-week-task ${t.done ? "done" : ""} tone-p${taskPriority(t)}">
+                    ${priorityDot(taskPriority(t), t.done)}
+                    <span>${escapeHtml(t.label)}</span>
+                  </div>
+                `).join("")}
               </div>
             `).join("") : `<div class="empty" style="font-size:0.75rem">Sin tareas</div>`}
           </div>
@@ -5487,13 +5601,19 @@
       if (!tasks.length) {
         return `<div class="cal-day-view"><p class="empty">No hay tareas con fecha este día.</p></div>`;
       }
-      return `<div class="cal-day-view">${tasks.map(({ p, t }) => `
-        <div class="cal-day-row tone-p${taskPriority(t)}">
-          <div>
-            <strong>${priorityDot(taskPriority(t), t.done)} ${t.done ? "✓ " : ""}${escapeHtml(t.label)}</strong>
-            <div class="meta">${escapeHtml(p.title)}${t.note ? " · tiene nota" : ""}</div>
-          </div>
-        </div>
+      const groups = groupTasksByProject(tasks);
+      return `<div class="cal-day-view">${groups.map(({ p, items }) => `
+        <section class="cal-proj-group" style="--proj-accent:${projectAccent(p.id)}">
+          <h3 class="cal-proj-head">${escapeHtml(p.title)}<span class="cal-proj-count">${items.length} tarea${items.length === 1 ? "" : "s"}</span></h3>
+          ${items.map(({ t }) => `
+            <div class="cal-day-row tone-p${taskPriority(t)}">
+              <div>
+                <strong>${priorityDot(taskPriority(t), t.done)} ${t.done ? "✓ " : ""}${escapeHtml(t.label)}</strong>
+                <div class="meta">${t.description ? "con detalle" : "sin detalle"}${t.note ? " · tiene nota" : ""}</div>
+              </div>
+            </div>
+          `).join("")}
+        </section>
       `).join("")}</div>`;
     }
 
