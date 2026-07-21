@@ -4044,9 +4044,37 @@
       return 4;
     }
 
-    /** Efectiva = la más urgente entre la base y la de fecha/hora (1 gana a 4). */
+    /** Efectiva = la más urgente entre la guardada y la de fecha/hora (1 gana a 4). */
     function effectivePriority(t) {
       return Math.min(basePriority(t), schedulePriority(t));
+    }
+
+    /**
+     * Escribe en t.priority la prioridad efectiva (solo sube urgencia).
+     * Así el botón, el color y el dato guardado coinciden en todos lados.
+     */
+    function applySchedulePriority(t) {
+      if (!t || t.done) return false;
+      const next = effectivePriority(t);
+      if (Number(t.priority) === next) return false;
+      t.priority = next;
+      return true;
+    }
+
+    function syncAllSchedulePriorities() {
+      if (!state) return false;
+      let dirty = false;
+      (state.projects || []).forEach((p) => {
+        (p.steps || []).forEach((st) => {
+          (st.tasks || []).forEach((t) => {
+            if (applySchedulePriority(t)) dirty = true;
+          });
+        });
+      });
+      (state.calEvents || []).forEach((e) => {
+        if (applySchedulePriority(e)) dirty = true;
+      });
+      return dirty;
     }
 
     /** Alias de lectura para UI/orden: siempre la efectiva. */
@@ -4185,6 +4213,7 @@
         (p.steps || []).forEach((st) => {
           (st.tasks || []).forEach((t) => {
             t.priority = basePriority(t);
+            applySchedulePriority(t);
             t.champion = taskChampion(t);
             if (!t.description) t.description = t.description || "";
             if (typeof t.note !== "string") t.note = t.note || "";
@@ -4243,6 +4272,7 @@
           doneBy: e.doneBy || null,
           createdAt: e.createdAt || todayISO()
         };
+        applySchedulePriority(ev);
         if (ev.shortCode && /^[A-Z0-9]{5}$/i.test(ev.shortCode)) {
           usedEv.add(ev.shortCode.toUpperCase());
           ev.shortCode = ev.shortCode.toUpperCase();
@@ -5714,6 +5744,7 @@
     }
 
     function renderAll() {
+      if (syncAllSchedulePriorities()) scheduleSave(true);
       paintLegends();
       renderProjects();
       renderPendientes();
@@ -5727,12 +5758,14 @@
       if (appView === "hub") paintHubCounts();
     }
 
-    /* Re-evaluar prioridades por hora (mismo día) sin recargar a mano */
+    /* Re-evaluar prioridades por fecha/hora y alinear botón + color + dato */
     if (!window.__prioTick) {
       window.__prioTick = setInterval(() => {
         if (!state || document.hidden) return;
         const tag = document.activeElement?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || document.activeElement?.isContentEditable) return;
+        const dirty = syncAllSchedulePriorities();
+        if (dirty) scheduleSave(true);
         if (appView === "module" && (currentModule === "calendario" || currentModule === "pendientes" || currentModule === "projects")) {
           renderPendientes();
           renderCalendario();
@@ -5794,12 +5827,10 @@
       if (!el) return;
 
       function rowHtml({ p, t }, isDone) {
-        const basePr = basePriority(t);
         const pr = effectivePriority(t);
         const ch = taskChampion(t);
         const isOverdue = !isDone && t.date && t.date < today;
         const isToday = !isDone && t.date === today;
-        const escalated = !isDone && pr < basePr;
         const cd = !isDone && t.date ? deadlineLabel(t.date) : null;
         const hasNote = !!(t.note && t.note.trim());
         const hasDesc = !!(t.description && t.description.trim());
@@ -5824,7 +5855,6 @@
                 · ${CHAMPIONS[ch].label}
                 ${t.time ? ` · ${escapeHtml(t.time)}` : ""}
                 ${cd ? ` · <span class="countdown ${cd.late ? "late" : ""}">${cd.text}</span>` : ""}
-                ${escalated ? ` · <span class="countdown late">auto → ${PRIORITY[pr].label}</span>` : ""}
               </div>
               <div class="meta-dates">
                 creada ${t.createdAt ? fmtDay(t.createdAt) : "—"}
@@ -6845,12 +6875,11 @@
         return empty;
       }
       const el = document.createElement("div");
-      const basePr = basePriority(t);
+      applySchedulePriority(t);
       const pr = effectivePriority(t);
       const ch = taskChampion(t);
       const hasNote = !!(t.note && t.note.trim());
       const hasDesc = !!(t.description && t.description.trim());
-      const escalated = !t.done && pr < basePr;
       el.className = "task " + (t.done ? "done tone-done" : `tone-p${pr}`);
       el.innerHTML = `
         <div class="task-row">
@@ -6862,7 +6891,6 @@
               · creada ${t.createdAt ? fmtDay(t.createdAt) : "—"}
               ${t.done && t.doneAt ? ` · hecha ${fmtDay(t.doneAt)}` : ""}
               ${t.doneBy ? ` · por ${USERS[t.doneBy]?.short || t.doneBy}` : ""}
-              ${escalated ? ` · <span class="countdown late">auto → ${PRIORITY[pr].label}</span>` : ""}
             </div>
           </div>
           <button type="button" class="icon-btn" data-act="del-task" title="Eliminar">×</button>
@@ -6870,7 +6898,7 @@
         <div class="task-meta">
           <label>Fecha <input type="date" value="${t.date || ""}" /></label>
           <label>Hora <input type="time" value="${t.time || ""}" /></label>
-          <span data-wrap="prio">${priorityButtons(basePr)}</span>
+          <span data-wrap="prio">${priorityButtons(pr)}</span>
           <span data-wrap="champ">${championDropdown(ch)}</span>
           <button type="button" class="mini ${hasDesc ? "has-content" : ""}" data-act="desc">Descripción</button>
           <button type="button" class="mini ${hasNote ? "has-content" : ""}" data-act="note">Nota</button>
