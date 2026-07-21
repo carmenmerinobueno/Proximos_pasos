@@ -1,0 +1,26 @@
+{
+  "name": "DHARMA SOLUTIONS · Tablero",
+  "short_name": "DHARMA",
+  "description": "Tablero compartido de Carmen y Edgar",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#120b18",
+  "theme_color": "#120b18",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "assets/dharma-gc-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/dharma-gc-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
