@@ -6829,11 +6829,13 @@
     document.getElementById("hubGrid")?.addEventListener("click", (e) => {
       const home = e.target.closest("[data-nav='hub']");
       if (home) {
+        e.preventDefault();
         showView("hub");
         return;
       }
       const card = e.target.closest("[data-module]");
-      if (!card) return;
+      if (!card || !card.closest("#hubGrid")) return;
+      e.preventDefault();
       openModule(card.dataset.module);
     });
 
