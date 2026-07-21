@@ -3515,6 +3515,15 @@
         padding: 0.5rem;
         padding-bottom: calc(0.5rem + var(--safe-b));
       }
+      /* iOS Safari: blur masivo = cuelgues al cambiar de pestaña */
+      .side-nav, .topbar, .kpi, .prio-item, .card, .modal, .cal-shell,
+      .settings-tile, .settings-export, .goal-item, .idea-capture, .idea-card,
+      .diario-feel, .diario-tasks, .user-card, .account-chip, .nav-btn {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+      .panel { animation: none !important; }
+      .idea-capture-bulb { animation: none !important; }
     }
 
     .module-chrome {
@@ -5513,8 +5522,7 @@
       document.documentElement.setAttribute("data-theme", next);
       localStorage.setItem(THEME_KEY, next);
       paintThemeButtons();
-      if (state && typeof renderCalendario === "function") renderCalendario();
-      if (appView === "module" && currentModule === "settings") paintSettings();
+      if (appView === "module" && currentModule) renderModule(currentModule);
     }
 
     function toggleTheme() {
@@ -6624,26 +6632,35 @@
     }
 
     function showView(view, moduleId) {
-      appView = view;
-      currentModule = moduleId || null;
-      document.body.dataset.appView = view === "module" ? "module" : view;
-      document.body.dataset.module = view === "module" && moduleId ? moduleId : "";
-      document.getElementById("hub")?.classList.toggle("active", view === "hub");
-      document.getElementById("modules")?.classList.toggle("active", view === "module");
-      document.querySelectorAll("#modules .panel").forEach((p) => p.classList.remove("active"));
-      if (view === "module" && moduleId && MODULE_META[moduleId]) {
-        const meta = MODULE_META[moduleId];
-        document.getElementById(meta.panel)?.classList.add("active");
-        const title = document.getElementById("moduleTitle");
-        if (title) title.textContent = meta.title;
-        paintModuleActions(moduleId);
-        updatePersonFilterUI();
-        renderModule(moduleId);
-      } else if (view === "hub") {
-        paintHubCounts();
+      try {
+        appView = view;
+        currentModule = moduleId || null;
+        document.body.dataset.appView = view === "module" ? "module" : view;
+        document.body.dataset.module = view === "module" && moduleId ? moduleId : "";
+        document.getElementById("hub")?.classList.toggle("active", view === "hub");
+        document.getElementById("modules")?.classList.toggle("active", view === "module");
+        document.querySelectorAll("#modules .panel").forEach((p) => p.classList.remove("active"));
+        if (view === "module" && moduleId && MODULE_META[moduleId]) {
+          const meta = MODULE_META[moduleId];
+          document.getElementById(meta.panel)?.classList.add("active");
+          const title = document.getElementById("moduleTitle");
+          if (title) {
+            title.textContent = (moduleId === "projects" && selectedProjectId)
+              ? (state?.projects?.find((x) => x.id === selectedProjectId)?.title || meta.title)
+              : meta.title;
+          }
+          paintModuleActions(moduleId);
+          updatePersonFilterUI();
+          renderModule(moduleId);
+        } else if (view === "hub") {
+          paintHubCounts();
+        }
+        paintSideNavActive();
+        paintFab();
+      } catch (err) {
+        console.error("showView", err);
+        toast("No se pudo abrir esa sección");
       }
-      paintSideNavActive();
-      paintFab();
     }
 
     function paintFab() {
@@ -6735,13 +6752,18 @@
     }
 
     function renderModule(moduleId) {
-      if (moduleId === "projects") renderProjects();
-      if (moduleId === "calendario") renderCalendario();
-      if (moduleId === "pendientes") renderPendientes();
-      if (moduleId === "diario") renderDiario();
-      if (moduleId === "goals") renderGoals();
-      if (moduleId === "ideas") renderIdeas();
-      if (moduleId === "settings") paintSettings();
+      try {
+        if (moduleId === "projects") renderProjects();
+        if (moduleId === "calendario") renderCalendario();
+        if (moduleId === "pendientes") renderPendientes();
+        if (moduleId === "diario") renderDiario();
+        if (moduleId === "goals") renderGoals();
+        if (moduleId === "ideas") renderIdeas();
+        if (moduleId === "settings") paintSettings();
+      } catch (err) {
+        console.error("renderModule", moduleId, err);
+        toast("Error al cargar " + (MODULE_META[moduleId]?.title || "sección"));
+      }
     }
 
     function paintHubCounts() {
@@ -6843,18 +6865,16 @@
     }
 
     function renderAll() {
-      flushDiarioFeel();
-      if (syncAllSchedulePriorities()) scheduleSave(true);
-      paintLegends();
-      renderProjects();
-      renderPendientes();
-      renderDiario();
-      renderCalendario();
-      renderGoals();
-      renderIdeas();
-      paintHubCounts();
-      if (appView === "module" && currentModule) renderModule(currentModule);
-      if (appView === "hub") paintHubCounts();
+      try {
+        flushDiarioFeel();
+        if (syncAllSchedulePriorities()) scheduleSave(true);
+        paintLegends();
+        paintHubCounts();
+        /* Solo la vista activa: en iPhone renderizar todo a la vez tumba Safari. */
+        if (appView === "module" && currentModule) renderModule(currentModule);
+      } catch (err) {
+        console.error("renderAll", err);
+      }
     }
 
     /* Re-evaluar prioridades por fecha/hora y alinear botón + color + dato */
@@ -9183,8 +9203,16 @@
 
     /* ——— Boot ——— */
     (async function boot() {
+      /* Quitar SW viejos que en iPhone provocaban el aviso de “problemas repetidamente”. */
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+          if (window.caches) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+          }
+        } catch (_) {}
       }
       const sid = sessionStorage.getItem(SESSION_KEY);
       if (sid && USERS[sid]) {
