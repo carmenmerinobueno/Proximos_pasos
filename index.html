@@ -1082,6 +1082,39 @@
       color: var(--silver);
       background: var(--silver-dim);
     }
+    .status-chip,
+    .dd-btn.dd-status {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.38rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      white-space: nowrap;
+      font-family: var(--font-display);
+    }
+    .status-chip.tone-muted, .dd-btn.dd-status.tone-muted { color: var(--text-soft); background: rgba(255,255,255,0.04); border-color: var(--line); }
+    .status-chip.tone-info, .dd-btn.dd-status.tone-info { color: #c4d4f0; background: rgba(196,212,240,0.1); border-color: rgba(196,212,240,0.35); }
+    .status-chip.tone-live, .dd-btn.dd-status.tone-live { color: #b8f0c8; background: rgba(52,199,89,0.12); border-color: rgba(52,199,89,0.4); }
+    .status-chip.tone-warm, .dd-btn.dd-status.tone-warm { color: #ffd19a; background: rgba(255,149,0,0.1); border-color: rgba(255,149,0,0.35); }
+    .status-chip.tone-warn, .dd-btn.dd-status.tone-warn { color: #ffe58a; background: rgba(255,204,0,0.1); border-color: rgba(255,204,0,0.35); }
+    .status-chip.tone-danger, .dd-btn.dd-status.tone-danger { color: #ffb4ae; background: rgba(255,59,48,0.1); border-color: rgba(255,59,48,0.4); }
+    .status-chip.tone-ok, .dd-btn.dd-status.tone-ok { color: #a8efb8; background: rgba(52,199,89,0.12); border-color: rgba(52,199,89,0.35); }
+    .proj-status-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.3rem;
+      flex-shrink: 0;
+    }
+    .proj-status-wrap .dd-menu { right: 0; left: auto; min-width: 200px; max-height: 260px; overflow: auto; }
+    [data-theme="light"] .status-chip.tone-info, [data-theme="light"] .dd-btn.dd-status.tone-info { color: #3d5a8a; }
+    [data-theme="light"] .status-chip.tone-live, [data-theme="light"] .dd-btn.dd-status.tone-live { color: #1b7a3a; }
+    [data-theme="light"] .status-chip.tone-warm, [data-theme="light"] .dd-btn.dd-status.tone-warm { color: #ef6c00; }
+    [data-theme="light"] .status-chip.tone-warn, [data-theme="light"] .dd-btn.dd-status.tone-warn { color: #9a7b00; }
+    [data-theme="light"] .status-chip.tone-danger, [data-theme="light"] .dd-btn.dd-status.tone-danger { color: #c62828; }
+    [data-theme="light"] .status-chip.tone-ok, [data-theme="light"] .dd-btn.dd-status.tone-ok { color: #1b7a3a; }
     .lede {
       color: var(--text-soft);
       font-size: 0.88rem;
@@ -3660,6 +3693,25 @@
       both: { id: "both", label: "Edgar y Carmen" }
     };
 
+    const PROJECT_STATUSES = [
+      { id: "nuevo", label: "Nuevo", tone: "muted" },
+      { id: "idea", label: "Idea", tone: "muted" },
+      { id: "por-definir", label: "Por definir", tone: "muted" },
+      { id: "a-decidir", label: "A decidir", tone: "warm" },
+      { id: "aterrizando", label: "Aterrizando", tone: "warm" },
+      { id: "planificado", label: "Planificado", tone: "info" },
+      { id: "en-marcha", label: "En marcha", tone: "info" },
+      { id: "en-produccion", label: "En producción", tone: "live" },
+      { id: "piloto", label: "Piloto", tone: "live" },
+      { id: "en-revision", label: "En revisión", tone: "warm" },
+      { id: "bloqueado", label: "Bloqueado", tone: "danger" },
+      { id: "en-pausa", label: "En pausa", tone: "warn" },
+      { id: "prioridad", label: "Prioridad", tone: "danger" },
+      { id: "academico", label: "Académico", tone: "info" },
+      { id: "entregado", label: "Entregado", tone: "ok" },
+      { id: "cerrado", label: "Cerrado", tone: "muted" }
+    ];
+
     let personFilter = ""; // "" | edgar | carmen
     let sharedQuery = ""; // búsqueda compartida (código + nombre)
 
@@ -3685,6 +3737,39 @@
 
     function projectOwnerLabel(p) {
       return PROJECT_OWNERS[projectOwner(p)].label;
+    }
+
+    function projectStatusMeta(badge) {
+      const raw = String(badge || "").trim();
+      const hit = PROJECT_STATUSES.find((s) => s.label.toLowerCase() === raw.toLowerCase());
+      if (hit) return hit;
+      if (raw) return { id: "custom", label: raw, tone: "muted" };
+      return PROJECT_STATUSES[0];
+    }
+
+    function projectBadge(p) {
+      return projectStatusMeta(p?.badge).label;
+    }
+
+    function statusOptions(currentLabel) {
+      const cur = String(currentLabel || "").trim();
+      const opts = PROJECT_STATUSES.map((s) => ({ id: s.label, label: s.label, tone: s.tone }));
+      if (cur && !opts.some((o) => o.label.toLowerCase() === cur.toLowerCase())) {
+        opts.unshift({ id: cur, label: cur, tone: "muted" });
+      }
+      return opts;
+    }
+
+    function statusDropdown(currentLabel) {
+      const opts = statusOptions(currentLabel);
+      const meta = projectStatusMeta(currentLabel);
+      const cur = opts.find((o) => o.label.toLowerCase() === meta.label.toLowerCase())?.id || opts[0].id;
+      return dropdownHtml("status", cur, opts, `dd-status tone-${meta.tone}`);
+    }
+
+    function statusChipHtml(badge) {
+      const meta = projectStatusMeta(badge);
+      return `<span class="status-chip tone-${meta.tone}">${escapeHtml(meta.label)}</span>`;
     }
 
     function matchesProjectOwnerFilter(p, filter) {
@@ -3758,6 +3843,7 @@
         if (typeof p.archived !== "boolean") p.archived = !!p.archived;
         if (!p.area) p.area = (s.areas[0] && s.areas[0].id) || "general";
         p.owner = projectOwner(p);
+        p.badge = projectBadge(p);
         (p.steps || []).forEach((st) => {
           (st.tasks || []).forEach((t) => {
             t.priority = taskPriority(t);
@@ -5286,7 +5372,7 @@
           <p class="proj-tile-lede">${escapeHtml(lede)}</p>
         </div>
         <div class="proj-tile-side">
-          <span class="badge ${p.area === "emprendimientos" && String(p.id).includes("replay") ? "silver" : ""}">${escapeHtml(p.badge || "Proyecto")}</span>
+          ${statusChipHtml(p.badge)}
           <div class="proj-stats">
             <span class="proj-stat">${p.steps.length} pasos</span>
             <span class="proj-stat">${open} abiertas</span>
@@ -5327,7 +5413,10 @@
               </div>
               <h3 contenteditable="true" data-edit="title">${escapeHtml(p.title)}</h3>
             </div>
-            <span class="badge ${p.area === "emprendimientos" && String(p.id).includes("replay") ? "silver" : ""}">${escapeHtml(p.badge || "Proyecto")}</span>
+            <div class="proj-status-wrap" data-wrap="status">
+              <span class="proj-area">Estado</span>
+              ${statusDropdown(p.badge)}
+            </div>
           </div>
           <div class="proj-desc-block${(p.lede || "").trim() ? "" : " is-empty"}">
             <label for="projDesc-${escapeHtml(p.id)}">De qué va el proyecto</label>
@@ -5384,6 +5473,14 @@
         if (!PROJECT_OWNERS[next] || next === projectOwner(p)) return;
         p.owner = next;
         logActivity("editar", `«${p.title}» → responsable ${PROJECT_OWNERS[next].label}`);
+        scheduleSave(true);
+        renderAll();
+      });
+      bindDropdown(card.querySelector('[data-wrap="status"]'), (next) => {
+        const label = String(next || "").trim();
+        if (!label || label === p.badge) return;
+        p.badge = label;
+        logActivity("editar", `«${p.title}» → estado ${label}`);
         scheduleSave(true);
         renderAll();
       });
@@ -5711,18 +5808,19 @@
     function openAddProject(area) {
       let chosenArea = defaultAreaId(area);
       let chosenOwner = "both";
+      let chosenStatus = "Nuevo";
       openModal(`
         <h3>Nuevo proyecto</h3>
         <div class="row"><label>Área</label><div id="mAreaWrap">${areaDropdown(chosenArea, { includeNew: true })}</div></div>
         <div class="row" id="mNewAreaRow" hidden><label>Nombre del área</label><input type="text" id="mNewArea" placeholder="Nueva área…" /></div>
         <div class="row"><label>Responsable</label><div id="mOwnerWrap">${ownerDropdown(chosenOwner)}</div></div>
+        <div class="row"><label>Estado</label><div id="mStatusWrap">${statusDropdown(chosenStatus)}</div></div>
         <div class="row"><label>Título</label><input type="text" id="mTitle" placeholder="Nombre del proyecto" /></div>
         <div class="row row-desc">
           <label>Descripción del proyecto</label>
           <textarea id="mLede" placeholder="De qué va, qué queréis conseguir y cuál es el alcance…"></textarea>
           <span class="field-hint">Obligatoria. Escribe al menos un par de frases claras para que quede bien definido.</span>
         </div>
-        <div class="row"><label>Etiqueta</label><input type="text" id="mBadge" placeholder="Ej. En producción" /></div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" id="mCancel">Cancelar</button>
           <button type="button" class="btn btn-gold" id="mOk">Crear</button>
@@ -5747,8 +5845,17 @@
           rebindOwner();
         });
       }
+      function rebindStatus() {
+        const wrap = modalBody.querySelector("#mStatusWrap");
+        wrap.innerHTML = statusDropdown(chosenStatus);
+        bindDropdown(wrap, (val) => {
+          chosenStatus = val;
+          rebindStatus();
+        });
+      }
       rebindArea();
       rebindOwner();
+      rebindStatus();
       modalBody.querySelector("#mCancel").onclick = closeModal;
       modalBody.querySelector("#mOk").onclick = () => {
         const title = modalBody.querySelector("#mTitle").value.trim();
@@ -5771,7 +5878,7 @@
           area: chosen,
           owner: projectOwner({ owner: chosenOwner }),
           title,
-          badge: modalBody.querySelector("#mBadge").value.trim() || "Nuevo",
+          badge: projectBadge({ badge: chosenStatus }),
           lede,
           note: "",
           archived: false,
