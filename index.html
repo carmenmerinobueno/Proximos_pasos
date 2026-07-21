@@ -6550,29 +6550,53 @@
 
     async function cloudGet(id) {
       if (!isCloudId(id)) return null;
+      /* No enviar Accept: JSONBlob no lo autoriza en CORS y tumba el sync del navegador. */
       const res = await fetchTimeout(`${CLOUD_API}/${id}`, {
-        headers: { Accept: "application/json" },
+        method: "GET",
         cache: "no-store"
-      }, 8000);
+      }, 12000);
       if (res.status === 404 || res.status === 400) return null;
-      if (!res.ok) throw new Error("Error al leer la nube (" + res.status + ")");
+      if (!res.ok) throw new Error("Leer nube HTTP " + res.status);
       return await res.json();
     }
 
     async function cloudPut(id, data) {
       if (!isCloudId(id)) return;
+      const payload = cloudPayload(data);
+      const body = JSON.stringify(payload);
       const res = await fetchTimeout(`${CLOUD_API}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(data)
-      }, 15000);
-      if (!res.ok) throw new Error("Error al guardar en la nube (" + res.status + ")");
+        headers: { "Content-Type": "application/json" },
+        body
+      }, 25000);
+      if (!res.ok) throw new Error("Guardar nube HTTP " + res.status);
+    }
+
+    function cloudPayload(data) {
+      if (!data || typeof data !== "object") return data;
+      return {
+        version: data.version || 4,
+        updatedAt: data.updatedAt || Date.now(),
+        projects: data.projects || [],
+        ideas: data.ideas || [],
+        goals: data.goals || [],
+        calEvents: data.calEvents || [],
+        journals: data.journals || {},
+        dailyPlans: data.dailyPlans || {},
+        areas: data.areas || [],
+        weeks: data.weeks || {},
+        activity: Array.isArray(data.activity) ? data.activity.slice(0, 80) : [],
+        novaCutPlanApplied: data.novaCutPlanApplied || null,
+        courtReplayPlanApplied: data.courtReplayPlanApplied || null,
+        carmen90PlanApplied: data.carmen90PlanApplied || null,
+        _meta: "dharma-tablero"
+      };
     }
 
     function fetchTimeout(url, opts, ms) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), ms);
-      return fetch(url, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(timer));
+      return fetch(url, { ...opts, mode: "cors", signal: ctrl.signal }).finally(() => clearTimeout(timer));
     }
 
     function mergeById(aList, bList, pick) {
@@ -6706,6 +6730,7 @@
     }
 
     let lastCloudOk = false;
+    let lastCloudError = "";
 
     async function syncNow({ showToast = false, push = true } = {}) {
       if (!state) return false;
@@ -6719,22 +6744,34 @@
       }
       setSyncStatus("Sincronizando…");
       try {
-        const remote = await cloudGet(spaceId);
+        let remote = null;
+        try {
+          remote = await cloudGet(spaceId);
+        } catch (readErr) {
+          console.warn("cloudGet", readErr);
+          /* Si falla la lectura, igual intentamos subir lo local. */
+        }
         if (remote && remote.version && Array.isArray(remote.projects)) {
-          state = mergeStates(state, remote);
+          try {
+            state = mergeStates(state, remote);
+          } catch (mergeErr) {
+            console.warn("mergeStates", mergeErr);
+          }
         }
         state.updatedAt = Date.now();
         saveLocal();
         if (push) await cloudPut(spaceId, state);
         lastCloudOk = true;
+        lastCloudError = "";
         setSyncStatus("Sincronizado · nube");
         if (showToast) toast("Sincronizado entre dispositivos");
         return true;
       } catch (e) {
         lastCloudOk = false;
+        lastCloudError = (e && e.name === "AbortError") ? "tiempo agotado" : ((e && e.message) || "error de red");
         setSyncStatus("Sin nube · solo este dispositivo");
         console.warn(e);
-        if (showToast) toast("No llegó a la nube. Revisa Wi‑Fi / datos");
+        if (showToast) toast("No llegó a la nube (" + lastCloudError + ")");
         return false;
       }
     }
