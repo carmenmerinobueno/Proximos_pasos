@@ -6482,15 +6482,17 @@
       const raw = text || "";
       const syncing = /Sincronizando/i.test(raw);
       const ok = /Sincronizado/i.test(raw);
+      const paused = /pausa|saturad/i.test(raw);
       let shown = "Sincronizado entre dispositivos";
       if (syncing) shown = "Sincronizando…";
+      else if (/pausa|saturad/i.test(raw)) shown = raw.replace(/^Nube\s*/i, "Nube ").slice(0, 42);
       else if (ok) shown = "Sincronizado entre dispositivos";
       else if (/Sin nube|Local|solo este|Solo este/i.test(raw)) shown = "Sin nube · pulsa para sincronizar";
       else if (raw) shown = raw;
       if (label) label.textContent = shown;
       if (chip) {
         chip.classList.toggle("is-syncing", syncing);
-        chip.classList.toggle("is-local", !ok && !syncing);
+        chip.classList.toggle("is-local", (!ok && !syncing) || paused);
         chip.title = shown;
         chip.setAttribute("aria-label", shown);
       }
@@ -6556,6 +6558,10 @@
         cache: "no-store"
       }, 12000);
       if (res.status === 404 || res.status === 400) return null;
+      if (res.status === 429) {
+        cloudCooldownUntil = Date.now() + 120000;
+        throw new Error("demasiadas peticiones · espera 2 min");
+      }
       if (!res.ok) throw new Error("Leer nube HTTP " + res.status);
       return await res.json();
     }
@@ -6569,6 +6575,10 @@
         headers: { "Content-Type": "application/json" },
         body
       }, 25000);
+      if (res.status === 429) {
+        cloudCooldownUntil = Date.now() + 120000;
+        throw new Error("demasiadas peticiones · espera 2 min");
+      }
       if (!res.ok) throw new Error("Guardar nube HTTP " + res.status);
     }
 
@@ -6731,15 +6741,77 @@
 
     let lastCloudOk = false;
     let lastCloudError = "";
+    let cloudCooldownUntil = 0;
+    let lastSyncAt = 0;
+    let syncInFlight = null;
+    let syncQueued = null;
+    const TAB_ID = "t" + Math.random().toString(36).slice(2, 10);
+    const SYNC_LOCK_KEY = "ce-tablero-sync-lock";
 
-    async function syncNow({ showToast = false, push = true } = {}) {
+    function cloudIsCoolingDown() {
+      return Date.now() < cloudCooldownUntil;
+    }
+
+    function tryAcquireSyncLock() {
+      const now = Date.now();
+      try {
+        const prev = JSON.parse(localStorage.getItem(SYNC_LOCK_KEY) || "null");
+        if (prev && prev.until > now && prev.tab !== TAB_ID) return false;
+        localStorage.setItem(SYNC_LOCK_KEY, JSON.stringify({ tab: TAB_ID, until: now + 25000 }));
+        return true;
+      } catch (_) {
+        return true;
+      }
+    }
+
+    function releaseSyncLock() {
+      try {
+        const prev = JSON.parse(localStorage.getItem(SYNC_LOCK_KEY) || "null");
+        if (!prev || prev.tab === TAB_ID) localStorage.removeItem(SYNC_LOCK_KEY);
+      } catch (_) {}
+    }
+
+    async function syncNow(opts = {}) {
+      const { showToast = false, push = true, force = false } = opts;
       if (!state) return false;
-      try { flushDiarioFeel(); } catch (_) {}
-      saveLocal();
       if (!isCloudId(spaceId)) {
         lastCloudOk = false;
         setSyncStatus("Solo este dispositivo");
         if (showToast) toast("Sin nube configurada");
+        return false;
+      }
+      if (!force && cloudIsCoolingDown()) {
+        const sec = Math.ceil((cloudCooldownUntil - Date.now()) / 1000);
+        setSyncStatus("Nube en pausa · espera " + sec + "s");
+        if (showToast) toast("La nube está saturada. Espera " + sec + " segundos y pulsa otra vez.");
+        return false;
+      }
+      if (syncInFlight) {
+        syncQueued = { showToast, push, force };
+        return syncInFlight;
+      }
+      syncInFlight = (async () => {
+        try {
+          return await runSyncOnce({ showToast, push, force });
+        } finally {
+          syncInFlight = null;
+          const q = syncQueued;
+          syncQueued = null;
+          if (q) {
+            /* Un solo reintento coalescido (no saturar). */
+            setTimeout(() => syncNow({ ...q, showToast: false }), 1500);
+          }
+        }
+      })();
+      return syncInFlight;
+    }
+
+    async function runSyncOnce({ showToast = false, push = true, force = false }) {
+      try { flushDiarioFeel(); } catch (_) {}
+      saveLocal();
+      if (!force && !tryAcquireSyncLock()) {
+        setSyncStatus("Otra pestaña está sincronizando…");
+        if (showToast) toast("Cierra la otra pestaña del tablero y prueba de nuevo");
         return false;
       }
       setSyncStatus("Sincronizando…");
@@ -6749,7 +6821,7 @@
           remote = await cloudGet(spaceId);
         } catch (readErr) {
           console.warn("cloudGet", readErr);
-          /* Si falla la lectura, igual intentamos subir lo local. */
+          if (/demasiadas peticiones/i.test(readErr?.message || "")) throw readErr;
         }
         if (remote && remote.version && Array.isArray(remote.projects)) {
           try {
@@ -6763,16 +6835,25 @@
         if (push) await cloudPut(spaceId, state);
         lastCloudOk = true;
         lastCloudError = "";
+        lastSyncAt = Date.now();
+        cloudCooldownUntil = 0;
         setSyncStatus("Sincronizado · nube");
         if (showToast) toast("Sincronizado entre dispositivos");
         return true;
       } catch (e) {
         lastCloudOk = false;
         lastCloudError = (e && e.name === "AbortError") ? "tiempo agotado" : ((e && e.message) || "error de red");
-        setSyncStatus("Sin nube · solo este dispositivo");
+        if (/demasiadas peticiones/i.test(lastCloudError)) {
+          setSyncStatus("Nube saturada · espera 2 min");
+          if (showToast) toast("Demasiados intentos. Espera 2 minutos y pulsa sincronizar.");
+        } else {
+          setSyncStatus("Sin nube · solo este dispositivo");
+          if (showToast) toast("No llegó a la nube (" + lastCloudError + ")");
+        }
         console.warn(e);
-        if (showToast) toast("No llegó a la nube (" + lastCloudError + ")");
         return false;
+      } finally {
+        releaseSyncLock();
       }
     }
 
@@ -6789,10 +6870,15 @@
       state.updatedAt = Date.now();
       saveLocal();
       clearTimeout(saveTimer);
+      /* Debounce largo: JSONBlob castiga con 429 si hay muchos PUT seguidos. */
       saveTimer = setTimeout(async () => {
+        if (cloudIsCoolingDown()) {
+          if (showToast) toast("Guardado aquí. La nube está en pausa; sincroniza en 2 min.");
+          return;
+        }
         const ok = await syncNow({ showToast: false, push: true });
-        if (showToast) toast(ok ? "Guardado · nube" : "Guardado solo en este móvil/PC");
-      }, 900);
+        if (showToast) toast(ok ? "Guardado · nube" : "Guardado solo en este dispositivo");
+      }, 3500);
     }
 
     /* ——— Auth flow: elegir usuario → mismo panel (sin códigos) ——— */
@@ -6837,7 +6923,6 @@
         if (ok) renderAll();
         setSyncStatus(ok ? "Sincronizado · nube" : "Sin nube · solo este dispositivo");
         logActivity("entrada", "Ha entrado al tablero");
-        if (!ok) scheduleSave(false);
       }).catch(() => {
         setSyncStatus("Sin nube · solo este dispositivo");
         logActivity("entrada", "Ha entrado al tablero");
@@ -6871,9 +6956,12 @@
     function startPolling() {
       stopPolling();
       if (!isCloudId(spaceId)) return;
-      const interval = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 45000 : 20000;
+      /* Poco frecuente: JSONBlob limita peticiones (HTTP 429). */
+      const interval = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 180000 : 120000;
       pollTimer = setInterval(async () => {
         if (document.hidden || !state) return;
+        if (cloudIsCoolingDown()) return;
+        if (Date.now() - lastSyncAt < 90000) return;
         const beforeIdeas = (state.ideas || []).length;
         const beforeEv = (state.calEvents || []).length;
         const beforeUp = state.updatedAt || 0;
