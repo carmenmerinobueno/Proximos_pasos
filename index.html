@@ -50,6 +50,7 @@
       --font-body: "Space Grotesk", system-ui, sans-serif;
       --safe-b: env(safe-area-inset-bottom, 0px);
       --safe-t: env(safe-area-inset-top, 0px);
+      --topbar-h: 4.75rem;
       --topbar-bg: rgba(18, 11, 24, 0.82);
       --gate-rad-gold: rgba(59, 29, 49, 0.45);
       --gate-rad-silver: rgba(36, 25, 48, 0.4);
@@ -611,7 +612,7 @@
     #app.ready {
       display: block;
       animation: rise 0.45s ease both;
-      padding-top: calc(4.6rem + var(--safe-t));
+      padding-top: calc(var(--topbar-h) + var(--safe-t));
     }
 
     .topbar {
@@ -624,7 +625,7 @@
       -webkit-backdrop-filter: blur(22px) saturate(1.25);
       background: var(--topbar-bg);
       border-bottom: 1px solid var(--line);
-      padding: calc(0.65rem + var(--safe-t)) max(0.75rem, env(safe-area-inset-right, 0px)) 0.65rem max(0.75rem, env(safe-area-inset-left, 0px));
+      padding: calc(0.55rem + var(--safe-t)) max(0.75rem, env(safe-area-inset-right, 0px)) 0.55rem max(0.75rem, env(safe-area-inset-left, 0px));
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
     }
     .topbar-inner {
@@ -634,19 +635,20 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.85rem;
-      min-height: 3.35rem;
+      gap: 0.65rem;
+      min-height: 3.2rem;
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 0.85rem;
       min-width: 0;
+      flex-shrink: 0;
     }
     .brand-logo {
-      height: 44px;
+      height: 42px;
       width: auto;
-      max-width: 230px;
+      max-width: 210px;
       object-fit: contain;
       flex-shrink: 0;
       background: transparent;
@@ -660,42 +662,80 @@
       opacity: 1;
       filter: drop-shadow(0 2px 6px rgba(40, 25, 35, 0.12));
     }
-    .brand-meta {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-width: 0;
-      gap: 0.12rem;
-    }
-    .brand-badge {
+    .sync-chip {
+      appearance: none;
+      border: 1.5px solid var(--line-strong);
+      background: var(--bg-elev);
+      color: var(--text);
+      border-radius: 999px;
+      min-height: 2.65rem;
+      padding: 0.35rem 0.85rem 0.35rem 0.65rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      font-family: var(--font-body);
-      font-size: 0.68rem;
-      color: var(--muted);
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      white-space: nowrap;
+      justify-content: center;
+      gap: 0.45rem;
+      cursor: pointer;
+      flex: 1 1 auto;
+      max-width: min(420px, 46vw);
+      min-width: 0;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 6px 16px rgba(0,0,0,0.12);
+      transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
     }
-    .brand-badge::before {
-      content: "";
-      width: 7px;
-      height: 7px;
+    .sync-chip:hover, .sync-chip:focus-visible {
+      border-color: var(--gold);
+      color: var(--gold-bright);
+      outline: none;
+    }
+    .sync-chip:active { transform: scale(0.98); }
+    .sync-chip-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--ok);
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent);
       flex-shrink: 0;
     }
-    .brand-badge.is-local::before {
+    .sync-chip.is-local .sync-chip-dot {
+      background: #c4a35a;
+      box-shadow: 0 0 0 3px color-mix(in srgb, #c4a35a 22%, transparent);
+    }
+    .sync-chip.is-syncing .sync-chip-dot {
       background: var(--muted);
       box-shadow: none;
+      animation: syncPulse 1s ease-in-out infinite;
+    }
+    @keyframes syncPulse {
+      0%, 100% { opacity: 0.35; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    .sync-chip-text {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .sync-chip-action {
+      font-size: 0.95rem;
+      line-height: 1;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .sync-chip.is-syncing .sync-chip-action {
+      animation: syncSpin 0.9s linear infinite;
+    }
+    @keyframes syncSpin {
+      to { transform: rotate(360deg); }
     }
     .who {
       display: flex;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.45rem;
       flex-shrink: 0;
     }
     .account-chip {
@@ -707,13 +747,13 @@
       border: 1.5px solid var(--line-strong);
       background: var(--bg-elev);
       backdrop-filter: blur(12px);
-      max-width: min(52vw, 260px);
-      min-height: 2.85rem;
+      max-width: min(42vw, 220px);
+      min-height: 2.65rem;
       box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 6px 16px rgba(0,0,0,0.12);
     }
     .account-chip .dot {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: 999px;
       display: grid;
       place-items: center;
@@ -741,7 +781,7 @@
       gap: 0.12rem;
     }
     .account-chip .name {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 700;
       color: var(--text);
       overflow: hidden;
@@ -760,7 +800,7 @@
     .topbar-actions {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.35rem;
     }
     .nav-btn {
       height: 2.85rem;
@@ -3195,11 +3235,11 @@
     .app-body {
       display: flex;
       align-items: stretch;
-      min-height: calc(100dvh - 4.6rem - var(--safe-t));
+      min-height: calc(100dvh - var(--topbar-h) - var(--safe-t));
     }
     .side-nav {
       position: fixed;
-      top: calc(4.6rem + var(--safe-t));
+      top: calc(var(--topbar-h) + var(--safe-t));
       left: 0;
       bottom: 0;
       width: 12.75rem;
@@ -3315,7 +3355,7 @@
     }
     body[data-app-view="hub"] .app-body > .wrap {
       width: auto;
-      min-height: calc(100dvh - 4.6rem - var(--safe-t));
+      min-height: calc(100dvh - var(--topbar-h) - var(--safe-t));
       display: flex;
       flex-direction: column;
       padding-top: 0;
@@ -3326,7 +3366,7 @@
       flex: 1;
       align-items: center;
       justify-content: center;
-      min-height: calc(100dvh - 5.4rem - var(--safe-t) - var(--safe-b));
+      min-height: calc(100dvh - var(--topbar-h) - var(--safe-t) - var(--safe-b));
       padding: 1.5rem 1rem;
       box-sizing: border-box;
     }
@@ -3355,6 +3395,7 @@
       margin: 0;
     }
     @media (max-width: 860px) {
+      :root { --topbar-h: 6.55rem; }
       .side-nav {
         top: auto;
         left: 0;
@@ -3413,7 +3454,7 @@
       }
       .side-link-count { display: none; }
       .app-body {
-        min-height: calc(100dvh - 4.6rem - var(--safe-t) - 4.6rem);
+        min-height: calc(100dvh - var(--topbar-h) - var(--safe-t) - 4.6rem);
       }
       .app-body > .wrap {
         margin-left: 0 !important;
@@ -3443,10 +3484,57 @@
         padding: 0.75rem;
         border-radius: 999px;
       }
-      .topbar-inner { gap: 0.45rem; }
+      .topbar-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "brand who"
+          "sync sync";
+        gap: 0.4rem 0.5rem;
+        align-items: center;
+        min-height: 0;
+      }
+      .brand { grid-area: brand; }
+      .sync-chip {
+        grid-area: sync;
+        max-width: none;
+        width: 100%;
+        justify-content: center;
+        min-height: 2.45rem;
+        padding: 0.4rem 0.7rem;
+      }
+      .sync-chip-text {
+        font-size: 0.7rem;
+        letter-spacing: 0.02em;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.2;
+      }
+      .who { grid-area: who; }
+      .brand-logo {
+        height: 30px;
+        max-width: 132px;
+      }
+      .account-chip {
+        padding: 0.2rem;
+        min-height: 0;
+        max-width: none;
+        border-radius: 999px;
+      }
+      .account-chip .account-text { display: none; }
       .account-chip .account-role { display: none; }
+      .account-chip .dot {
+        width: 32px;
+        height: 32px;
+      }
+      .nav-btn {
+        height: 2.45rem;
+        min-width: 2.45rem;
+        padding: 0;
+      }
       .nav-btn-label { display: none; }
-      .brand-meta { display: none; }
+      .topbar-actions { gap: 0.25rem; }
+      #btnHome { display: none; }
       .toolbar-row {
         flex-direction: column;
         align-items: stretch;
@@ -3519,7 +3607,7 @@
       .side-nav, .topbar, .kpi, .prio-item, .card, .modal, .cal-shell,
       .settings-tile, .settings-export, .goal-item, .idea-capture, .idea-card,
       .diario-feel, .diario-tasks, .user-card, .account-chip, .nav-btn,
-      .fab-bar, .module-chrome, .home-quote {
+      .fab-bar, .module-chrome, .home-quote, .sync-chip {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
       }
@@ -4733,10 +4821,12 @@
       <div class="topbar-inner">
         <div class="brand">
           <img class="brand-logo" src="assets/dharma-gc-logo.png" alt="DHARMA SOLUTIONS" />
-          <div class="brand-meta">
-            <span class="brand-badge" id="syncLabel">Panel compartido</span>
-          </div>
         </div>
+        <button type="button" class="sync-chip is-local" id="btnTopSync" title="Sincronizar entre dispositivos" aria-label="Sincronizar entre dispositivos">
+          <span class="sync-chip-dot" aria-hidden="true"></span>
+          <span class="sync-chip-text" id="syncLabel">Sincronizado entre dispositivos</span>
+          <span class="sync-chip-action" aria-hidden="true">↻</span>
+        </button>
         <div class="who">
           <div class="account-chip" id="whoPill">
             <span class="dot" id="whoDot" aria-hidden="true">—</span>
@@ -6388,11 +6478,22 @@
 
     function setSyncStatus(text) {
       const label = document.getElementById("syncLabel");
-      if (!label) return;
-      label.textContent = "Panel compartido";
-      const ok = /Sincronizado/i.test(text || "");
-      label.classList.toggle("is-local", !ok);
-      label.title = text || "Panel compartido";
+      const chip = document.getElementById("btnTopSync");
+      const raw = text || "";
+      const syncing = /Sincronizando/i.test(raw);
+      const ok = /Sincronizado/i.test(raw);
+      let shown = "Sincronizado entre dispositivos";
+      if (syncing) shown = "Sincronizando…";
+      else if (ok) shown = "Sincronizado entre dispositivos";
+      else if (/Sin nube|Local|solo este|Solo este/i.test(raw)) shown = "Sin nube · pulsa para sincronizar";
+      else if (raw) shown = raw;
+      if (label) label.textContent = shown;
+      if (chip) {
+        chip.classList.toggle("is-syncing", syncing);
+        chip.classList.toggle("is-local", !ok && !syncing);
+        chip.title = shown;
+        chip.setAttribute("aria-label", shown);
+      }
     }
 
     function logActivity(action, detail) {
@@ -9385,11 +9486,21 @@
     document.getElementById("settingsSwitchAccount")?.addEventListener("click", () => {
       document.getElementById("btnLogout")?.click();
     });
-    document.getElementById("settingsRefreshSync")?.addEventListener("click", async () => {
+    async function runManualSync() {
+      const chip = document.getElementById("btnTopSync");
+      if (chip?.classList.contains("is-syncing")) return;
       const ok = await syncNow({ showToast: true, push: true });
       renderAll();
       paintSettings();
       if (!ok) setSyncStatus("Sin nube · solo este dispositivo");
+    }
+
+    document.getElementById("btnTopSync")?.addEventListener("click", () => {
+      runManualSync();
+    });
+
+    document.getElementById("settingsRefreshSync")?.addEventListener("click", () => {
+      runManualSync();
     });
     document.getElementById("settingsExportDiario")?.addEventListener("click", () => {
       exportJournalXlsx();
