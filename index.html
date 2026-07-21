@@ -2501,11 +2501,144 @@
     .proj-toolbar {
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
-      margin-bottom: 1.15rem;
+      gap: 0.85rem;
+      margin-bottom: 1.25rem;
     }
-    .proj-toolbar .area-chips,
-    .proj-toolbar .filter-chips { margin-bottom: 0; }
+    .proj-areas-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.85rem;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0;
+    }
+    .proj-areas-track {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.15rem;
+      overflow-x: auto;
+      min-width: 0;
+      flex: 1;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0;
+    }
+    .proj-areas-track::-webkit-scrollbar { height: 4px; }
+    .proj-areas-track button {
+      flex: 0 0 auto;
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      padding: 0.55rem 0.7rem 0.7rem;
+      border-radius: 0;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .proj-areas-track button:hover {
+      color: var(--text-soft);
+    }
+    .proj-areas-track button.active {
+      color: var(--text);
+      border-bottom-color: var(--gold-bright);
+    }
+    .proj-area-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-shrink: 0;
+      padding-bottom: 0.45rem;
+      margin-left: auto;
+    }
+    .proj-area-btn {
+      appearance: none;
+      border: 1px solid rgba(230, 236, 242, 0.28);
+      background: rgba(255,255,255,0.04);
+      color: var(--gold-bright);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.42rem 0.7rem;
+      border-radius: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .proj-area-btn:hover {
+      background: var(--bg-soft);
+      border-color: var(--line-strong);
+    }
+    .proj-area-btn-ghost {
+      color: var(--text-soft);
+      border-color: var(--line);
+      background: transparent;
+    }
+    .proj-status-seg {
+      display: inline-flex;
+      align-items: stretch;
+      align-self: flex-start;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.18);
+    }
+    .proj-status-seg button {
+      appearance: none;
+      border: none;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 0.45rem 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .proj-status-seg button:last-child { border-right: none; }
+    .proj-status-seg button:hover { color: var(--text-soft); background: rgba(255,255,255,0.03); }
+    .proj-status-seg button.active {
+      color: var(--text);
+      background: var(--bg-soft);
+      font-weight: 700;
+    }
+    [data-theme="light"] .proj-status-seg {
+      background: rgba(255,255,255,0.45);
+    }
+    [data-theme="light"] .proj-area-btn {
+      background: rgba(255,255,255,0.55);
+    }
+    @media (max-width: 720px) {
+      .proj-areas-row {
+        flex-wrap: wrap;
+        align-items: stretch;
+        gap: 0.55rem;
+        padding-bottom: 0.55rem;
+      }
+      .proj-areas-track {
+        width: 100%;
+        order: 1;
+        border-bottom: none;
+      }
+      .proj-areas-track button {
+        margin-bottom: 0;
+        border-bottom-width: 2px;
+      }
+      .proj-area-actions {
+        order: 0;
+        width: 100%;
+        justify-content: flex-end;
+        padding-bottom: 0;
+        margin-left: 0;
+      }
+    }
     .proj-board {
       display: flex;
       flex-direction: column;
@@ -2786,20 +2919,6 @@
     }
 
 
-    .area-chip-action {
-      padding: 0.4rem 0.75rem;
-      border-radius: 999px;
-      border: 1px dashed var(--line-strong);
-      background: transparent;
-      color: var(--gold-bright);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-    .area-chip-action:hover {
-      background: var(--bg-soft);
-      border-style: solid;
-    }
     .area-manage-list {
       display: flex;
       flex-direction: column;
@@ -3127,8 +3246,14 @@
         <section class="panel" id="panel-projects">
           <div id="projectsListView">
             <div class="proj-toolbar">
-              <div class="area-chips" id="areaChips"></div>
-              <div class="filter-chips" id="projectArchiveFilter">
+              <div class="proj-areas-row">
+                <div class="proj-areas-track" id="areaChips" role="tablist" aria-label="Áreas"></div>
+                <div class="proj-area-actions" id="areaActions">
+                  <button type="button" class="proj-area-btn" data-act="add-area" title="Añadir área">+ Área</button>
+                  <button type="button" class="proj-area-btn proj-area-btn-ghost" data-act="manage-areas" title="Gestionar áreas">Gestionar</button>
+                </div>
+              </div>
+              <div class="proj-status-seg" id="projectArchiveFilter" role="group" aria-label="Estado">
                 <button type="button" data-arch="active" class="active">Activos</button>
                 <button type="button" data-arch="archived">Archivados</button>
                 <button type="button" data-arch="all">Todos</button>
@@ -4737,11 +4862,8 @@
       if (!root) return;
       const items = [["", "Todos"], ...getAreas().map((a) => [a.id, a.label])];
       root.innerHTML = items.map(([id, label]) =>
-        `<button type="button" data-area-filter="${id}" class="${areaFilter === id ? "active" : ""}">${escapeHtml(label)}</button>`
-      ).join("") + `
-        <button type="button" class="area-chip-action" data-act="add-area" title="Añadir área">+ Área</button>
-        <button type="button" class="area-chip-action" data-act="manage-areas" title="Gestionar áreas">Gestionar</button>
-      `;
+        `<button type="button" role="tab" data-area-filter="${id}" class="${areaFilter === id ? "active" : ""}" aria-selected="${areaFilter === id ? "true" : "false"}">${escapeHtml(label)}</button>`
+      ).join("");
     }
 
     function closeProjectDetail() {
@@ -5526,20 +5648,19 @@
     }
 
     document.getElementById("areaChips")?.addEventListener("click", (e) => {
-      const addBtn = e.target.closest("[data-act='add-area']");
-      if (addBtn) {
-        openAddAreaModal();
-        return;
-      }
-      const manageBtn = e.target.closest("[data-act='manage-areas']");
-      if (manageBtn) {
-        openManageAreasModal();
-        return;
-      }
       const btn = e.target.closest("[data-area-filter]");
       if (!btn) return;
       areaFilter = btn.dataset.areaFilter || "";
       renderProjects();
+    });
+    document.getElementById("areaActions")?.addEventListener("click", (e) => {
+      if (e.target.closest("[data-act='add-area']")) {
+        openAddAreaModal();
+        return;
+      }
+      if (e.target.closest("[data-act='manage-areas']")) {
+        openManageAreasModal();
+      }
     });
     document.getElementById("projectArchiveFilter")?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-arch]");
