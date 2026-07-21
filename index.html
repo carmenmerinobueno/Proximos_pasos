@@ -5665,8 +5665,8 @@
       settings: { title: "Configuración", panel: "panel-settings" }
     };
 
-    const MODULES_WITH_PERSON_FILTER = new Set(["pendientes","projects","stats","calendario","diario"]);
-    const MODULES_WITH_SEARCH = new Set(["pendientes","projects","stats","calendario","diario"]);
+    const MODULES_WITH_PERSON_FILTER = new Set(["pendientes","projects","stats","calendario"]);
+    const MODULES_WITH_SEARCH = new Set(["pendientes","projects","stats","calendario"]);
 
     function paintSideNavActive() {
       document.querySelectorAll("#hubGrid .side-link").forEach((el) => {
@@ -6105,12 +6105,8 @@
       const nice = label[2] + "/" + label[1] + "/" + label[0];
 
       root.innerHTML = `
-        <div class="diario-head">
-          <h3>Hoy · ${nice} · ${escapeHtml(currentUser.short)}</h3>
-          <button type="button" class="btn btn-ghost" id="diarioExport">Exportar Excel (.xlsx)</button>
-        </div>
         <div class="diario-feel">
-          <label for="diarioFeel">¿Cómo me he sentido hoy?</label>
+          <label for="diarioFeel">¿Cómo me he sentido hoy? · ${nice}</label>
           <textarea id="diarioFeel" placeholder="Escribe libremente… se guarda solo.">${escapeHtml(feel)}</textarea>
         </div>
         <div class="diario-tasks">
@@ -6134,7 +6130,6 @@
         </div>
       `;
 
-      root.querySelector("#diarioExport")?.addEventListener("click", () => exportJournalXlsx());
       const ta = root.querySelector("#diarioFeel");
       ta?.addEventListener("change", () => {
         bucket[iso] = { text: ta.value || "", updatedAt: Date.now() };
