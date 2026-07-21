@@ -6453,7 +6453,7 @@
         cache: "no-store"
       }, 8000);
       if (res.status === 404 || res.status === 400) return null;
-      if (!res.ok) throw new Error("Error al leer la nube");
+      if (!res.ok) throw new Error("Error al leer la nube (" + res.status + ")");
       return await res.json();
     }
 
@@ -6463,8 +6463,8 @@
         method: "PUT",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(data)
-      }, 10000);
-      if (!res.ok) throw new Error("Error al guardar en la nube");
+      }, 15000);
+      if (!res.ok) throw new Error("Error al guardar en la nube (" + res.status + ")");
     }
 
     function fetchTimeout(url, opts, ms) {
@@ -6473,53 +6473,187 @@
       return fetch(url, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(timer));
     }
 
-    async function pullCloud() {
-      if (!isCloudId(spaceId)) return false;
+    function mergeById(aList, bList, pick) {
+      const map = new Map();
+      (aList || []).forEach((item) => {
+        if (item && item.id) map.set(item.id, item);
+      });
+      (bList || []).forEach((item) => {
+        if (!item || !item.id) return;
+        const prev = map.get(item.id);
+        map.set(item.id, prev ? pick(prev, item) : item);
+      });
+      return [...map.values()];
+    }
+
+    function newerStamp(a, b) {
+      return (Number(a) || 0) >= (Number(b) || 0) ? a : b;
+    }
+
+    function mergeIdea(a, b) {
+      return ((a.updatedAt || 0) >= (b.updatedAt || 0) ? a : b);
+    }
+
+    function mergeGoal(a, b) {
+      return ((a.updatedAt || 0) >= (b.updatedAt || 0) ? a : b);
+    }
+
+    function mergeCalEvent(a, b) {
+      /* Preferir el que esté hecho con marca más reciente; si no, el más completo. */
+      if (a.done !== b.done) {
+        const doneOne = a.done ? a : b;
+        const openOne = a.done ? b : a;
+        if (doneOne.doneAt || !openOne.done) return doneOne;
+      }
+      const aScore = (a.label || "").length + (a.description || "").length + (a.note || "").length;
+      const bScore = (b.label || "").length + (b.description || "").length + (b.note || "").length;
+      return bScore > aScore ? b : a;
+    }
+
+    function mergeTask(a, b) {
+      if (a.done !== b.done) return (a.done ? a : b);
+      const out = { ...a };
+      ["label", "note", "description", "date", "time", "champion"].forEach((k) => {
+        if ((b[k] || "") && (!(a[k] || "") || String(b[k]).length > String(a[k] || "").length)) out[k] = b[k];
+      });
+      if (b.priority && (!a.priority || b.priority < a.priority)) out.priority = b.priority;
+      return out;
+    }
+
+    function mergeStep(a, b) {
+      return {
+        ...a,
+        title: (b.title && b.title.length > (a.title || "").length) ? b.title : a.title,
+        tasks: mergeById(a.tasks || [], b.tasks || [], mergeTask)
+      };
+    }
+
+    function mergeProject(a, b) {
+      return {
+        ...a,
+        ...b,
+        title: a.title || b.title,
+        lede: ((b.lede || "").length > (a.lede || "").length) ? b.lede : a.lede,
+        note: ((b.note || "").length > (a.note || "").length) ? b.note : a.note,
+        archived: !!(a.archived || b.archived),
+        costs: mergeById(a.costs || [], b.costs || [], (x, y) => ((x.createdAt || "") >= (y.createdAt || "") ? x : y)),
+        steps: mergeById(a.steps || [], b.steps || [], mergeStep)
+      };
+    }
+
+    function mergeJournals(a, b) {
+      const out = { ...(a || {}) };
+      Object.entries(b || {}).forEach(([uid, days]) => {
+        out[uid] = { ...(out[uid] || {}) };
+        Object.entries(days || {}).forEach(([day, entry]) => {
+          const prev = out[uid][day];
+          if (!prev) out[uid][day] = entry;
+          else {
+            const pa = typeof prev === "string" ? prev : (prev.feel || prev.text || "");
+            const pb = typeof entry === "string" ? entry : (entry.feel || entry.text || "");
+            out[uid][day] = (String(pb).length > String(pa).length) ? entry : prev;
+          }
+        });
+      });
+      return out;
+    }
+
+    function mergeDailyPlans(a, b) {
+      const out = { ...(a || {}) };
+      Object.entries(b || {}).forEach(([uid, days]) => {
+        out[uid] = { ...(out[uid] || {}) };
+        Object.entries(days || {}).forEach(([day, plan]) => {
+          const prev = out[uid][day];
+          if (!prev) out[uid][day] = plan;
+          else {
+            const order = [...new Set([...(prev.order || []), ...(plan.order || [])])];
+            out[uid][day] = { ...prev, ...plan, order };
+          }
+        });
+      });
+      return out;
+    }
+
+    function mergeStates(local, remote) {
+      if (!local) return normalizeState(remote);
+      if (!remote) return normalizeState(local);
+      const a = local;
+      const b = remote;
+      const merged = {
+        ...b,
+        ...a,
+        version: Math.max(Number(a.version) || 0, Number(b.version) || 0, 4),
+        projects: mergeById(a.projects || [], b.projects || [], mergeProject),
+        ideas: mergeById(a.ideas || [], b.ideas || [], mergeIdea),
+        goals: mergeById(a.goals || [], b.goals || [], mergeGoal),
+        calEvents: mergeById(a.calEvents || [], b.calEvents || [], mergeCalEvent),
+        activity: [...(a.activity || []), ...(b.activity || [])]
+          .sort((x, y) => (y.at || 0) - (x.at || 0))
+          .slice(0, 200),
+        weeks: { ...(b.weeks || {}), ...(a.weeks || {}) },
+        journals: mergeJournals(a.journals, b.journals),
+        dailyPlans: mergeDailyPlans(a.dailyPlans, b.dailyPlans),
+        areas: mergeById(a.areas || [], b.areas || [], (x, y) => x),
+        updatedAt: Math.max(Number(a.updatedAt) || 0, Number(b.updatedAt) || 0, Date.now())
+      };
+      /* Conservar flags de planes si alguno los aplicó */
+      ["novaCutPlanApplied", "courtReplayPlanApplied", "carmen90PlanApplied"].forEach((k) => {
+        merged[k] = a[k] || b[k] || merged[k];
+      });
+      return normalizeState(merged);
+    }
+
+    let lastCloudOk = false;
+
+    async function syncNow({ showToast = false, push = true } = {}) {
+      if (!state) return false;
+      try { flushDiarioFeel(); } catch (_) {}
+      saveLocal();
+      if (!isCloudId(spaceId)) {
+        lastCloudOk = false;
+        setSyncStatus("Solo este dispositivo");
+        if (showToast) toast("Sin nube configurada");
+        return false;
+      }
+      setSyncStatus("Sincronizando…");
       try {
-        setSyncStatus("Sincronizando…");
         const remote = await cloudGet(spaceId);
         if (remote && remote.version && Array.isArray(remote.projects)) {
-          if (!state || (remote.updatedAt || 0) >= (state.updatedAt || 0)) {
-            state = normalizeState(remote);
-            saveLocal();
-          }
-        } else if (state) {
-          await cloudPut(spaceId, state);
+          state = mergeStates(state, remote);
         }
+        state.updatedAt = Date.now();
+        saveLocal();
+        if (push) await cloudPut(spaceId, state);
+        lastCloudOk = true;
         setSyncStatus("Sincronizado · nube");
+        if (showToast) toast("Sincronizado entre dispositivos");
         return true;
       } catch (e) {
-        setSyncStatus("Local (sin red)");
+        lastCloudOk = false;
+        setSyncStatus("Sin nube · solo este dispositivo");
         console.warn(e);
+        if (showToast) toast("No llegó a la nube. Revisa Wi‑Fi / datos");
         return false;
       }
     }
 
+    async function pullCloud() {
+      return syncNow({ showToast: false, push: true });
+    }
+
     async function pushCloud() {
-      if (!state) return;
-      state.updatedAt = Date.now();
-      saveLocal();
-      if (!isCloudId(spaceId)) {
-        setSyncStatus("Solo este dispositivo");
-        return;
-      }
-      try {
-        await cloudPut(spaceId, state);
-        setSyncStatus("Sincronizado");
-      } catch (e) {
-        setSyncStatus("Guardado local");
-        console.warn(e);
-      }
+      return syncNow({ showToast: false, push: true });
     }
 
     function scheduleSave(showToast) {
+      if (!state) return;
       state.updatedAt = Date.now();
       saveLocal();
       clearTimeout(saveTimer);
       saveTimer = setTimeout(async () => {
-        await pushCloud();
-        if (showToast) toast("Guardado · nube");
-      }, 1200);
+        const ok = await syncNow({ showToast: false, push: true });
+        if (showToast) toast(ok ? "Guardado · nube" : "Guardado solo en este móvil/PC");
+      }, 900);
     }
 
     /* ——— Auth flow: elegir usuario → mismo panel (sin códigos) ——— */
@@ -6561,15 +6695,12 @@
       setSyncStatus("Sincronizando…");
       startPolling();
       pullCloud().then((ok) => {
-        if (ok) {
-          state = normalizeState(state || DEFAULT_SEED());
-          renderAll();
-        }
-        setSyncStatus(ok ? "Sincronizado · nube" : "Local (sin red)");
+        if (ok) renderAll();
+        setSyncStatus(ok ? "Sincronizado · nube" : "Sin nube · solo este dispositivo");
         logActivity("entrada", "Ha entrado al tablero");
-        scheduleSave(false);
+        if (!ok) scheduleSave(false);
       }).catch(() => {
-        setSyncStatus("Local (sin red)");
+        setSyncStatus("Sin nube · solo este dispositivo");
         logActivity("entrada", "Ha entrado al tablero");
       });
     }
@@ -6601,12 +6732,19 @@
     function startPolling() {
       stopPolling();
       if (!isCloudId(spaceId)) return;
-      const interval = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 45000 : 15000;
+      const interval = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 45000 : 20000;
       pollTimer = setInterval(async () => {
-        if (document.hidden) return;
-        const before = state?.updatedAt || 0;
-        await pullCloud();
-        if ((state?.updatedAt || 0) > before) renderAll();
+        if (document.hidden || !state) return;
+        const beforeIdeas = (state.ideas || []).length;
+        const beforeEv = (state.calEvents || []).length;
+        const beforeUp = state.updatedAt || 0;
+        const ok = await syncNow({ showToast: false, push: true });
+        if (!ok) return;
+        if ((state.ideas || []).length !== beforeIdeas ||
+            (state.calEvents || []).length !== beforeEv ||
+            (state.updatedAt || 0) !== beforeUp) {
+          renderAll();
+        }
       }, interval);
     }
     function stopPolling() {
@@ -9124,9 +9262,9 @@
 
       const sync = document.getElementById("settingsSyncLine");
       if (sync) {
-        sync.textContent = isCloudId(spaceId)
-          ? "Nube activa · lo que guardéis se ve en los dos móviles/PC"
-          : "Sin nube · solo este dispositivo";
+        sync.textContent = lastCloudOk
+          ? "Nube OK · ideas/eventos se comparten entre dispositivos"
+          : "Nube no conectada · los cambios quedan solo aquí hasta que sync funcione";
       }
 
       const box = document.getElementById("settingsProjectChecks");
@@ -9247,12 +9385,10 @@
       document.getElementById("btnLogout")?.click();
     });
     document.getElementById("settingsRefreshSync")?.addEventListener("click", async () => {
-      setSyncStatus("Sincronizando…");
-      await pullCloud();
+      const ok = await syncNow({ showToast: true, push: true });
       renderAll();
       paintSettings();
-      setSyncStatus(isCloudId(spaceId) ? "Sincronizado · nube" : "Solo este dispositivo");
-      toast(isCloudId(spaceId) ? "Sincronizado con la nube" : "Sin nube activa");
+      if (!ok) setSyncStatus("Sin nube · solo este dispositivo");
     });
     document.getElementById("settingsExportDiario")?.addEventListener("click", () => {
       exportJournalXlsx();
