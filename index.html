@@ -1954,6 +1954,81 @@
     [data-theme="light"] .cal-week-task.tone-p4 { border-left-color: #2e7d32; }
 
 
+
+    .diario-shell { display: grid; gap: 1rem; }
+    .diario-head {
+      display: flex; flex-wrap: wrap; gap: 0.65rem; align-items: center;
+      justify-content: space-between;
+    }
+    .diario-head h3 {
+      margin: 0; font-family: var(--font-display); font-size: 1.25rem;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .diario-feel, .diario-tasks, .cost-box {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--bg-card); padding: 0.9rem 1rem;
+      box-shadow: var(--shadow-card);
+    }
+    .diario-feel label, .cost-box h4, .diario-tasks h4 {
+      display: block; margin: 0 0 0.5rem;
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); font-family: var(--font-display); font-weight: 700;
+    }
+    .diario-feel textarea {
+      width: 100%; min-height: 110px; resize: vertical;
+      background: var(--input-bg); border: 1px solid var(--line);
+      border-radius: 10px; padding: 0.75rem; color: var(--text);
+      color-scheme: var(--scheme);
+    }
+    .diario-task {
+      display: grid; grid-template-columns: auto 1fr auto auto;
+      gap: 0.45rem; align-items: center;
+      padding: 0.55rem 0.6rem; margin-bottom: 0.4rem;
+      border: 1px solid var(--line); border-radius: 10px;
+      border-left: 3px solid var(--proj-accent, var(--line-strong));
+      background: rgba(0,0,0,0.18);
+    }
+    .diario-task.done { opacity: 0.45; }
+    .diario-task .label { font-weight: 600; font-size: 0.88rem; }
+    .diario-task .meta { font-size: 0.68rem; color: var(--muted); margin-top: 0.12rem; }
+    .diario-task input[type="time"] {
+      background: var(--input-bg); border: 1px solid var(--line);
+      border-radius: 8px; padding: 0.3rem 0.4rem; color: var(--text);
+      color-scheme: var(--scheme); font-size: 0.78rem;
+    }
+    .diario-ord { display: flex; flex-direction: column; gap: 0.15rem; }
+    .diario-ord button {
+      width: 1.6rem; height: 1.35rem; border-radius: 6px;
+      border: 1px solid var(--line); background: transparent; color: var(--text-soft);
+      font-size: 0.65rem; cursor: pointer; line-height: 1;
+    }
+    .diario-ord button:hover { color: var(--gold-bright); border-color: var(--line-strong); }
+    .cost-row {
+      display: grid; grid-template-columns: 1.2fr 0.7fr 0.9fr 1fr auto;
+      gap: 0.35rem; align-items: center; margin-bottom: 0.35rem;
+    }
+    .cost-row input {
+      width: 100%; background: var(--input-bg); border: 1px solid var(--line);
+      border-radius: 8px; padding: 0.4rem 0.5rem; color: var(--text);
+      color-scheme: var(--scheme); font-size: 0.78rem;
+    }
+    .cost-list { list-style: none; margin: 0.65rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+    .cost-item {
+      display: grid; grid-template-columns: 1fr auto auto; gap: 0.45rem; align-items: center;
+      padding: 0.45rem 0.55rem; border: 1px solid var(--line); border-radius: 8px;
+      font-size: 0.82rem;
+    }
+    .cost-item .amt { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .cost-total {
+      margin-top: 0.65rem; padding-top: 0.55rem; border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; font-weight: 700;
+    }
+    [data-theme="light"] .diario-task, [data-theme="light"] .diario-feel,
+    [data-theme="light"] .diario-tasks, [data-theme="light"] .cost-box {
+      background: rgba(255,255,255,0.75);
+    }
+    .side-link[data-module="diario"] { --hub-accent: #d4c4b0; }
+
     .side-link.has-overdue .side-link-count {
       color: #ff6b5a;
       font-weight: 800;
@@ -3811,8 +3886,8 @@
           <div class="person-filter" id="personFilter">
             <span class="lbl">Ver</span>
             <button type="button" data-person="" class="active">Todos</button>
-            <button type="button" data-person="edgar">Edgar</button>
-            <button type="button" data-person="carmen">Carmen</button>
+            <button type="button" data-person="carmen" title="Tareas de Carmen y las compartidas">Carmen</button>
+            <button type="button" data-person="edgar" title="Tareas de Edgar y las compartidas">Edgar</button>
           </div>
           <div class="search-wrap" id="sharedSearchWrap">
             <input type="search" class="search-soft" id="sharedSearch" placeholder="Buscar por código o nombre…" autocomplete="off" />
@@ -3886,6 +3961,10 @@
           </div>
           <div class="legend-soft" id="legendPendientes"></div>
           <ul class="prio-list" id="prioList"></ul>
+        </section>
+
+        <section class="panel" id="panel-diario">
+          <div class="diario-shell" id="diarioRoot"></div>
         </section>
 
         <section class="panel" id="panel-goals">
@@ -4244,6 +4323,8 @@
       if (!s.weeks || typeof s.weeks !== "object") s.weeks = {};
       if (!Array.isArray(s.activity)) s.activity = [];
       if (!Array.isArray(s.calEvents)) s.calEvents = [];
+      if (!s.journals || typeof s.journals !== "object") s.journals = {};
+      if (!s.dailyPlans || typeof s.dailyPlans !== "object") s.dailyPlans = {};
       s.areas = normalizeAreas(s);
       applyNovaCutPlan(s);
       applyCourtReplayPlan(s);
@@ -4254,6 +4335,15 @@
         if (!p.area) p.area = (s.areas[0] && s.areas[0].id) || "general";
         p.owner = projectOwner(p);
         p.badge = projectBadge(p);
+        if (!Array.isArray(p.costs)) p.costs = [];
+        p.costs = p.costs.map((c) => ({
+          id: c.id || uid("cost"),
+          label: c.label || "",
+          amount: Number(c.amount) || 0,
+          date: c.date || "",
+          note: c.note || "",
+          createdAt: c.createdAt || todayISO()
+        }));
         (p.steps || []).forEach((st) => {
           (st.tasks || []).forEach((t) => {
             t.priority = basePriority(t);
@@ -5052,7 +5142,9 @@
       weeks: {},
       goals: [],
       ideas: [],
-      calEvents: []
+      calEvents: [],
+      journals: {},
+      dailyPlans: {}
     });
 
     let state = null;
@@ -5560,14 +5652,15 @@
       projects: { title: "Proyectos", panel: "panel-projects" },
       calendario: { title: "Calendario", panel: "panel-calendario" },
       pendientes: { title: "Tareas", panel: "panel-pendientes" },
+      diario: { title: "Mi día", panel: "panel-diario" },
       goals: { title: "Objetivos", panel: "panel-goals" },
       ideas: { title: "Ideas", panel: "panel-ideas" },
       stats: { title: "Estadísticas", panel: "panel-stats" },
       settings: { title: "Configuración", panel: "panel-settings" }
     };
 
-    const MODULES_WITH_PERSON_FILTER = new Set(["pendientes","projects","stats","calendario"]);
-    const MODULES_WITH_SEARCH = new Set(["pendientes","projects","stats","calendario"]);
+    const MODULES_WITH_PERSON_FILTER = new Set(["pendientes","projects","stats","calendario","diario"]);
+    const MODULES_WITH_SEARCH = new Set(["pendientes","projects","stats","calendario","diario"]);
 
     function paintSideNavActive() {
       document.querySelectorAll("#hubGrid .side-link").forEach((el) => {
@@ -5611,6 +5704,7 @@
         ideas: "Nueva idea",
         goals: "Nuevo objetivo",
         calendario: "Nueva tarea",
+        diario: "Nueva tarea",
         stats: "",
         settings: ""
       };
@@ -5638,10 +5732,12 @@
           const p = state?.projects?.find((x) => x.id === selectedProjectId);
           box.innerHTML = `
             <button type="button" class="btn btn-ghost" id="btnBackProjects">← Lista</button>
+            <button type="button" class="btn btn-ghost" id="btnExportProject">Exportar Excel</button>
             <button type="button" class="btn btn-gold" id="btnDetailAddStep">+ Paso</button>
             <button type="button" class="btn btn-gold" id="btnDetailAddTask">+ Tarea</button>
           `;
           box.querySelector("#btnBackProjects").onclick = () => closeProjectDetail();
+          box.querySelector("#btnExportProject").onclick = () => p && exportProjectXlsx(p);
           box.querySelector("#btnDetailAddStep").onclick = () => p && openAddStep(p.id);
           box.querySelector("#btnDetailAddTask").onclick = () => {
             if (!p) return;
@@ -5660,6 +5756,9 @@
           if (!first.steps.length) return openAddStep(first.id);
           openAddTask(first.id, first.steps[first.steps.length - 1].id);
         };
+      } else if (moduleId === "diario") {
+        box.innerHTML = `<button type="button" class="btn btn-ghost" id="btnExportDiario">Exportar diario Excel</button>`;
+        box.querySelector("#btnExportDiario").onclick = () => exportJournalXlsx();
       } else {
         box.innerHTML = "";
       }
@@ -5687,6 +5786,7 @@
       if (moduleId === "projects") renderProjects();
       if (moduleId === "calendario") renderCalendario();
       if (moduleId === "pendientes") renderPendientes();
+      if (moduleId === "diario") renderDiario();
       if (moduleId === "goals") renderGoals();
       if (moduleId === "ideas") renderIdeas();
       if (moduleId === "stats") { renderPendientes(); renderWeek(); renderActivity(); }
@@ -5710,6 +5810,10 @@
       set("projects", String(activeProjects));
       set("calendario", overdueN ? `${dueToday}·${overdueN}↓` : String(dueToday || openDated.length));
       set("pendientes", overdueN ? `${openTasks}·${overdueN}↓` : String(openTasks));
+      const myToday = currentUser ? allTasks().filter(({ t, p }) =>
+        !p.archived && t.date === today && !t.done && matchesPersonFilter(t, currentUser.id)
+      ).length : 0;
+      set("diario", String(myToday));
       set("goals", String(goalsOpen));
       set("ideas", String(ideasOpen));
       set("stats", "·");
@@ -5793,6 +5897,7 @@
       paintLegends();
       renderProjects();
       renderPendientes();
+      renderDiario();
       renderCalendario();
       renderWeek();
       renderActivity();
@@ -5819,6 +5924,221 @@
         }
       }, 60000);
     }
+
+
+    function ensureJournalBucket(userId) {
+      if (!state.journals) state.journals = {};
+      if (!state.journals[userId] || typeof state.journals[userId] !== "object") state.journals[userId] = {};
+      return state.journals[userId];
+    }
+
+    function ensureDailyPlan(userId, iso) {
+      if (!state.dailyPlans) state.dailyPlans = {};
+      if (!state.dailyPlans[userId] || typeof state.dailyPlans[userId] !== "object") state.dailyPlans[userId] = {};
+      if (!state.dailyPlans[userId][iso]) state.dailyPlans[userId][iso] = { order: [] };
+      if (!Array.isArray(state.dailyPlans[userId][iso].order)) state.dailyPlans[userId][iso].order = [];
+      return state.dailyPlans[userId][iso];
+    }
+
+    function myDayTasks(iso) {
+      if (!currentUser) return [];
+      const uid = currentUser.id;
+      const items = allTasks().filter(({ t, p }) =>
+        !p.archived && t.date === iso && matchesPersonFilter(t, uid) && matchesSearch(t, p)
+      );
+      const plan = ensureDailyPlan(uid, iso);
+      const order = plan.order || [];
+      return items.slice().sort((a, b) => {
+        const ia = order.indexOf(a.t.id);
+        const ib = order.indexOf(b.t.id);
+        if (ia >= 0 || ib >= 0) {
+          if (ia < 0) return 1;
+          if (ib < 0) return -1;
+          return ia - ib;
+        }
+        if (!!a.t.done !== !!b.t.done) return a.t.done ? 1 : -1;
+        const ta = a.t.time || "99:99";
+        const tb = b.t.time || "99:99";
+        if (ta !== tb) return ta.localeCompare(tb);
+        return effectivePriority(a.t) - effectivePriority(b.t);
+      });
+    }
+
+    function moveDayTask(iso, taskId, dir) {
+      if (!currentUser) return;
+      const items = myDayTasks(iso);
+      const ids = items.map((x) => x.t.id);
+      const i = ids.indexOf(taskId);
+      if (i < 0) return;
+      const j = i + dir;
+      if (j < 0 || j >= ids.length) return;
+      const next = ids.slice();
+      const tmp = next[i];
+      next[i] = next[j];
+      next[j] = tmp;
+      ensureDailyPlan(currentUser.id, iso).order = next;
+      scheduleSave(true);
+      renderDiario();
+    }
+
+    function downloadXlsx(filename, sheets) {
+      if (typeof XLSX === "undefined") {
+        toast("No se pudo cargar Excel. Revisa la conexión e inténtalo otra vez.");
+        return;
+      }
+      const wb = XLSX.utils.book_new();
+      sheets.forEach(({ name, rows }) => {
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb, ws, String(name || "Hoja").slice(0, 31));
+      });
+      XLSX.writeFile(wb, filename.endsWith(".xlsx") ? filename : filename + ".xlsx");
+    }
+
+    function exportProjectXlsx(p) {
+      const taskRows = [[
+        "Paso", "Código", "Tarea", "Hecha", "Fecha", "Hora", "Prioridad", "Champion",
+        "Descripción", "Nota", "Creada", "Hecha el", "Hecha por"
+      ]];
+      (p.steps || []).forEach((st) => {
+        (st.tasks || []).forEach((t) => {
+          taskRows.push([
+            st.title || "",
+            t.shortCode || "",
+            t.label || "",
+            t.done ? "Sí" : "No",
+            t.date || "",
+            t.time || "",
+            PRIORITY[effectivePriority(t)]?.label || "",
+            CHAMPIONS[taskChampion(t)]?.label || "",
+            t.description || "",
+            t.note || "",
+            t.createdAt || "",
+            t.doneAt || "",
+            t.doneBy ? (USERS[t.doneBy]?.short || t.doneBy) : ""
+          ]);
+        });
+      });
+      const costRows = [["Concepto", "Importe", "Fecha", "Nota", "Creado"]];
+      let total = 0;
+      (p.costs || []).forEach((c) => {
+        total += Number(c.amount) || 0;
+        costRows.push([c.label || "", Number(c.amount) || 0, c.date || "", c.note || "", c.createdAt || ""]);
+      });
+      costRows.push(["TOTAL", total, "", "", ""]);
+      const safe = String(p.title || "proyecto").replace(/[\\/:*?"<>|]/g, "_").slice(0, 40);
+      downloadXlsx(safe + ".xlsx", [
+        { name: "Tareas", rows: taskRows },
+        { name: "Costes", rows: costRows },
+        { name: "Info", rows: [
+          ["Proyecto", p.title || ""],
+          ["Área", areaLabel(p.area)],
+          ["Responsable", PROJECT_OWNERS[projectOwner(p)]?.label || ""],
+          ["Estado", p.badge || ""],
+          ["Descripción", p.lede || ""],
+          ["Notas", p.note || ""]
+        ]}
+      ]);
+      toast("Excel del proyecto descargado");
+    }
+
+    function exportJournalXlsx() {
+      if (!currentUser) return toast("Entra con un usuario primero");
+      const bucket = ensureJournalBucket(currentUser.id);
+      const rows = [["Día", "Cómo me he sentido", "Actualizado"]];
+      Object.keys(bucket).sort().forEach((day) => {
+        const entry = bucket[day] || {};
+        rows.push([day, entry.text || "", entry.updatedAt ? new Date(entry.updatedAt).toLocaleString("es-ES") : ""]);
+      });
+      if (rows.length === 1) rows.push(["—", "(sin entradas todavía)", ""]);
+      downloadXlsx("diario-" + (currentUser.short || currentUser.id) + ".xlsx", [
+        { name: "Diario", rows }
+      ]);
+      toast("Excel del diario descargado");
+    }
+
+    function renderDiario() {
+      const root = document.getElementById("diarioRoot");
+      if (!root) return;
+      if (!currentUser) {
+        root.innerHTML = `<p class="empty">Entra como Carmen o Edgar para ver tu día.</p>`;
+        return;
+      }
+      const iso = todayISO();
+      const items = myDayTasks(iso);
+      const bucket = ensureJournalBucket(currentUser.id);
+      const feel = (bucket[iso] && bucket[iso].text) || "";
+      const label = iso.split("-");
+      const nice = label[2] + "/" + label[1] + "/" + label[0];
+
+      root.innerHTML = `
+        <div class="diario-head">
+          <h3>Hoy · ${nice} · ${escapeHtml(currentUser.short)}</h3>
+          <button type="button" class="btn btn-ghost" id="diarioExport">Exportar diario Excel</button>
+        </div>
+        <div class="diario-feel">
+          <label for="diarioFeel">¿Cómo me he sentido hoy?</label>
+          <textarea id="diarioFeel" placeholder="Escribe libremente… se guarda solo.">${escapeHtml(feel)}</textarea>
+        </div>
+        <div class="diario-tasks">
+          <h4>Tareas de hoy (${items.length}) · propias y compartidas</h4>
+          ${items.length ? items.map(({ p, t }) => {
+            applySchedulePriority(t);
+            const pr = effectivePriority(t);
+            return `<div class="diario-task ${t.done ? "done" : ""} tone-p${pr}" style="--proj-accent:${projectAccent(p.id)}">
+              <div class="diario-ord">
+                <button type="button" data-up="${t.id}" title="Subir">▲</button>
+                <button type="button" data-down="${t.id}" title="Bajar">▼</button>
+              </div>
+              <div>
+                <div class="label">${priorityDot(pr, t.done)} ${escapeHtml(t.label)}</div>
+                <div class="meta">${escapeHtml(p.title)} · ${CHAMPIONS[taskChampion(t)].label}${t.shortCode ? " · " + escapeHtml(t.shortCode) : ""}</div>
+              </div>
+              <input type="time" data-time="${t.id}" value="${t.time || ""}" title="Hora" />
+              <input class="check" type="checkbox" data-toggle="${t.id}" ${t.done ? "checked" : ""} title="Hecha" />
+            </div>`;
+          }).join("") : `<p class="empty">No tienes tareas con fecha de hoy. Las compartidas (Carmen y Edgar) también aparecen aquí.</p>`}
+        </div>
+      `;
+
+      root.querySelector("#diarioExport")?.addEventListener("click", () => exportJournalXlsx());
+      const ta = root.querySelector("#diarioFeel");
+      ta?.addEventListener("change", () => {
+        bucket[iso] = { text: ta.value || "", updatedAt: Date.now() };
+        logActivity("resumen", `Diario del ${nice}`);
+        scheduleSave(true);
+      });
+      root.querySelectorAll("[data-up]").forEach((btn) => {
+        btn.addEventListener("click", () => moveDayTask(iso, btn.dataset.up, -1));
+      });
+      root.querySelectorAll("[data-down]").forEach((btn) => {
+        btn.addEventListener("click", () => moveDayTask(iso, btn.dataset.down, 1));
+      });
+      root.querySelectorAll("[data-time]").forEach((inp) => {
+        inp.addEventListener("change", () => {
+          const meta = findTask(inp.dataset.time);
+          if (!meta) return;
+          meta.task.time = normalizeTime(inp.value || "");
+          applySchedulePriority(meta.task);
+          logActivity("fecha", `Hora «${meta.task.label}»: ${meta.task.time || "sin hora"}`);
+          scheduleSave(true);
+          renderDiario();
+          paintHubCounts();
+        });
+      });
+      root.querySelectorAll("[data-toggle]").forEach((chk) => {
+        chk.addEventListener("change", () => {
+          const meta = findTask(chk.dataset.toggle);
+          if (!meta) return;
+          meta.task.done = chk.checked;
+          meta.task.doneAt = chk.checked ? todayISO() : null;
+          meta.task.doneBy = chk.checked ? currentUser.id : null;
+          logActivity(chk.checked ? "completar" : "reabrir", `«${meta.task.label}»`);
+          scheduleSave(true);
+          renderAll();
+        });
+      });
+    }
+
 
     function renderPendientes() {
       const items = allTasks().filter(({ t, p }) => taskVisible(t, p));
@@ -6776,7 +7096,20 @@
               <label>Apuntes del proyecto</label>
               <textarea data-role="project-note" placeholder="Ideas, bloqueos, decisiones…">${escapeHtml(p.note || "")}</textarea>
             </div>
+            <div class="cost-box" data-role="costs">
+              <h4>Costes del proyecto</h4>
+              <div class="cost-row">
+                <input type="text" data-cost="label" placeholder="Concepto" />
+                <input type="number" data-cost="amount" placeholder="€" step="0.01" />
+                <input type="date" data-cost="date" />
+                <input type="text" data-cost="note" placeholder="Nota" />
+                <button type="button" class="mini" data-act="add-cost">+</button>
+              </div>
+              <ul class="cost-list" data-role="cost-list"></ul>
+              <div class="cost-total"><span>Total</span><span data-role="cost-total">0 €</span></div>
+            </div>
             <div class="card-actions">
+              <button type="button" class="mini" data-act="export-xlsx">Exportar Excel</button>
               <button type="button" class="mini" data-act="add-step">+ Paso</button>
               <button type="button" class="mini" data-act="add-task-quick">+ Tarea</button>
               <button type="button" class="mini" data-act="archive-project">${p.archived ? "Desarchivar" : "Archivar"}</button>
@@ -6875,6 +7208,57 @@
         renderAll();
         if (currentModule === "projects") paintModuleActions("projects");
       });
+
+
+      if (!Array.isArray(p.costs)) p.costs = [];
+      const paintCosts = () => {
+        const list = card.querySelector('[data-role="cost-list"]');
+        const totalEl = card.querySelector('[data-role="cost-total"]');
+        if (!list) return;
+        const total = p.costs.reduce((s, c) => s + (Number(c.amount) || 0), 0);
+        if (totalEl) totalEl.textContent = `${total.toLocaleString("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
+        if (!p.costs.length) {
+          list.innerHTML = `<li class="empty" style="border:none;background:transparent">Sin costes aún.</li>`;
+          return;
+        }
+        list.innerHTML = p.costs.map((c) => `
+          <li class="cost-item" data-cost-id="${c.id}">
+            <div>
+              <strong>${escapeHtml(c.label || "Sin concepto")}</strong>
+              <div class="meta" style="font-size:0.68rem;color:var(--muted)">${c.date ? fmtDay(c.date) : "sin fecha"}${c.note ? " · " + escapeHtml(c.note) : ""}</div>
+            </div>
+            <span class="amt">${(Number(c.amount) || 0).toLocaleString("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €</span>
+            <button type="button" class="icon-btn" data-del-cost="${c.id}" title="Eliminar">×</button>
+          </li>
+        `).join("");
+        list.querySelectorAll("[data-del-cost]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            p.costs = p.costs.filter((x) => x.id !== btn.dataset.delCost);
+            logActivity("editar", `Quitó un coste en «${p.title}»`);
+            scheduleSave(true);
+            paintCosts();
+          });
+        });
+      };
+      paintCosts();
+      card.querySelector('[data-act="add-cost"]')?.addEventListener("click", () => {
+        const box = card.querySelector('[data-role="costs"]');
+        const label = box.querySelector('[data-cost="label"]').value.trim();
+        const amount = Number(box.querySelector('[data-cost="amount"]').value);
+        const date = box.querySelector('[data-cost="date"]').value || "";
+        const note = box.querySelector('[data-cost="note"]').value.trim();
+        if (!label) return toast("Escribe el concepto del coste");
+        if (!Number.isFinite(amount)) return toast("Importe no válido");
+        p.costs.push({ id: uid("cost"), label, amount, date, note, createdAt: todayISO() });
+        box.querySelector('[data-cost="label"]').value = "";
+        box.querySelector('[data-cost="amount"]').value = "";
+        box.querySelector('[data-cost="note"]').value = "";
+        logActivity("crear", `Coste «${label}» en ${p.title}`);
+        scheduleSave(true);
+        paintCosts();
+      });
+      card.querySelector('[data-act="export-xlsx"]')?.addEventListener("click", () => exportProjectXlsx(p));
+
 
       return card;
     }
@@ -7345,6 +7729,9 @@
       if (currentModule === "calendario") {
         return openCalCreate(toISO(calCursor));
       }
+      if (currentModule === "diario") {
+        return openCalCreate(todayISO());
+      }
       if (currentModule === "pendientes") {
         const first = state.projects.find((p) => !p.archived);
         if (!first) return toast("Crea un proyecto primero");
@@ -7569,5 +7956,6 @@
       }
     })();
   </script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </body>
 </html>
