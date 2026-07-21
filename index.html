@@ -2294,200 +2294,115 @@
       }
     }
 
-    /* ——— WELCOME + HUB SHELL ——— */
+    /* --- HOME (quote + fixed menu) --- */
     .app-view { display: none; animation: rise 0.45s ease both; }
     .app-view.active { display: block; }
-    #welcome.app-view.active {
+    body[data-app-view="hub"] .wrap {
+      width: min(1200px, calc(100% - 1.5rem));
+      padding-top: 0.35rem;
+      padding-bottom: 1.25rem;
+      min-height: calc(100dvh - 5rem - var(--safe-t));
+      display: flex;
+      flex-direction: column;
+    }
+    #hub.app-view.active {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      min-height: calc(100dvh - 5.4rem - var(--safe-t) - var(--safe-b));
+      padding: 0.5rem 0 1rem;
+      box-sizing: border-box;
+    }
+    .home-split {
+      width: 100%;
       display: grid;
-      place-items: center;
-      min-height: calc(100dvh - 4.5rem - var(--safe-t));
-      padding: 2rem 1.25rem 4rem;
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+      align-items: center;
     }
-    .welcome-inner {
-      width: min(42rem, 100%);
-      text-align: center;
+    @media (min-width: 900px) {
+      .home-split {
+        grid-template-columns: minmax(280px, 0.95fr) minmax(340px, 1.15fr);
+        gap: 2.75rem;
+        align-items: center;
+      }
     }
-    .welcome-kicker {
+    .home-quote {
+      text-align: left;
+      max-width: 34rem;
+    }
+    .home-quote .welcome-kicker {
       font-family: var(--font-display);
-      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      font-size: clamp(0.85rem, 1.8vw, 1rem);
       letter-spacing: 0.28em;
       text-transform: uppercase;
       color: var(--text-soft);
       font-weight: 700;
-      margin-bottom: 1.65rem;
+      margin-bottom: 1.25rem;
     }
-    .welcome-quote {
+    .home-quote .welcome-quote {
       font-family: "Cormorant Garamond", "Times New Roman", serif;
-      font-size: clamp(1.45rem, 3.2vw, 1.95rem);
+      font-size: clamp(1.35rem, 2.6vw, 1.85rem);
       font-weight: 500;
       font-style: italic;
-      line-height: 1.48;
+      line-height: 1.45;
       color: var(--text);
       letter-spacing: 0.01em;
-      margin: 0 auto 2.15rem;
-      max-width: 34em;
-    }
-    .welcome-cta {
-      min-width: 200px;
-    }
-    #hub.app-view.active {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: calc(100dvh - 5.5rem - var(--safe-t) - var(--safe-b));
-      padding: 0.5rem 0 1.5rem;
-      box-sizing: border-box;
-    }
-    body[data-app-view="hub"] .wrap {
-      width: min(1280px, calc(100% - 1.25rem));
-      padding-top: 0.5rem;
-      padding-bottom: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      min-height: calc(100dvh - 5.2rem - var(--safe-t));
-    }
-    body[data-app-view="hub"] #hub.app-view.active {
-      flex: 1;
-    }
-    .hub-head {
-      margin: 0 0 1.35rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-    .hub-head h2 {
-      font-family: var(--font-display);
-      font-size: clamp(1.55rem, 3vw, 2.15rem);
-      font-weight: 650;
-      letter-spacing: -0.03em;
-      margin-bottom: 0;
-    }
-    .hub-carousel-nav {
-      display: flex;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-    .hub-carousel-nav button {
-      width: 2.85rem;
-      height: 2.85rem;
-      border-radius: 999px;
-      border: 1.5px solid var(--line-strong);
-      background: var(--bg-elev);
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      font-size: 1.35rem;
-      line-height: 1;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.16);
-      transition: transform 0.15s, border-color 0.15s, background 0.15s;
-    }
-    .hub-carousel-nav button:hover {
-      border-color: var(--gold);
-      color: var(--gold-bright);
-      transform: translateY(-1px);
-    }
-    .hub-carousel-nav button:disabled {
-      opacity: 0.35;
-      pointer-events: none;
-    }
-    .hub-carousel {
-      position: relative;
       margin: 0;
-      flex: 0 0 auto;
-      overflow: visible;
     }
-    .hub-carousel::before,
-    .hub-carousel::after {
-      display: none;
+    .home-menu-wrap { width: 100%; }
+    .home-menu-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 0.85rem;
     }
     .hub-grid {
       display: flex;
-      gap: 1.25rem;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      scroll-padding-inline: 1.25rem;
-      padding: 0.75rem 1.25rem 1.4rem;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      flex-direction: column;
+      gap: 0.55rem;
+      overflow: visible;
+      padding: 0;
     }
-    .hub-grid::-webkit-scrollbar { display: none; }
     .hub-card {
       --hub-accent: rgba(200, 210, 220, 0.55);
       position: relative;
       overflow: hidden;
       text-align: left;
-      padding: 1.75rem 1.55rem 1.45rem;
-      border-radius: 26px;
+      padding: 0.95rem 1.05rem;
+      border-radius: 16px;
       border: 1px solid var(--line);
       background:
-        linear-gradient(145deg, rgba(255,255,255,0.05), transparent 42%),
+        linear-gradient(120deg, rgba(255,255,255,0.04), transparent 45%),
         var(--bg-card);
-      backdrop-filter: blur(18px);
+      backdrop-filter: blur(16px);
       box-shadow: var(--shadow-card);
       color: inherit;
-      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-      min-height: min(52vh, 340px);
-      width: min(86vw, 360px);
-      flex: 0 0 min(86vw, 360px);
-      scroll-snap-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      width: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto auto;
+      column-gap: 0.85rem;
+      row-gap: 0.2rem;
+      align-items: center;
       cursor: pointer;
       isolation: isolate;
       box-sizing: border-box;
-    }
-    @media (min-width: 720px) {
-      .hub-card {
-        width: 380px;
-        flex-basis: 380px;
-        min-height: min(48vh, 360px);
-        scroll-snap-align: start;
-        padding: 1.9rem 1.7rem 1.55rem;
-      }
-      .hub-grid {
-        scroll-padding-inline: 1.5rem;
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-      }
-    }
-    @media (min-width: 1100px) {
-      .hub-card {
-        width: 400px;
-        flex-basis: 400px;
-        min-height: min(50vh, 380px);
-      }
     }
     .hub-card::before {
       content: "";
       position: absolute;
       left: 0;
-      top: 18%;
-      bottom: 18%;
+      top: 20%;
+      bottom: 20%;
       width: 3px;
       border-radius: 0 4px 4px 0;
       background: linear-gradient(180deg, transparent, var(--hub-accent), transparent);
-      opacity: 0.85;
     }
-    .hub-card::after {
-      content: attr(data-index);
-      position: absolute;
-      right: 0.55rem;
-      bottom: -0.15rem;
-      font-family: var(--font-display);
-      font-size: clamp(4.4rem, 10vw, 6.8rem);
-      font-weight: 700;
-      letter-spacing: -0.06em;
-      line-height: 0.85;
-      color: var(--text);
-      opacity: 0.05;
-      pointer-events: none;
-      z-index: 0;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-    }
-    .hub-card > * { position: relative; z-index: 1; }
+    .hub-card::after { display: none; }
     .hub-card[data-module="projects"] { --hub-accent: #d8dee6; }
     .hub-card[data-module="calendario"] { --hub-accent: #b8c0c8; }
     .hub-card[data-module="pendientes"] { --hub-accent: #c5d4c8; }
@@ -2496,121 +2411,73 @@
     .hub-card[data-module="stats"] { --hub-accent: #a8b8c8; }
     .hub-card[data-module="settings"] { --hub-accent: #b0a8b0; }
     .hub-card:hover, .hub-card:focus-visible {
-      transform: translateY(-4px) scale(1.015);
+      transform: translateX(4px);
       border-color: rgba(230, 236, 242, 0.35);
-      box-shadow: var(--shadow-card), 0 18px 40px rgba(0,0,0,0.28);
+      box-shadow: var(--shadow-card), 0 12px 28px rgba(0,0,0,0.22);
       outline: none;
     }
-    .hub-card:hover::after, .hub-card:focus-visible::after {
-      opacity: 0.1;
-      transform: translate(-4px, -6px);
-    }
-    .hub-card.is-active {
-      border-color: rgba(230, 236, 242, 0.42);
-      box-shadow: var(--shadow-card), 0 0 0 1px rgba(210,220,230,0.12), 0 20px 44px rgba(0,0,0,0.3);
-    }
-    .hub-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      margin-bottom: 0.15rem;
-    }
     .hub-card-icon {
-      width: auto;
-      height: auto;
-      border: none;
-      background: none;
-      border-radius: 0;
-      display: inline-flex;
+      grid-row: 1 / span 2;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      display: grid;
+      place-items: center;
       color: var(--gold-bright);
-      opacity: 0.92;
     }
     .hub-card-icon svg {
-      width: 30px;
-      height: 30px;
+      width: 20px;
+      height: 20px;
       stroke: currentColor;
       fill: none;
-      stroke-width: 1.85;
+      stroke-width: 1.9;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+    .hub-card h3 {
+      grid-column: 2;
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .hub-card p {
+      grid-column: 2;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+      margin: 0;
+      max-width: none;
+    }
     .hub-card .hub-meta {
-      font-size: 0.7rem;
-      letter-spacing: 0.14em;
+      grid-column: 3;
+      grid-row: 1 / span 2;
+      align-self: center;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--text-soft);
       font-weight: 700;
-      padding: 0.32rem 0.65rem;
+      padding: 0.35rem 0.55rem;
       border-radius: 999px;
       border: 1px solid var(--line);
       background: rgba(255,255,255,0.03);
       white-space: nowrap;
     }
-    .hub-card h3 {
-      font-family: var(--font-display);
-      font-size: clamp(1.45rem, 2.4vw, 1.75rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      margin-top: 0.2rem;
-    }
-    .hub-card p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
-      flex: 1;
-      max-width: 28rem;
-    }
-    .hub-card-go {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      margin-top: 0.35rem;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--gold);
-      opacity: 0.75;
-      transition: opacity 0.2s, transform 0.2s, gap 0.2s;
-    }
-    .hub-card:hover .hub-card-go {
-      opacity: 1;
-      gap: 0.55rem;
-      color: var(--gold-bright);
-    }
-    .hub-dots {
-      display: flex;
-      justify-content: center;
-      gap: 0.4rem;
-      margin-top: 0.15rem;
-    }
-    .hub-dots button {
-      width: 0.45rem;
-      height: 0.45rem;
-      border-radius: 999px;
-      border: none;
-      background: var(--muted);
-      opacity: 0.35;
-      padding: 0;
-      transition: width 0.2s, opacity 0.2s, background 0.2s;
-    }
-    .hub-dots button.active {
-      width: 1.35rem;
-      opacity: 1;
-      background: var(--gold-bright);
-    }
+    .hub-card-top, .hub-card-go { display: none !important; }
     [data-theme="light"] .hub-card {
       background:
-        linear-gradient(145deg, rgba(255,255,255,0.55), transparent 48%),
-        rgba(250, 246, 244, 0.92);
+        linear-gradient(120deg, rgba(255,255,255,0.65), transparent 50%),
+        rgba(250, 246, 244, 0.94);
     }
-    [data-theme="light"] .hub-card::after { opacity: 0.06; color: #1c161a; }
-    [data-theme="light"] .hub-card:hover::after { opacity: 0.1; }
-    [data-theme="light"] .hub-carousel-nav button {
-      background: rgba(248, 244, 242, 0.96);
-      color: #1c161a;
+    @media (max-width: 899px) {
+      .home-quote { text-align: center; margin: 0 auto; }
+      .home-quote .welcome-quote { font-size: clamp(1.25rem, 4.5vw, 1.55rem); }
     }
+
     .module-chrome {
       display: flex;
       align-items: center;
@@ -2724,9 +2591,7 @@
     .settings-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     #btnHome { display: none; }
     body[data-app-view="module"] #btnHome { display: inline-flex; }
-    body[data-app-view="welcome"] .fab-bar,
     body[data-app-view="hub"] .fab-bar { display: none; }
-    body[data-app-view="welcome"] .topbar .brand-badge { opacity: 0.7; }
     .stats-stack { display: grid; gap: 1.25rem; }
     .card.is-archived { opacity: 0.62; }
     .card-area-tag {
@@ -2819,92 +2684,61 @@
     </header>
 
     <div class="wrap">
-      <!-- WELCOME -->
-      <section id="welcome" class="app-view active" aria-label="Bienvenida">
-        <div class="welcome-inner">
-          <div class="welcome-kicker">DHARMA SOLUTIONS</div>
-          <p class="welcome-quote">Algún día miraremos atrás y recordaremos que todo empezó aquí: dos personas, una visión y la determinación de convertir lo imposible en inevitable.</p>
-          <button type="button" class="btn btn-gold welcome-cta" id="btnEnterHub">Entrar al panel</button>
-        </div>
-      </section>
-
-      <!-- HUB -->
-      <section id="hub" class="app-view" aria-label="Panel principal">
-        <div class="hub-head">
-          <h2>Centro de control</h2>
-          <div class="hub-carousel-nav">
-            <button type="button" id="hubPrev" aria-label="Anterior">‹</button>
-            <button type="button" id="hubNext" aria-label="Siguiente">›</button>
+      <!-- HOME: quote + fixed menu (after login) -->
+      <section id="hub" class="app-view active" aria-label="Inicio">
+        <div class="home-split">
+          <aside class="home-quote">
+            <div class="welcome-kicker">DHARMA SOLUTIONS</div>
+            <p class="welcome-quote">Algún día miraremos atrás y recordaremos que todo empezó aquí: dos personas, una visión y la determinación de convertir lo imposible en inevitable.</p>
+          </aside>
+          <div class="home-menu-wrap">
+            <div class="home-menu-label">Menú</div>
+            <div class="hub-grid" id="hubGrid">
+              <button type="button" class="hub-card" data-module="projects" data-index="01">
+                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/></svg></span>
+                <h3>Proyectos</h3>
+                <p>Progreso, estado y archivo.</p>
+                <span class="hub-meta" data-hub-count="projects">—</span>
+              </button>
+              <button type="button" class="hub-card" data-module="calendario" data-index="02">
+                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+                <h3>Calendario</h3>
+                <p>Día, semana y mes.</p>
+                <span class="hub-meta" data-hub-count="calendario">—</span>
+              </button>
+              <button type="button" class="hub-card" data-module="pendientes" data-index="03">
+                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+                <h3>Tareas</h3>
+                <p>Por prioridad y estado.</p>
+                <span class="hub-meta" data-hub-count="pendientes">—</span>
+              </button>
+              <button type="button" class="hub-card" data-module="goals" data-index="04">
+                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>
+                <h3>Objetivos</h3>
+                <p>Corto, medio y largo plazo.</p>
+                <span class="hub-meta" data-hub-count="goals">—</span>
+              </button>
+              <button type="button" class="hub-card" data-module="ideas" data-index="05">
+                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c.6.6 1 1.4 1 2.2V17h6v-.8c0-.8.4-1.6 1-2.2A7 7 0 0 0 12 2z"/></svg></span>
+                <h3>Ideas</h3>
+                <p>Captura rápida con etiquetas.</p>
+                <span class="hub-meta" data-hub-count="ideas">—</span>
+              </button>
+              <button type="button" class="hub-card" data-module="stats" data-index="06">
+                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V9"/><path d="M13 16V6"/><path d="M18 16v-4"/></svg></span>
+                <h3>Estadísticas</h3>
+                <p>Métricas y actividad.</p>
+                <span class="hub-meta" data-hub-count="stats">—</span>
+              </button>
+              <button type="button" class="hub-card" data-module="settings" data-index="07">
+                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.2.7.8 1.2 1.5 1.2H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+                <h3>Configuración</h3>
+                <p>Tema, cuenta y sync.</p>
+                <span class="hub-meta">Cuenta</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="hub-carousel">
-        <div class="hub-grid" id="hubGrid">
-          <button type="button" class="hub-card" data-module="projects" data-index="01">
-            <div class="hub-card-top">
-              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/></svg></span>
-              <span class="hub-meta" data-hub-count="projects">—</span>
-            </div>
-            <h3>Proyectos</h3>
-            <p>Progreso, estado y archivo. Todo el trabajo vivo en un solo sitio.</p>
-            <span class="hub-card-go">Abrir →</span>
-          </button>
-          <button type="button" class="hub-card" data-module="calendario" data-index="02">
-            <div class="hub-card-top">
-              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
-              <span class="hub-meta" data-hub-count="calendario">—</span>
-            </div>
-            <h3>Calendario</h3>
-            <p>Día, semana y mes con lo que marca la agenda.</p>
-            <span class="hub-card-go">Abrir →</span>
-          </button>
-          <button type="button" class="hub-card" data-module="pendientes" data-index="03">
-            <div class="hub-card-top">
-              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
-              <span class="hub-meta" data-hub-count="pendientes">—</span>
-            </div>
-            <h3>Tareas</h3>
-            <p>Prioridad Eisenhower: pendientes, en curso y hechas.</p>
-            <span class="hub-card-go">Abrir →</span>
-          </button>
-          <button type="button" class="hub-card" data-module="goals" data-index="04">
-            <div class="hub-card-top">
-              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>
-              <span class="hub-meta" data-hub-count="goals">—</span>
-            </div>
-            <h3>Objetivos</h3>
-            <p>Corto, medio y largo plazo con progreso visible.</p>
-            <span class="hub-card-go">Abrir →</span>
-          </button>
-          <button type="button" class="hub-card" data-module="ideas" data-index="05">
-            <div class="hub-card-top">
-              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c.6.6 1 1.4 1 2.2V17h6v-.8c0-.8.4-1.6 1-2.2A7 7 0 0 0 12 2z"/></svg></span>
-              <span class="hub-meta" data-hub-count="ideas">—</span>
-            </div>
-            <h3>Ideas</h3>
-            <p>Captura rápida y etiquetas para no perder el hilo.</p>
-            <span class="hub-card-go">Abrir →</span>
-          </button>
-          <button type="button" class="hub-card" data-module="stats" data-index="06">
-            <div class="hub-card-top">
-              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V9"/><path d="M13 16V6"/><path d="M18 16v-4"/></svg></span>
-              <span class="hub-meta" data-hub-count="stats">—</span>
-            </div>
-            <h3>Estadísticas</h3>
-            <p>Métricas, semana y actividad reciente.</p>
-            <span class="hub-card-go">Abrir →</span>
-          </button>
-          <button type="button" class="hub-card" data-module="settings" data-index="07">
-            <div class="hub-card-top">
-              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.2.7.8 1.2 1.5 1.2H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
-              <span class="hub-meta">Cuenta</span>
-            </div>
-            <h3>Configuración</h3>
-            <p>Tema, cuenta y sincronización.</p>
-            <span class="hub-card-go">Abrir →</span>
-          </button>
-        </div>
-        </div>
-        <div class="hub-dots" id="hubDots" aria-label="Posición del carrusel"></div>
       </section>
 
       <!-- MODULES -->
@@ -3790,7 +3624,7 @@
       paintWho();
       updatePersonFilterUI();
       renderAll();
-      showView("welcome");
+      showView("hub");
       logActivity("entrada", "Ha entrado al tablero");
       scheduleSave(false);
       startPolling();
@@ -3834,7 +3668,7 @@
     }
 
     /* ——— Hub navigation ——— */
-    let appView = "welcome";
+    let appView = "hub";
     let currentModule = null;
     let areaFilter = "";
     let projectArchFilter = "active";
@@ -3859,7 +3693,6 @@
       appView = view;
       currentModule = moduleId || null;
       document.body.dataset.appView = view === "module" ? "module" : view;
-      document.getElementById("welcome")?.classList.toggle("active", view === "welcome");
       document.getElementById("hub")?.classList.toggle("active", view === "hub");
       document.getElementById("modules")?.classList.toggle("active", view === "module");
       document.querySelectorAll("#modules .panel").forEach((p) => p.classList.remove("active"));
@@ -3873,9 +3706,6 @@
         renderModule(moduleId);
       } else if (view === "hub") {
         paintHubCounts();
-        requestAnimationFrame(() => {
-          if (typeof syncHubCarousel === "function") syncHubCarousel();
-        });
       }
     }
 
@@ -3982,82 +3812,14 @@
       input?.focus();
     });
 
-    document.getElementById("btnEnterHub")?.addEventListener("click", () => {
-      showView("hub");
-      requestAnimationFrame(() => syncHubCarousel());
-    });
-    document.getElementById("btnHome")?.addEventListener("click", () => {
-      showView("hub");
-      requestAnimationFrame(() => syncHubCarousel());
-    });
+    document.getElementById("btnHome")?.addEventListener("click", () => showView("hub"));
     document.getElementById("hubGrid")?.addEventListener("click", (e) => {
       const card = e.target.closest("[data-module]");
       if (!card) return;
       openModule(card.dataset.module);
     });
 
-    (function setupHubCarousel() {
-      const track = document.getElementById("hubGrid");
-      const prev = document.getElementById("hubPrev");
-      const next = document.getElementById("hubNext");
-      const dotsRoot = document.getElementById("hubDots");
-      if (!track || !prev || !next || !dotsRoot) return;
-
-      const cards = () => [...track.querySelectorAll(".hub-card")];
-
-      function buildDots() {
-        dotsRoot.innerHTML = cards().map((_, i) =>
-          `<button type="button" data-hub-dot="${i}" aria-label="Ir a tarjeta ${i + 1}"></button>`
-        ).join("");
-      }
-
-      function nearestIndex() {
-        const list = cards();
-        if (!list.length) return 0;
-        const mid = track.scrollLeft + track.clientWidth / 2;
-        let best = 0;
-        let bestDist = Infinity;
-        list.forEach((card, i) => {
-          const center = card.offsetLeft + card.offsetWidth / 2;
-          const dist = Math.abs(center - mid);
-          if (dist < bestDist) { bestDist = dist; best = i; }
-        });
-        return best;
-      }
-
-      window.syncHubCarousel = function syncHubCarousel() {
-        const list = cards();
-        const idx = nearestIndex();
-        list.forEach((c, i) => c.classList.toggle("is-active", i === idx));
-        dotsRoot.querySelectorAll("button").forEach((d, i) => d.classList.toggle("active", i === idx));
-        prev.disabled = track.scrollLeft <= 4;
-        next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
-      };
-
-      function scrollByCard(dir) {
-        const list = cards();
-        if (!list.length) return;
-        const idx = Math.max(0, Math.min(list.length - 1, nearestIndex() + dir));
-        list[idx].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-      }
-
-      buildDots();
-      prev.addEventListener("click", () => scrollByCard(-1));
-      next.addEventListener("click", () => scrollByCard(1));
-      dotsRoot.addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-hub-dot]");
-        if (!btn) return;
-        const list = cards();
-        const i = Number(btn.dataset.hubDot);
-        list[i]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-      });
-      track.addEventListener("scroll", () => {
-        window.clearTimeout(track._hubScrollT);
-        track._hubScrollT = window.setTimeout(() => syncHubCarousel(), 60);
-      }, { passive: true });
-      window.addEventListener("resize", () => syncHubCarousel());
-      syncHubCarousel();
-    })();
+    
 
     /* ——— Render ——— */
     function findTask(taskId) {
