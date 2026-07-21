@@ -2332,7 +2332,11 @@
     }
     #hub.app-view.active { padding-bottom: 2.5rem; }
     .hub-head {
-      margin: 0.15rem 0 1.35rem;
+      margin: 0.15rem 0 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
     }
     .hub-head h2 {
       font-family: var(--font-display);
@@ -2341,47 +2345,80 @@
       letter-spacing: -0.03em;
       margin-bottom: 0;
     }
-    .hub-head p {
-      color: var(--text-soft);
-      font-size: 0.92rem;
-      max-width: 36rem;
+    .hub-carousel-nav {
+      display: flex;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+    .hub-carousel-nav button {
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 999px;
+      border: 1.5px solid var(--line-strong);
+      background: var(--bg-elev);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      font-size: 1.25rem;
+      line-height: 1;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.16);
+      transition: transform 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .hub-carousel-nav button:hover {
+      border-color: var(--gold);
+      color: var(--gold-bright);
+      transform: translateY(-1px);
+    }
+    .hub-carousel-nav button:disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .hub-carousel {
+      position: relative;
+      margin: 0 -0.15rem;
+    }
+    .hub-carousel::before,
+    .hub-carousel::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0.85rem;
+      width: 2.5rem;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .hub-carousel::before {
+      left: 0;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--plum-1, #120b18) 88%, transparent), transparent);
+    }
+    .hub-carousel::after {
+      right: 0;
+      background: linear-gradient(270deg, color-mix(in srgb, var(--plum-1, #120b18) 88%, transparent), transparent);
+    }
+    [data-theme="light"] .hub-carousel::before {
+      background: linear-gradient(90deg, color-mix(in srgb, var(--plum-1, #ddd6d4) 92%, transparent), transparent);
+    }
+    [data-theme="light"] .hub-carousel::after {
+      background: linear-gradient(270deg, color-mix(in srgb, var(--plum-1, #ddd6d4) 92%, transparent), transparent);
     }
     .hub-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-      grid-auto-flow: dense;
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      padding: 0.35rem 0.35rem 1.1rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
-    @media (min-width: 720px) {
-      .hub-grid {
-        grid-template-columns: repeat(6, 1fr);
-        gap: 0.85rem;
-      }
-      .hub-card[data-module="projects"] { grid-column: span 4; min-height: 200px; }
-      .hub-card[data-module="calendario"] { grid-column: span 2; min-height: 200px; }
-      .hub-card[data-module="pendientes"] { grid-column: span 3; min-height: 168px; }
-      .hub-card[data-module="goals"] { grid-column: span 3; min-height: 168px; }
-      .hub-card[data-module="ideas"] { grid-column: span 2; }
-      .hub-card[data-module="stats"] { grid-column: span 2; }
-      .hub-card[data-module="settings"] { grid-column: span 2; }
-    }
-    @media (min-width: 1100px) {
-      .hub-grid { gap: 1rem; }
-      .hub-card[data-module="projects"] { grid-column: span 3; min-height: 220px; }
-      .hub-card[data-module="calendario"] { grid-column: span 3; min-height: 220px; }
-      .hub-card[data-module="pendientes"] { grid-column: span 2; min-height: 180px; }
-      .hub-card[data-module="goals"] { grid-column: span 2; min-height: 180px; }
-      .hub-card[data-module="ideas"] { grid-column: span 2; min-height: 180px; }
-      .hub-card[data-module="stats"] { grid-column: span 3; }
-      .hub-card[data-module="settings"] { grid-column: span 3; }
-    }
+    .hub-grid::-webkit-scrollbar { display: none; }
     .hub-card {
       --hub-accent: rgba(200, 210, 220, 0.55);
       position: relative;
       overflow: hidden;
       text-align: left;
-      padding: 1.35rem 1.3rem 1.2rem;
-      border-radius: 22px;
+      padding: 1.45rem 1.35rem 1.25rem;
+      border-radius: 24px;
       border: 1px solid var(--line);
       background:
         linear-gradient(145deg, rgba(255,255,255,0.05), transparent 42%),
@@ -2390,12 +2427,23 @@
       box-shadow: var(--shadow-card);
       color: inherit;
       transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-      min-height: 142px;
+      min-height: 250px;
+      width: min(78vw, 300px);
+      flex: 0 0 min(78vw, 300px);
+      scroll-snap-align: center;
       display: flex;
       flex-direction: column;
       gap: 0.55rem;
       cursor: pointer;
       isolation: isolate;
+    }
+    @media (min-width: 720px) {
+      .hub-card {
+        width: 320px;
+        flex-basis: 320px;
+        min-height: 270px;
+        scroll-snap-align: start;
+      }
     }
     .hub-card::before {
       content: "";
@@ -2414,12 +2462,12 @@
       right: 0.55rem;
       bottom: -0.15rem;
       font-family: var(--font-display);
-      font-size: clamp(3.5rem, 8vw, 5.5rem);
+      font-size: clamp(3.8rem, 9vw, 5.8rem);
       font-weight: 700;
       letter-spacing: -0.06em;
       line-height: 0.85;
       color: var(--text);
-      opacity: 0.045;
+      opacity: 0.05;
       pointer-events: none;
       z-index: 0;
       transition: opacity 0.25s ease, transform 0.25s ease;
@@ -2433,14 +2481,18 @@
     .hub-card[data-module="stats"] { --hub-accent: #a8b8c8; }
     .hub-card[data-module="settings"] { --hub-accent: #b0a8b0; }
     .hub-card:hover, .hub-card:focus-visible {
-      transform: translateY(-4px) scale(1.01);
+      transform: translateY(-4px) scale(1.015);
       border-color: rgba(230, 236, 242, 0.35);
       box-shadow: var(--shadow-card), 0 18px 40px rgba(0,0,0,0.28);
       outline: none;
     }
     .hub-card:hover::after, .hub-card:focus-visible::after {
-      opacity: 0.09;
+      opacity: 0.1;
       transform: translate(-4px, -6px);
+    }
+    .hub-card.is-active {
+      border-color: rgba(230, 236, 242, 0.42);
+      box-shadow: var(--shadow-card), 0 0 0 1px rgba(210,220,230,0.12), 0 20px 44px rgba(0,0,0,0.3);
     }
     .hub-card-top {
       display: flex;
@@ -2482,14 +2534,14 @@
     }
     .hub-card h3 {
       font-family: var(--font-display);
-      font-size: clamp(1.2rem, 2vw, 1.45rem);
+      font-size: clamp(1.25rem, 2vw, 1.5rem);
       font-weight: 700;
       letter-spacing: -0.025em;
       margin-top: 0.15rem;
     }
     .hub-card p {
       color: var(--muted);
-      font-size: 0.86rem;
+      font-size: 0.88rem;
       line-height: 1.45;
       flex: 1;
       max-width: 28rem;
@@ -2512,6 +2564,27 @@
       gap: 0.55rem;
       color: var(--gold-bright);
     }
+    .hub-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-top: 0.15rem;
+    }
+    .hub-dots button {
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 999px;
+      border: none;
+      background: var(--muted);
+      opacity: 0.35;
+      padding: 0;
+      transition: width 0.2s, opacity 0.2s, background 0.2s;
+    }
+    .hub-dots button.active {
+      width: 1.35rem;
+      opacity: 1;
+      background: var(--gold-bright);
+    }
     [data-theme="light"] .hub-card {
       background:
         linear-gradient(145deg, rgba(255,255,255,0.55), transparent 48%),
@@ -2519,6 +2592,10 @@
     }
     [data-theme="light"] .hub-card::after { opacity: 0.06; color: #1c161a; }
     [data-theme="light"] .hub-card:hover::after { opacity: 0.1; }
+    [data-theme="light"] .hub-carousel-nav button {
+      background: rgba(248, 244, 242, 0.96);
+      color: #1c161a;
+    }
     .module-chrome {
       display: flex;
       align-items: center;
@@ -2740,7 +2817,12 @@
       <section id="hub" class="app-view" aria-label="Panel principal">
         <div class="hub-head">
           <h2>Centro de control</h2>
+          <div class="hub-carousel-nav">
+            <button type="button" id="hubPrev" aria-label="Anterior">‹</button>
+            <button type="button" id="hubNext" aria-label="Siguiente">›</button>
+          </div>
         </div>
+        <div class="hub-carousel">
         <div class="hub-grid" id="hubGrid">
           <button type="button" class="hub-card" data-module="projects" data-index="01">
             <div class="hub-card-top">
@@ -2806,6 +2888,8 @@
             <span class="hub-card-go">Abrir →</span>
           </button>
         </div>
+        </div>
+        <div class="hub-dots" id="hubDots" aria-label="Posición del carrusel"></div>
       </section>
 
       <!-- MODULES -->
@@ -3774,6 +3858,9 @@
         renderModule(moduleId);
       } else if (view === "hub") {
         paintHubCounts();
+        requestAnimationFrame(() => {
+          if (typeof syncHubCarousel === "function") syncHubCarousel();
+        });
       }
     }
 
@@ -3880,13 +3967,82 @@
       input?.focus();
     });
 
-    document.getElementById("btnEnterHub")?.addEventListener("click", () => showView("hub"));
-    document.getElementById("btnHome")?.addEventListener("click", () => showView("hub"));
+    document.getElementById("btnEnterHub")?.addEventListener("click", () => {
+      showView("hub");
+      requestAnimationFrame(() => syncHubCarousel());
+    });
+    document.getElementById("btnHome")?.addEventListener("click", () => {
+      showView("hub");
+      requestAnimationFrame(() => syncHubCarousel());
+    });
     document.getElementById("hubGrid")?.addEventListener("click", (e) => {
       const card = e.target.closest("[data-module]");
       if (!card) return;
       openModule(card.dataset.module);
     });
+
+    (function setupHubCarousel() {
+      const track = document.getElementById("hubGrid");
+      const prev = document.getElementById("hubPrev");
+      const next = document.getElementById("hubNext");
+      const dotsRoot = document.getElementById("hubDots");
+      if (!track || !prev || !next || !dotsRoot) return;
+
+      const cards = () => [...track.querySelectorAll(".hub-card")];
+
+      function buildDots() {
+        dotsRoot.innerHTML = cards().map((_, i) =>
+          `<button type="button" data-hub-dot="${i}" aria-label="Ir a tarjeta ${i + 1}"></button>`
+        ).join("");
+      }
+
+      function nearestIndex() {
+        const list = cards();
+        if (!list.length) return 0;
+        const mid = track.scrollLeft + track.clientWidth / 2;
+        let best = 0;
+        let bestDist = Infinity;
+        list.forEach((card, i) => {
+          const center = card.offsetLeft + card.offsetWidth / 2;
+          const dist = Math.abs(center - mid);
+          if (dist < bestDist) { bestDist = dist; best = i; }
+        });
+        return best;
+      }
+
+      window.syncHubCarousel = function syncHubCarousel() {
+        const list = cards();
+        const idx = nearestIndex();
+        list.forEach((c, i) => c.classList.toggle("is-active", i === idx));
+        dotsRoot.querySelectorAll("button").forEach((d, i) => d.classList.toggle("active", i === idx));
+        prev.disabled = track.scrollLeft <= 4;
+        next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+      };
+
+      function scrollByCard(dir) {
+        const list = cards();
+        if (!list.length) return;
+        const idx = Math.max(0, Math.min(list.length - 1, nearestIndex() + dir));
+        list[idx].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+
+      buildDots();
+      prev.addEventListener("click", () => scrollByCard(-1));
+      next.addEventListener("click", () => scrollByCard(1));
+      dotsRoot.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-hub-dot]");
+        if (!btn) return;
+        const list = cards();
+        const i = Number(btn.dataset.hubDot);
+        list[i]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      });
+      track.addEventListener("scroll", () => {
+        window.clearTimeout(track._hubScrollT);
+        track._hubScrollT = window.setTimeout(() => syncHubCarousel(), 60);
+      }, { passive: true });
+      window.addEventListener("resize", () => syncHubCarousel());
+      syncHubCarousel();
+    })();
 
     /* ——— Render ——— */
     function findTask(taskId) {
