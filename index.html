@@ -3846,12 +3846,6 @@
         <section class="panel" id="panel-calendario">
           <div id="calOverdue" class="cal-overdue-box" hidden></div>
           <div class="cal-filters" id="calFilters">
-            <span class="lbl">Ver</span>
-            <div class="cal-person-inline" id="calPersonFilter">
-              <button type="button" data-cal-person="" class="active">Los dos</button>
-              <button type="button" data-cal-person="carmen">Carmen</button>
-              <button type="button" data-cal-person="edgar">Edgar</button>
-            </div>
             <span class="lbl">Proyecto</span>
             <select id="calProjectFilter" aria-label="Filtrar por proyecto"></select>
             <span class="lbl">Área</span>
@@ -6132,9 +6126,6 @@
       }
       const prio = document.getElementById("calPrioFilter");
       if (prio) prio.value = calPrioFilter;
-      document.querySelectorAll("#calPersonFilter [data-cal-person]").forEach((b) => {
-        b.classList.toggle("active", (b.dataset.calPerson || "") === personFilter);
-      });
     }
 
     function renderCalOverdue() {
@@ -6568,13 +6559,6 @@
     document.getElementById("calPrioFilter")?.addEventListener("change", (e) => {
       calPrioFilter = e.target.value || "";
       renderCalendario();
-    });
-    document.getElementById("calPersonFilter")?.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-cal-person]");
-      if (!btn) return;
-      personFilter = btn.dataset.calPerson || "";
-      updatePersonFilterUI();
-      renderAll();
     });
 
     function bindWeekSummaryField(id) {
