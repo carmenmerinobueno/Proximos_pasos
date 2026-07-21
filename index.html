@@ -3515,15 +3515,28 @@
         padding: 0.5rem;
         padding-bottom: calc(0.5rem + var(--safe-b));
       }
-      /* iOS Safari: blur masivo = cuelgues al cambiar de pestaña */
+      /* iOS Safari: blur/animaciones = crash al cambiar de pestaña */
       .side-nav, .topbar, .kpi, .prio-item, .card, .modal, .cal-shell,
       .settings-tile, .settings-export, .goal-item, .idea-capture, .idea-card,
-      .diario-feel, .diario-tasks, .user-card, .account-chip, .nav-btn {
+      .diario-feel, .diario-tasks, .user-card, .account-chip, .nav-btn,
+      .fab-bar, .module-chrome, .home-quote {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
       }
-      .panel { animation: none !important; }
-      .idea-capture-bulb { animation: none !important; }
+      .side-nav {
+        background: var(--bg-card) !important;
+      }
+      .app-view, .panel, .proj-detail-view, .task-note.open {
+        animation: none !important;
+      }
+      .idea-capture-bulb,
+      .cal-overdue-item,
+      .cal-chip.late {
+        animation: none !important;
+      }
+      * {
+        scroll-behavior: auto !important;
+      }
     }
 
     .module-chrome {
@@ -6588,11 +6601,13 @@
     function startPolling() {
       stopPolling();
       if (!isCloudId(spaceId)) return;
+      const interval = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 45000 : 15000;
       pollTimer = setInterval(async () => {
+        if (document.hidden) return;
         const before = state?.updatedAt || 0;
         await pullCloud();
         if ((state?.updatedAt || 0) > before) renderAll();
-      }, 15000);
+      }, interval);
     }
     function stopPolling() {
       if (pollTimer) clearInterval(pollTimer);
@@ -6601,6 +6616,7 @@
     /* ——— Hub navigation ——— */
     let appView = "hub";
     let currentModule = null;
+    let navRenderToken = 0;
     let areaFilter = "";
     let projectArchFilter = "active";
     let selectedProjectId = null;
@@ -6631,32 +6647,87 @@
       });
     }
 
+    function releaseInactivePanels(activeModule) {
+      /* Liberar DOM pesado de secciones ocultas (Safari iOS se queda sin memoria). */
+      try {
+        if (activeModule !== "calendario") {
+          const shell = document.getElementById("calShell");
+          if (shell) shell.innerHTML = "";
+          const overdue = document.getElementById("calOverdue");
+          if (overdue) { overdue.innerHTML = ""; overdue.hidden = true; }
+        }
+        if (activeModule !== "pendientes") {
+          const list = document.getElementById("prioList");
+          if (list) list.innerHTML = "";
+          const kpi = document.getElementById("kpiGrid");
+          if (kpi) kpi.innerHTML = "";
+        }
+        if (activeModule !== "ideas") {
+          const ideas = document.getElementById("ideaList");
+          if (ideas) ideas.innerHTML = "";
+        }
+        if (activeModule !== "goals") {
+          const goals = document.getElementById("goalList");
+          if (goals) goals.innerHTML = "";
+        }
+        if (activeModule !== "diario") {
+          flushDiarioFeel();
+          const diario = document.getElementById("diarioRoot");
+          if (diario && !diario.querySelector("#diarioFeel:focus")) diario.innerHTML = "";
+        }
+        if (activeModule !== "projects") {
+          const grid = document.getElementById("projectsGrid");
+          if (grid) grid.innerHTML = "";
+          const detail = document.getElementById("projectDetailRoot");
+          if (detail) detail.innerHTML = "";
+        }
+      } catch (_) {}
+    }
+
     function showView(view, moduleId) {
       try {
+        const nextModule = view === "module" ? (moduleId || null) : null;
+        /* Evitar re-render completo si ya estás en esa pestaña. */
+        if (view === appView && nextModule === currentModule && view === "module") {
+          paintSideNavActive();
+          return;
+        }
         appView = view;
-        currentModule = moduleId || null;
+        currentModule = nextModule;
         document.body.dataset.appView = view === "module" ? "module" : view;
-        document.body.dataset.module = view === "module" && moduleId ? moduleId : "";
+        document.body.dataset.module = nextModule || "";
         document.getElementById("hub")?.classList.toggle("active", view === "hub");
         document.getElementById("modules")?.classList.toggle("active", view === "module");
         document.querySelectorAll("#modules .panel").forEach((p) => p.classList.remove("active"));
-        if (view === "module" && moduleId && MODULE_META[moduleId]) {
-          const meta = MODULE_META[moduleId];
+        paintSideNavActive();
+        paintFab();
+
+        if (view === "module" && nextModule && MODULE_META[nextModule]) {
+          const meta = MODULE_META[nextModule];
           document.getElementById(meta.panel)?.classList.add("active");
           const title = document.getElementById("moduleTitle");
           if (title) {
-            title.textContent = (moduleId === "projects" && selectedProjectId)
+            title.textContent = (nextModule === "projects" && selectedProjectId)
               ? (state?.projects?.find((x) => x.id === selectedProjectId)?.title || meta.title)
               : meta.title;
           }
-          paintModuleActions(moduleId);
           updatePersonFilterUI();
-          renderModule(moduleId);
+          paintModuleActions(nextModule);
+          releaseInactivePanels(nextModule);
+          const token = ++navRenderToken;
+          requestAnimationFrame(() => {
+            if (token !== navRenderToken) return;
+            try {
+              renderModule(nextModule);
+            } catch (err) {
+              console.error("showView render", err);
+              toast("No se pudo abrir esa sección");
+            }
+          });
         } else if (view === "hub") {
+          releaseInactivePanels(null);
           paintHubCounts();
         }
-        paintSideNavActive();
-        paintFab();
       } catch (err) {
         console.error("showView", err);
         toast("No se pudo abrir esa sección");
@@ -6887,12 +6958,11 @@
         if (tag === "INPUT" || tag === "TEXTAREA" || document.activeElement?.isContentEditable) return;
         const dirty = syncAllSchedulePriorities();
         if (dirty) scheduleSave(true);
-        if (appView === "module" && (currentModule === "calendario" || currentModule === "pendientes" || currentModule === "projects")) {
-          renderPendientes();
-          renderCalendario();
-          if (currentModule === "projects") renderProjects();
-          paintHubCounts();
-        }
+        if (appView !== "module" || !currentModule) return;
+        if (currentModule === "calendario") renderCalendario();
+        else if (currentModule === "pendientes") renderPendientes();
+        else if (currentModule === "projects") renderProjects();
+        paintHubCounts();
       }, 60000);
     }
 
