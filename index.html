@@ -2294,188 +2294,193 @@
       }
     }
 
-    /* --- HOME (quote + fixed menu) --- */
+    /* --- APP SIDEBAR + HOME QUOTE --- */
     .app-view { display: none; animation: rise 0.45s ease both; }
     .app-view.active { display: block; }
-    body[data-app-view="hub"] .wrap {
-      width: min(1200px, calc(100% - 1.5rem));
-      padding-top: 0.35rem;
-      padding-bottom: 1.25rem;
-      min-height: calc(100dvh - 5rem - var(--safe-t));
+    .app-body {
+      display: flex;
+      align-items: stretch;
+      min-height: calc(100dvh - 4.6rem - var(--safe-t));
+    }
+    .side-nav {
+      position: fixed;
+      top: calc(4.6rem + var(--safe-t));
+      left: 0;
+      bottom: 0;
+      width: 12.75rem;
+      z-index: 28;
       display: flex;
       flex-direction: column;
-    }
-    #hub.app-view.active {
-      display: flex;
-      flex: 1;
-      align-items: center;
-      min-height: calc(100dvh - 5.4rem - var(--safe-t) - var(--safe-b));
-      padding: 0.5rem 0 1rem;
+      gap: 0.2rem;
+      padding: 0.85rem 0.65rem calc(1rem + var(--safe-b));
+      border-right: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+      backdrop-filter: blur(18px) saturate(1.15);
+      -webkit-backdrop-filter: blur(18px) saturate(1.15);
+      overflow-y: auto;
       box-sizing: border-box;
     }
-    .home-split {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.75rem;
-      align-items: center;
+    [data-theme="light"] .side-nav {
+      background: color-mix(in srgb, rgba(246, 241, 238, 0.94) 92%, transparent);
     }
-    @media (min-width: 900px) {
-      .home-split {
-        grid-template-columns: minmax(280px, 0.95fr) minmax(340px, 1.15fr);
-        gap: 2.75rem;
-        align-items: center;
-      }
-    }
-    .home-quote {
-      text-align: left;
-      max-width: 34rem;
-    }
-    .home-quote .welcome-kicker {
-      font-family: var(--font-display);
-      font-size: clamp(0.85rem, 1.8vw, 1rem);
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--text-soft);
-      font-weight: 700;
-      margin-bottom: 1.25rem;
-    }
-    .home-quote .welcome-quote {
-      font-family: "Cormorant Garamond", "Times New Roman", serif;
-      font-size: clamp(1.35rem, 2.6vw, 1.85rem);
-      font-weight: 500;
-      font-style: italic;
-      line-height: 1.45;
-      color: var(--text);
-      letter-spacing: 0.01em;
-      margin: 0;
-    }
-    .home-menu-wrap { width: 100%; }
-    .home-menu-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
+    .side-nav-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--muted);
       font-weight: 700;
-      margin-bottom: 0.85rem;
+      padding: 0.15rem 0.55rem 0.55rem;
     }
-    .hub-grid {
+    .side-nav-list {
       display: flex;
       flex-direction: column;
-      gap: 0.55rem;
-      overflow: visible;
-      padding: 0;
+      gap: 0.2rem;
     }
-    .hub-card {
+    .side-link {
       --hub-accent: rgba(200, 210, 220, 0.55);
-      position: relative;
-      overflow: hidden;
-      text-align: left;
-      padding: 0.95rem 1.05rem;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background:
-        linear-gradient(120deg, rgba(255,255,255,0.04), transparent 45%),
-        var(--bg-card);
-      backdrop-filter: blur(16px);
-      box-shadow: var(--shadow-card);
-      color: inherit;
-      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-      width: 100%;
+      appearance: none;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-soft);
+      border-radius: 12px;
+      padding: 0.55rem 0.55rem;
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      grid-template-rows: auto auto;
-      column-gap: 0.85rem;
-      row-gap: 0.2rem;
+      grid-template-columns: 28px 1fr auto;
       align-items: center;
+      gap: 0.45rem;
+      text-align: left;
       cursor: pointer;
-      isolation: isolate;
+      width: 100%;
       box-sizing: border-box;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     }
-    .hub-card::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 20%;
-      bottom: 20%;
-      width: 3px;
-      border-radius: 0 4px 4px 0;
-      background: linear-gradient(180deg, transparent, var(--hub-accent), transparent);
-    }
-    .hub-card::after { display: none; }
-    .hub-card[data-module="projects"] { --hub-accent: #d8dee6; }
-    .hub-card[data-module="calendario"] { --hub-accent: #b8c0c8; }
-    .hub-card[data-module="pendientes"] { --hub-accent: #c5d4c8; }
-    .hub-card[data-module="goals"] { --hub-accent: #d0c4c8; }
-    .hub-card[data-module="ideas"] { --hub-accent: #c8c0d0; }
-    .hub-card[data-module="stats"] { --hub-accent: #a8b8c8; }
-    .hub-card[data-module="settings"] { --hub-accent: #b0a8b0; }
-    .hub-card:hover, .hub-card:focus-visible {
-      transform: translateX(4px);
-      border-color: rgba(230, 236, 242, 0.35);
-      box-shadow: var(--shadow-card), 0 12px 28px rgba(0,0,0,0.22);
+    .side-link:hover, .side-link:focus-visible {
+      background: var(--bg-soft);
+      border-color: var(--line);
+      color: var(--text);
       outline: none;
     }
-    .hub-card-icon {
-      grid-row: 1 / span 2;
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
+    .side-link.active {
       background: var(--bg-soft);
+      border-color: var(--line-strong);
+      color: var(--text);
+      box-shadow: inset 3px 0 0 var(--hub-accent);
+    }
+    .side-link[data-module="projects"] { --hub-accent: #d8dee6; }
+    .side-link[data-module="calendario"] { --hub-accent: #b8c0c8; }
+    .side-link[data-module="pendientes"] { --hub-accent: #c5d4c8; }
+    .side-link[data-module="goals"] { --hub-accent: #d0c4c8; }
+    .side-link[data-module="ideas"] { --hub-accent: #c8c0d0; }
+    .side-link[data-module="stats"] { --hub-accent: #a8b8c8; }
+    .side-link[data-module="settings"] { --hub-accent: #b0a8b0; }
+    .side-link-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
       display: grid;
       place-items: center;
       color: var(--gold-bright);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
     }
-    .hub-card-icon svg {
-      width: 20px;
-      height: 20px;
+    .side-link-icon svg {
+      width: 15px;
+      height: 15px;
       stroke: currentColor;
       fill: none;
       stroke-width: 1.9;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
-    .hub-card h3 {
-      grid-column: 2;
+    .side-link-text {
       font-family: var(--font-display);
-      font-size: 1.02rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0;
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      min-width: 0;
     }
-    .hub-card p {
-      grid-column: 2;
+    .side-link-count {
+      font-size: 0.58rem;
+      letter-spacing: 0.04em;
       color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.35;
-      margin: 0;
-      max-width: none;
+      font-weight: 600;
+      max-width: 3.6rem;
+      text-align: right;
+      line-height: 1.2;
     }
-    .hub-card .hub-meta {
-      grid-column: 3;
-      grid-row: 1 / span 2;
-      align-self: center;
-      font-size: 0.62rem;
-      letter-spacing: 0.1em;
+    .app-body > .wrap {
+      flex: 1;
+      width: auto;
+      max-width: none;
+      margin: 0 0 0 12.75rem;
+      padding-left: max(1rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1rem, env(safe-area-inset-right, 0px));
+      box-sizing: border-box;
+    }
+    body[data-app-view="hub"] .app-body > .wrap {
+      width: auto;
+      min-height: calc(100dvh - 4.6rem - var(--safe-t));
+      display: flex;
+      flex-direction: column;
+      padding-top: 0;
+      padding-bottom: 1rem;
+    }
+    #hub.app-view.active {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100dvh - 5.4rem - var(--safe-t) - var(--safe-b));
+      padding: 1.5rem 1rem;
+      box-sizing: border-box;
+    }
+    .home-quote {
+      text-align: center;
+      max-width: min(42rem, 92%);
+      margin: 0 auto;
+    }
+    .home-quote .welcome-kicker {
+      font-family: var(--font-display);
+      font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+      letter-spacing: 0.3em;
       text-transform: uppercase;
       color: var(--text-soft);
       font-weight: 700;
-      padding: 0.35rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      white-space: nowrap;
+      margin-bottom: 1.5rem;
     }
-    .hub-card-top, .hub-card-go { display: none !important; }
-    [data-theme="light"] .hub-card {
-      background:
-        linear-gradient(120deg, rgba(255,255,255,0.65), transparent 50%),
-        rgba(250, 246, 244, 0.94);
+    .home-quote .welcome-quote {
+      font-family: "Cormorant Garamond", "Times New Roman", serif;
+      font-size: clamp(1.85rem, 4.2vw, 2.85rem);
+      font-weight: 500;
+      font-style: italic;
+      line-height: 1.28;
+      color: var(--text);
+      letter-spacing: 0.01em;
+      margin: 0;
     }
-    @media (max-width: 899px) {
-      .home-quote { text-align: center; margin: 0 auto; }
-      .home-quote .welcome-quote { font-size: clamp(1.25rem, 4.5vw, 1.55rem); }
+    @media (max-width: 860px) {
+      .side-nav {
+        width: 4.35rem;
+        padding: 0.7rem 0.4rem calc(1rem + var(--safe-b));
+        align-items: center;
+      }
+      .side-nav-label { display: none; }
+      .side-link {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: 0.55rem 0.3rem;
+        gap: 0.25rem;
+      }
+      .side-link-text {
+        font-size: 0.58rem;
+        letter-spacing: 0;
+        text-align: center;
+        line-height: 1.1;
+      }
+      .side-link-count { display: none; }
+      .app-body > .wrap { margin-left: 4.35rem; }
+      .home-quote .welcome-quote { font-size: clamp(1.55rem, 6.5vw, 2.1rem); }
     }
 
     .module-chrome {
@@ -2592,6 +2597,15 @@
     #btnHome { display: none; }
     body[data-app-view="module"] #btnHome { display: inline-flex; }
     body[data-app-view="hub"] .fab-bar { display: none; }
+    body[data-app-view="module"] .app-body > .wrap {
+      width: min(1120px, calc(100% - 12.75rem - 1.5rem));
+      margin-right: auto;
+    }
+    @media (max-width: 860px) {
+      body[data-app-view="module"] .app-body > .wrap {
+        width: min(1120px, calc(100% - 4.35rem - 1rem));
+      }
+    }
     .stats-stack { display: grid; gap: 1.25rem; }
     .card.is-archived { opacity: 0.62; }
     .card-area-tag {
@@ -2683,61 +2697,59 @@
       </div>
     </header>
 
-    <div class="wrap">
-      <!-- HOME: quote + fixed menu (after login) -->
+    <div class="app-body">
+      <aside class="side-nav" aria-label="Menú principal">
+        <div class="side-nav-label">Menú</div>
+        <nav class="side-nav-list" id="hubGrid">
+          <button type="button" class="side-link active" data-nav="hub" title="Inicio">
+            <span class="side-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M7 10.5V20h10v-9.5"/></svg></span>
+            <span class="side-link-text">Inicio</span>
+            <span class="side-link-count"></span>
+          </button>
+          <button type="button" class="side-link" data-module="projects" title="Proyectos">
+            <span class="side-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/></svg></span>
+            <span class="side-link-text">Proyectos</span>
+            <span class="side-link-count" data-hub-count="projects">—</span>
+          </button>
+          <button type="button" class="side-link" data-module="calendario" title="Calendario">
+            <span class="side-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+            <span class="side-link-text">Calendario</span>
+            <span class="side-link-count" data-hub-count="calendario">—</span>
+          </button>
+          <button type="button" class="side-link" data-module="pendientes" title="Tareas">
+            <span class="side-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+            <span class="side-link-text">Tareas</span>
+            <span class="side-link-count" data-hub-count="pendientes">—</span>
+          </button>
+          <button type="button" class="side-link" data-module="goals" title="Objetivos">
+            <span class="side-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>
+            <span class="side-link-text">Objetivos</span>
+            <span class="side-link-count" data-hub-count="goals">—</span>
+          </button>
+          <button type="button" class="side-link" data-module="ideas" title="Ideas">
+            <span class="side-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c.6.6 1 1.4 1 2.2V17h6v-.8c0-.8.4-1.6 1-2.2A7 7 0 0 0 12 2z"/></svg></span>
+            <span class="side-link-text">Ideas</span>
+            <span class="side-link-count" data-hub-count="ideas">—</span>
+          </button>
+          <button type="button" class="side-link" data-module="stats" title="Estadísticas">
+            <span class="side-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V9"/><path d="M13 16V6"/><path d="M18 16v-4"/></svg></span>
+            <span class="side-link-text">Estadísticas</span>
+            <span class="side-link-count" data-hub-count="stats">—</span>
+          </button>
+          <button type="button" class="side-link" data-module="settings" title="Configuración">
+            <span class="side-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.2.7.8 1.2 1.5 1.2H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+            <span class="side-link-text">Ajustes</span>
+            <span class="side-link-count">·</span>
+          </button>
+        </nav>
+      </aside>
+
+      <div class="wrap">
+      <!-- HOME: centered quote -->
       <section id="hub" class="app-view active" aria-label="Inicio">
-        <div class="home-split">
-          <aside class="home-quote">
-            <div class="welcome-kicker">DHARMA SOLUTIONS</div>
-            <p class="welcome-quote">Algún día miraremos atrás y recordaremos que todo empezó aquí: dos personas, una visión y la determinación de convertir lo imposible en inevitable.</p>
-          </aside>
-          <div class="home-menu-wrap">
-            <div class="home-menu-label">Menú</div>
-            <div class="hub-grid" id="hubGrid">
-              <button type="button" class="hub-card" data-module="projects" data-index="01">
-                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/></svg></span>
-                <h3>Proyectos</h3>
-                <p>Progreso, estado y archivo.</p>
-                <span class="hub-meta" data-hub-count="projects">—</span>
-              </button>
-              <button type="button" class="hub-card" data-module="calendario" data-index="02">
-                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
-                <h3>Calendario</h3>
-                <p>Día, semana y mes.</p>
-                <span class="hub-meta" data-hub-count="calendario">—</span>
-              </button>
-              <button type="button" class="hub-card" data-module="pendientes" data-index="03">
-                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
-                <h3>Tareas</h3>
-                <p>Por prioridad y estado.</p>
-                <span class="hub-meta" data-hub-count="pendientes">—</span>
-              </button>
-              <button type="button" class="hub-card" data-module="goals" data-index="04">
-                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>
-                <h3>Objetivos</h3>
-                <p>Corto, medio y largo plazo.</p>
-                <span class="hub-meta" data-hub-count="goals">—</span>
-              </button>
-              <button type="button" class="hub-card" data-module="ideas" data-index="05">
-                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c.6.6 1 1.4 1 2.2V17h6v-.8c0-.8.4-1.6 1-2.2A7 7 0 0 0 12 2z"/></svg></span>
-                <h3>Ideas</h3>
-                <p>Captura rápida con etiquetas.</p>
-                <span class="hub-meta" data-hub-count="ideas">—</span>
-              </button>
-              <button type="button" class="hub-card" data-module="stats" data-index="06">
-                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V9"/><path d="M13 16V6"/><path d="M18 16v-4"/></svg></span>
-                <h3>Estadísticas</h3>
-                <p>Métricas y actividad.</p>
-                <span class="hub-meta" data-hub-count="stats">—</span>
-              </button>
-              <button type="button" class="hub-card" data-module="settings" data-index="07">
-                <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.2.7.8 1.2 1.5 1.2H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
-                <h3>Configuración</h3>
-                <p>Tema, cuenta y sync.</p>
-                <span class="hub-meta">Cuenta</span>
-              </button>
-            </div>
-          </div>
+        <div class="home-quote">
+          <div class="welcome-kicker">DHARMA SOLUTIONS</div>
+          <p class="welcome-quote">Algún día miraremos atrás y recordaremos que todo empezó aquí: dos personas, una visión y la determinación de convertir lo imposible en inevitable.</p>
         </div>
       </section>
 
@@ -2900,6 +2912,7 @@
           </div>
         </section>
       </section>
+    </div>
     </div>
 
     <div class="fab-bar">
@@ -3689,6 +3702,15 @@
     const MODULES_WITH_PERSON_FILTER = new Set(["pendientes","projects","stats","calendario"]);
     const MODULES_WITH_SEARCH = new Set(["pendientes","projects","stats","calendario"]);
 
+    function paintSideNavActive() {
+      document.querySelectorAll("#hubGrid .side-link").forEach((el) => {
+        const isHub = el.dataset.nav === "hub";
+        const mod = el.dataset.module;
+        const on = (appView === "hub" && isHub) || (appView === "module" && mod && mod === currentModule);
+        el.classList.toggle("active", !!on);
+      });
+    }
+
     function showView(view, moduleId) {
       appView = view;
       currentModule = moduleId || null;
@@ -3707,6 +3729,7 @@
       } else if (view === "hub") {
         paintHubCounts();
       }
+      paintSideNavActive();
     }
 
     function openModule(moduleId) {
@@ -3772,12 +3795,12 @@
         const el = document.querySelector(`[data-hub-count="${k}"]`);
         if (el) el.textContent = v;
       };
-      set("projects", `${activeProjects} activos`);
-      set("calendario", `${dated} con fecha`);
-      set("pendientes", `${openTasks} abiertas`);
-      set("goals", `${goalsOpen} en curso`);
-      set("ideas", `${ideasOpen} guardadas`);
-      set("stats", "Métricas y semana");
+      set("projects", String(activeProjects));
+      set("calendario", String(dated));
+      set("pendientes", String(openTasks));
+      set("goals", String(goalsOpen));
+      set("ideas", String(ideasOpen));
+      set("stats", "·");
     }
 
     function syncSharedSearchUI() {
@@ -3814,6 +3837,11 @@
 
     document.getElementById("btnHome")?.addEventListener("click", () => showView("hub"));
     document.getElementById("hubGrid")?.addEventListener("click", (e) => {
+      const home = e.target.closest("[data-nav='hub']");
+      if (home) {
+        showView("hub");
+        return;
+      }
       const card = e.target.closest("[data-module]");
       if (!card) return;
       openModule(card.dataset.module);
