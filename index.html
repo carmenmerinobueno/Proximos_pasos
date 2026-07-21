@@ -376,15 +376,28 @@
       background: linear-gradient(135deg, #f0f4f8, #8a929c);
       flex: 0 0 auto;
     }
-    .gate-seal {
-      font-size: 0.62rem;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: #a8b0b8;
-      font-weight: 500;
-      margin: -0.35rem auto 1.35rem;
+    .gate-quote {
+      max-width: min(34rem, 92%);
+      margin: -0.15rem auto 1.45rem;
+      text-align: center;
+      color: #c5ccd4;
+      font-weight: 400;
+      font-size: clamp(0.78rem, 1.55vw, 0.92rem);
+      line-height: 1.55;
+      letter-spacing: 0.02em;
     }
-    [data-theme="light"] .gate-seal { color: #6e636a; }
+    .gate-quote p { margin: 0; }
+    .gate-quote .gate-quote-punch {
+      display: block;
+      margin-top: 0.45rem;
+      font-size: 0.78em;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #e8eef4;
+    }
+    [data-theme="light"] .gate-quote { color: #4a4046; }
+    [data-theme="light"] .gate-quote .gate-quote-punch { color: #1c161a; }
     [data-theme="light"] .gate-ornament i {
       border-color: #5c555c;
       background: linear-gradient(135deg, #f5f1ef, #6e636a);
@@ -2275,7 +2288,11 @@
       </div>
       <h1>Tablero <em>de proyectos</em></h1>
       <div class="gate-ornament" aria-hidden="true"><i></i></div>
-      <div class="gate-seal">Carmen · Edgar</div>
+      <div class="gate-quote">
+        <p>No estamos sólo construyendo una empresa.</p>
+        <p>Estamos construyendo la libertad de decidir cómo vivir nuestra vida.</p>
+        <p class="gate-quote-punch">¡Cada día cuenta!</p>
+      </div>
       <div class="user-picks">
         <div class="user-card carmen" data-user="carmen" role="button" tabindex="0">
           <div class="photo"><img src="assets/carmen.jpg" alt="Carmen" /></div>
