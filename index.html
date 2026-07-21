@@ -2330,16 +2330,16 @@
     .welcome-cta {
       min-width: 200px;
     }
-    #hub.app-view.active { padding-bottom: 2rem; }
+    #hub.app-view.active { padding-bottom: 2.5rem; }
     .hub-head {
-      margin: 0.25rem 0 1.5rem;
+      margin: 0.15rem 0 1.35rem;
     }
     .hub-head h2 {
       font-family: var(--font-display);
-      font-size: clamp(1.35rem, 2.5vw, 1.75rem);
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.35rem;
+      font-size: clamp(1.45rem, 2.8vw, 1.95rem);
+      font-weight: 650;
+      letter-spacing: -0.03em;
+      margin-bottom: 0;
     }
     .hub-head p {
       color: var(--text-soft);
@@ -2349,74 +2349,176 @@
     .hub-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 0.85rem;
+      gap: 0.75rem;
+      grid-auto-flow: dense;
     }
-    @media (min-width: 640px) {
-      .hub-grid { grid-template-columns: 1fr 1fr; }
+    @media (min-width: 720px) {
+      .hub-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 0.85rem;
+      }
+      .hub-card[data-module="projects"] { grid-column: span 4; min-height: 200px; }
+      .hub-card[data-module="calendario"] { grid-column: span 2; min-height: 200px; }
+      .hub-card[data-module="pendientes"] { grid-column: span 3; min-height: 168px; }
+      .hub-card[data-module="goals"] { grid-column: span 3; min-height: 168px; }
+      .hub-card[data-module="ideas"] { grid-column: span 2; }
+      .hub-card[data-module="stats"] { grid-column: span 2; }
+      .hub-card[data-module="settings"] { grid-column: span 2; }
     }
-    @media (min-width: 980px) {
-      .hub-grid { grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    @media (min-width: 1100px) {
+      .hub-grid { gap: 1rem; }
+      .hub-card[data-module="projects"] { grid-column: span 3; min-height: 220px; }
+      .hub-card[data-module="calendario"] { grid-column: span 3; min-height: 220px; }
+      .hub-card[data-module="pendientes"] { grid-column: span 2; min-height: 180px; }
+      .hub-card[data-module="goals"] { grid-column: span 2; min-height: 180px; }
+      .hub-card[data-module="ideas"] { grid-column: span 2; min-height: 180px; }
+      .hub-card[data-module="stats"] { grid-column: span 3; }
+      .hub-card[data-module="settings"] { grid-column: span 3; }
     }
     .hub-card {
+      --hub-accent: rgba(200, 210, 220, 0.55);
+      position: relative;
+      overflow: hidden;
       text-align: left;
-      padding: 1.25rem 1.2rem 1.15rem;
-      border-radius: 18px;
+      padding: 1.35rem 1.3rem 1.2rem;
+      border-radius: 22px;
       border: 1px solid var(--line);
-      background: var(--bg-card);
-      backdrop-filter: blur(16px);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.05), transparent 42%),
+        var(--bg-card);
+      backdrop-filter: blur(18px);
       box-shadow: var(--shadow-card);
       color: inherit;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-      min-height: 148px;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      min-height: 142px;
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
+      gap: 0.55rem;
       cursor: pointer;
+      isolation: isolate;
     }
+    .hub-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 18%;
+      bottom: 18%;
+      width: 3px;
+      border-radius: 0 4px 4px 0;
+      background: linear-gradient(180deg, transparent, var(--hub-accent), transparent);
+      opacity: 0.85;
+    }
+    .hub-card::after {
+      content: attr(data-index);
+      position: absolute;
+      right: 0.55rem;
+      bottom: -0.15rem;
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 8vw, 5.5rem);
+      font-weight: 700;
+      letter-spacing: -0.06em;
+      line-height: 0.85;
+      color: var(--text);
+      opacity: 0.045;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .hub-card > * { position: relative; z-index: 1; }
+    .hub-card[data-module="projects"] { --hub-accent: #d8dee6; }
+    .hub-card[data-module="calendario"] { --hub-accent: #b8c0c8; }
+    .hub-card[data-module="pendientes"] { --hub-accent: #c5d4c8; }
+    .hub-card[data-module="goals"] { --hub-accent: #d0c4c8; }
+    .hub-card[data-module="ideas"] { --hub-accent: #c8c0d0; }
+    .hub-card[data-module="stats"] { --hub-accent: #a8b8c8; }
+    .hub-card[data-module="settings"] { --hub-accent: #b0a8b0; }
     .hub-card:hover, .hub-card:focus-visible {
-      transform: translateY(-3px);
-      border-color: var(--line-strong);
-      box-shadow: var(--shadow-card), 0 12px 32px rgba(0,0,0,0.18);
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(230, 236, 242, 0.35);
+      box-shadow: var(--shadow-card), 0 18px 40px rgba(0,0,0,0.28);
       outline: none;
     }
+    .hub-card:hover::after, .hub-card:focus-visible::after {
+      opacity: 0.09;
+      transform: translate(-4px, -6px);
+    }
+    .hub-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.15rem;
+    }
     .hub-card-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--line);
-      background: var(--bg-soft);
+      width: auto;
+      height: auto;
+      border: none;
+      background: none;
+      border-radius: 0;
+      display: inline-flex;
       color: var(--gold-bright);
+      opacity: 0.92;
     }
     .hub-card-icon svg {
-      width: 20px;
-      height: 20px;
+      width: 26px;
+      height: 26px;
       stroke: currentColor;
       fill: none;
-      stroke-width: 1.7;
+      stroke-width: 1.85;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+    .hub-card .hub-meta {
+      font-size: 0.66rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      font-weight: 700;
+      padding: 0.28rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      white-space: nowrap;
+    }
     .hub-card h3 {
       font-family: var(--font-display);
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-size: clamp(1.2rem, 2vw, 1.45rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-top: 0.15rem;
     }
     .hub-card p {
       color: var(--muted);
-      font-size: 0.82rem;
+      font-size: 0.86rem;
       line-height: 1.45;
       flex: 1;
+      max-width: 28rem;
     }
-    .hub-card .hub-meta {
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
+    .hub-card-go {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--text-soft);
-      font-weight: 600;
+      color: var(--gold);
+      opacity: 0.75;
+      transition: opacity 0.2s, transform 0.2s, gap 0.2s;
     }
+    .hub-card:hover .hub-card-go {
+      opacity: 1;
+      gap: 0.55rem;
+      color: var(--gold-bright);
+    }
+    [data-theme="light"] .hub-card {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.55), transparent 48%),
+        rgba(250, 246, 244, 0.92);
+    }
+    [data-theme="light"] .hub-card::after { opacity: 0.06; color: #1c161a; }
+    [data-theme="light"] .hub-card:hover::after { opacity: 0.1; }
     .module-chrome {
       display: flex;
       align-items: center;
@@ -2640,47 +2742,68 @@
           <h2>Centro de control</h2>
         </div>
         <div class="hub-grid" id="hubGrid">
-          <button type="button" class="hub-card" data-module="projects">
-            <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/></svg></span>
+          <button type="button" class="hub-card" data-module="projects" data-index="01">
+            <div class="hub-card-top">
+              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/></svg></span>
+              <span class="hub-meta" data-hub-count="projects">—</span>
+            </div>
             <h3>Proyectos</h3>
-            <p>Todos los proyectos, progreso y estado. Crear, editar y archivar.</p>
-            <span class="hub-meta" data-hub-count="projects">—</span>
+            <p>Progreso, estado y archivo. Todo el trabajo vivo en un solo sitio.</p>
+            <span class="hub-card-go">Abrir →</span>
           </button>
-          <button type="button" class="hub-card" data-module="calendario">
-            <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+          <button type="button" class="hub-card" data-module="calendario" data-index="02">
+            <div class="hub-card-top">
+              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+              <span class="hub-meta" data-hub-count="calendario">—</span>
+            </div>
             <h3>Calendario</h3>
-            <p>Vista diaria, semanal y mensual de fechas importantes.</p>
-            <span class="hub-meta" data-hub-count="calendario">—</span>
+            <p>Día, semana y mes con lo que marca la agenda.</p>
+            <span class="hub-card-go">Abrir →</span>
           </button>
-          <button type="button" class="hub-card" data-module="pendientes">
-            <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+          <button type="button" class="hub-card" data-module="pendientes" data-index="03">
+            <div class="hub-card-top">
+              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+              <span class="hub-meta" data-hub-count="pendientes">—</span>
+            </div>
             <h3>Tareas</h3>
-            <p>Pendientes por prioridad, en curso y completadas.</p>
-            <span class="hub-meta" data-hub-count="pendientes">—</span>
+            <p>Prioridad Eisenhower: pendientes, en curso y hechas.</p>
+            <span class="hub-card-go">Abrir →</span>
           </button>
-          <button type="button" class="hub-card" data-module="goals">
-            <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>
+          <button type="button" class="hub-card" data-module="goals" data-index="04">
+            <div class="hub-card-top">
+              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span>
+              <span class="hub-meta" data-hub-count="goals">—</span>
+            </div>
             <h3>Objetivos</h3>
-            <p>Corto, medio y largo plazo con seguimiento de progreso.</p>
-            <span class="hub-meta" data-hub-count="goals">—</span>
+            <p>Corto, medio y largo plazo con progreso visible.</p>
+            <span class="hub-card-go">Abrir →</span>
           </button>
-          <button type="button" class="hub-card" data-module="ideas">
-            <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c.6.6 1 1.4 1 2.2V17h6v-.8c0-.8.4-1.6 1-2.2A7 7 0 0 0 12 2z"/></svg></span>
+          <button type="button" class="hub-card" data-module="ideas" data-index="05">
+            <div class="hub-card-top">
+              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c.6.6 1 1.4 1 2.2V17h6v-.8c0-.8.4-1.6 1-2.2A7 7 0 0 0 12 2z"/></svg></span>
+              <span class="hub-meta" data-hub-count="ideas">—</span>
+            </div>
             <h3>Ideas</h3>
-            <p>Captura rápida con etiquetas para no perder nada.</p>
-            <span class="hub-meta" data-hub-count="ideas">—</span>
+            <p>Captura rápida y etiquetas para no perder el hilo.</p>
+            <span class="hub-card-go">Abrir →</span>
           </button>
-          <button type="button" class="hub-card" data-module="stats">
-            <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V9"/><path d="M13 16V6"/><path d="M18 16v-4"/></svg></span>
+          <button type="button" class="hub-card" data-module="stats" data-index="06">
+            <div class="hub-card-top">
+              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V9"/><path d="M13 16V6"/><path d="M18 16v-4"/></svg></span>
+              <span class="hub-meta" data-hub-count="stats">—</span>
+            </div>
             <h3>Estadísticas</h3>
-            <p>Métricas, resumen semanal y actividad reciente.</p>
-            <span class="hub-meta" data-hub-count="stats">—</span>
+            <p>Métricas, semana y actividad reciente.</p>
+            <span class="hub-card-go">Abrir →</span>
           </button>
-          <button type="button" class="hub-card" data-module="settings">
-            <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.2.7.8 1.2 1.5 1.2H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+          <button type="button" class="hub-card" data-module="settings" data-index="07">
+            <div class="hub-card-top">
+              <span class="hub-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.2.7.8 1.2 1.5 1.2H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+              <span class="hub-meta">Cuenta</span>
+            </div>
             <h3>Configuración</h3>
-            <p>Tema, cuenta y preferencias del panel.</p>
-            <span class="hub-meta">Cuenta y sync</span>
+            <p>Tema, cuenta y sincronización.</p>
+            <span class="hub-card-go">Abrir →</span>
           </button>
         </div>
       </section>
