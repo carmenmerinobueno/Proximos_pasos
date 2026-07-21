@@ -3838,6 +3838,7 @@
       if (!s.weeks || typeof s.weeks !== "object") s.weeks = {};
       if (!Array.isArray(s.activity)) s.activity = [];
       s.areas = normalizeAreas(s);
+      applyNovaCutPlan(s);
       const used = new Set();
       s.projects.forEach((p) => {
         if (typeof p.archived !== "boolean") p.archived = !!p.archived;
@@ -4017,47 +4018,132 @@
     document.getElementById("themeToggleApp")?.addEventListener("click", toggleTheme);
     paintThemeButtons();
 
+
+    function mkNovaTask(id, label, date, opts = {}) {
+      return {
+        id,
+        label,
+        date: date || "",
+        note: "",
+        description: opts.description || "",
+        priority: opts.priority || 2,
+        champion: opts.champion || "both",
+        done: false,
+        doneAt: null,
+        doneBy: null,
+        createdAt: date || "2026-07-21"
+      };
+    }
+
+    function buildNovaCutProject() {
+      return {
+        id: "emp-app-edicion",
+        area: "emprendimientos",
+        owner: "both",
+        title: "NovaCut AI",
+        badge: "En marcha",
+        planVersion: "novacut-july-2026-v1",
+        lede: "Editor de vídeo con IA: cortes inteligentes, subtítulos con estilo, clips virales y flujos largo/corto. Sprint de cierre de julio (21–31) para dejarla funcional, testeada y desplegada.",
+        note: "Calendario rápido: 21–22 cortes+subtítulos · 23–24 clips · 24–25 pack+SFX · 25–27 flujos · 27–28 IA · 28–29 tests · 29–30 UI · 30–31 deploy.",
+        archived: false,
+        steps: [
+          {
+            id: "step-nc-1",
+            title: "1. Hacerla funcional (21–25 jul)",
+            tasks: [
+              mkNovaTask("nc-cortes", "Cortes inteligentes (silencios + muletillas)", "2026-07-22", {
+                priority: 1,
+                description: "Plazo 21–22/07. Detectar silencios y pausas largas; umbral agresivo/normal/suave; quitar muletillas (eh, o sea, vale…); preview antes/después; no cortar en mitad de frase."
+              }),
+              mkNovaTask("nc-subs", "Subtítulos con estilos elegibles", "2026-07-23", {
+                description: "Plazo 22–23/07. Estilos al subir (mín. 4–6): Hormozi / MrBeast / Minimal / Clean / Karaoke / Bold. Color, tamaño y posición; resaltar palabra activa; ES/EN; exportar con/sin subtítulos quemados."
+              }),
+              mkNovaTask("nc-clips", "Detector de mejores clips", "2026-07-24", {
+                description: "Plazo 23–24/07. Hooks y momentos fuertes; score de viralidad + motivo; duraciones 15/30/45/60s; reframe 9:16; título + texto sugerido para redes."
+              }),
+              mkNovaTask("nc-pack", "Pack / conjunto de clips", "2026-07-25", {
+                description: "Plazo 24–25/07. Pack 5–10 clips del mismo vídeo; orden de publicación; variar ganchos; ZIP o uno a uno; mini-trailer opcional."
+              }),
+              mkNovaTask("nc-sfx", "SFX de edición (whoosh, teclado, pop)", "2026-07-25", {
+                description: "Plazo 25/07. Sonidos (teclado, whoosh, pop, click, zoom); transiciones cortas; intro/outro 1–2s; zooms en frases clave; plantillas de ritmo calmado/dinámico/agresivo."
+              })
+            ]
+          },
+          {
+            id: "step-nc-2",
+            title: "2. Flujos: vídeo largo vs corto (25–27 jul)",
+            tasks: [
+              mkNovaTask("nc-largo", "Flujo vídeo largo", "2026-07-26", {
+                description: "Plazo 25–26/07. Podcast/clase/entrevista/vlog. Pipeline: transcribir → cortar silencios → clips → subtítulos. Resumen, capítulos/timestamps, destacar lo mejor en 1 clic."
+              }),
+              mkNovaTask("nc-corto", "Flujo vídeo corto", "2026-07-27", {
+                description: "Plazo 26–27/07. Reels/TikTok/Shorts. Pipeline: limpiar → subtítulos → SFX → export. Ratio 9:16; hook 3s; CTA final; pack sonidos+subtítulos en un paso."
+              })
+            ]
+          },
+          {
+            id: "step-nc-3",
+            title: "3. ¿Qué IA? (27–28 jul)",
+            tasks: [
+              mkNovaTask("nc-ia-investiga", "Investigar IA", "2026-07-27", {
+                description: "Comparar calidad/precio/velocidad: transcripción, detección de clips, análisis de ganchos. Decidir stack (1 principal + 1 backup). Anotar límites (1h+, idiomas, coste/min)."
+              }),
+              mkNovaTask("nc-ia-probar", "Probar y elegir IA", "2026-07-28", {
+                description: "Misma batería 5–8 vídeos en cada opción. Medir cortes, subtítulos, clips útiles, tiempo y coste. Fijar ganadora en la app. Documentar fallos (ruido, acentos, varios speakers)."
+              })
+            ]
+          },
+          {
+            id: "step-nc-4",
+            title: "4. Testear y dar forma (28–31 jul)",
+            tasks: [
+              mkNovaTask("nc-test", "Test masivo", "2026-07-29", {
+                description: "Mín. 15–20 vídeos reales (largos+cortos). Casos borde: mal audio, música, 2 personas, outdoor. Bugs priorizados. Checklist listo para usuario real."
+              }),
+              mkNovaTask("nc-ui", "Lavado de cara NovaCut AI", "2026-07-30", {
+                description: "Marca NovaCut AI en toda la UI. Subida Largo/Corto clara. Selector visual de estilos de subtítulos y SFX/ritmo. Textos simples. Mobile usable."
+              }),
+              mkNovaTask("nc-deploy", "Despliegue final", "2026-07-31", {
+                priority: 1,
+                description: "Deploy estable (dominio+HTTPS). Auth, storage y cola en producción. Login/registro. Plan free vs paid básico. Smoke test + 1 vídeo real punta a punta."
+              })
+            ]
+          }
+        ]
+      };
+    }
+
+    function applyNovaCutPlan(s) {
+      const PLAN = "novacut-july-2026-v1";
+      if (!s || !Array.isArray(s.projects)) return s;
+      if (s.novacutPlanApplied === PLAN) return s;
+      const fresh = buildNovaCutProject();
+      const idx = s.projects.findIndex((p) =>
+        p.id === "emp-app-edicion" ||
+        /novacut/i.test(p.title || "") ||
+        /edici[oó]n de videos?/i.test(p.title || "")
+      );
+      if (idx >= 0) {
+        const prev = s.projects[idx];
+        s.projects[idx] = {
+          ...fresh,
+          owner: prev.owner || fresh.owner,
+          archived: !!prev.archived
+        };
+      } else {
+        s.projects.unshift(fresh);
+      }
+      s.novacutPlanApplied = PLAN;
+      s.updatedAt = Date.now();
+      return s;
+    }
+
+
     const DEFAULT_SEED = () => ({
       version: 4,
       updatedAt: Date.now(),
       projects: [
-        {
-          id: "emp-app-edicion",
-          area: "emprendimientos",
-          title: "App → Edición de videos",
-          badge: "En producción",
-          lede: "Flujo usable: cortes, subtítulos, clips; luego IA.",
-          note: "",
-          steps: [
-            {
-              id: "step-app-1",
-              title: "Hacerla funcional",
-              tasks: [
-                { id: "emp-app-cortes", label: "Cortes de silencios", date: "2026-07-20", note: "", done: false, doneAt: null, doneBy: null },
-                { id: "emp-app-subtitulos", label: "Subtítulos", date: "2026-07-20", note: "", done: false, doneAt: null, doneBy: null },
-                { id: "emp-app-mejores-clips", label: "Mejores clips", date: "2026-07-21", note: "", done: false, doneAt: null, doneBy: null },
-                { id: "emp-app-conjunto-clips", label: "Conjunto de clips", date: "2026-07-22", note: "", done: false, doneAt: null, doneBy: null }
-              ]
-            },
-            {
-              id: "step-app-2",
-              title: "¿Qué IA?",
-              tasks: [
-                { id: "emp-app-investigar-ia", label: "Investigar IA", date: "2026-07-23", note: "", done: false, doneAt: null, doneBy: null },
-                { id: "emp-app-probar-ia", label: "Probar IA", date: "2026-07-23", note: "", done: false, doneAt: null, doneBy: null }
-              ]
-            },
-            {
-              id: "step-app-3",
-              title: "Testear y dar forma",
-              tasks: [
-                { id: "emp-app-test", label: "Probar con muchos vídeos", date: "2026-07-24", note: "", done: false, doneAt: null, doneBy: null },
-                { id: "emp-app-ui", label: "Lavado de cara APP", date: "2026-07-25", note: "", done: false, doneAt: null, doneBy: null },
-                { id: "emp-app-deploy", label: "Desplegarla", date: "2026-07-26", note: "", done: false, doneAt: null, doneBy: null }
-              ]
-            }
-          ]
-        },
+        buildNovaCutProject(),
         {
           id: "emp-replay",
           area: "emprendimientos",
