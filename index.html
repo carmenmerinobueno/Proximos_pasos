@@ -2731,61 +2731,56 @@
       width: 100%;
       margin: 0.35rem 0 0.15rem;
     }
-    .owner-field > .proj-area {
-      margin: 0;
-    }
-    .owner-picker {
+    .proj-meta-field {
       display: inline-flex;
-      flex-wrap: wrap;
-      align-items: stretch;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      overflow: hidden;
-      background: rgba(0,0,0,0.22);
-      max-width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.3rem;
+      margin: 0.15rem 0.55rem 0.15rem 0;
     }
-    .owner-pick {
-      appearance: none;
-      border: none;
-      border-right: 1px solid var(--line);
-      background: transparent;
-      color: var(--muted);
+    .dd-btn.dd-proj {
+      min-height: 2rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      color: var(--text);
       font-size: 0.78rem;
       font-weight: 600;
       letter-spacing: 0.01em;
-      padding: 0.55rem 0.9rem;
-      cursor: pointer;
-      transition: background 0.15s ease, color 0.15s ease;
-      white-space: nowrap;
     }
-    .owner-pick:last-child { border-right: none; }
-    .owner-pick:hover { color: var(--text-soft); background: rgba(255,255,255,0.04); }
-    .owner-pick.active.owner-carmen {
-      color: #f7d4e0;
-      background: rgba(240, 196, 212, 0.16);
-      box-shadow: inset 0 -2px 0 rgba(240, 196, 212, 0.7);
+    .dd-btn.dd-proj.owner-carmen {
+      color: #f0c4d4;
+      border-color: rgba(240, 196, 212, 0.35);
+      background: rgba(240, 196, 212, 0.08);
     }
-    .owner-pick.active.owner-edgar {
-      color: #d4e0f7;
-      background: rgba(196, 212, 240, 0.16);
-      box-shadow: inset 0 -2px 0 rgba(196, 212, 240, 0.7);
+    .dd-btn.dd-proj.owner-edgar {
+      color: #c4d4f0;
+      border-color: rgba(196, 212, 240, 0.35);
+      background: rgba(196, 212, 240, 0.08);
     }
-    .owner-pick.active.owner-both {
+    .dd-btn.dd-proj.owner-both {
       color: var(--gold-bright);
-      background: rgba(230, 210, 160, 0.14);
-      box-shadow: inset 0 -2px 0 rgba(212, 175, 110, 0.75);
+      border-color: rgba(230, 210, 160, 0.35);
+      background: rgba(230, 210, 160, 0.08);
     }
-    [data-theme="light"] .owner-picker { background: rgba(255,255,255,0.55); }
-    [data-theme="light"] .owner-pick.active.owner-carmen {
-      color: #8a3d5c;
-      background: rgba(138, 61, 92, 0.1);
+    [data-theme="light"] .dd-btn.dd-proj.owner-carmen { color: #8a3d5c; background: rgba(138, 61, 92, 0.08); }
+    [data-theme="light"] .dd-btn.dd-proj.owner-edgar { color: #3d5a8a; background: rgba(61, 90, 138, 0.08); }
+    .proj-meta-field .dd-menu,
+    #mAreaWrap .dd-menu,
+    #mOwnerWrap .dd-menu {
+      min-width: 220px;
+      max-width: min(92vw, 320px);
+      z-index: 80;
     }
-    [data-theme="light"] .owner-pick.active.owner-edgar {
-      color: #3d5a8a;
-      background: rgba(61, 90, 138, 0.1);
+    [data-theme="light"] .dd-menu {
+      background: rgba(250, 246, 244, 0.98);
+      border-color: var(--line-strong);
     }
-    .modal .owner-picker { width: 100%; }
-    .modal .owner-pick { flex: 1; text-align: center; }
+    [data-theme="light"] .dd-menu button { color: var(--text); }
+    .modal .dd { display: block; width: 100%; }
+    .modal .dd-btn.dd-proj { width: 100%; justify-content: space-between; border-radius: 12px; }
+    .modal .dd-btn.dd-proj::after { content: "▾"; opacity: 0.7; margin-left: auto; padding-left: 0.5rem; }
     .proj-area {
       font-size: 0.62rem;
       letter-spacing: 0.12em;
@@ -3078,28 +3073,12 @@
       color: var(--muted);
       white-space: nowrap;
     }
-    .proj-area-select-wrap {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .proj-area-select-wrap select {
-      appearance: none;
-      border: 1px solid var(--line);
-      background: var(--bg-soft);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 0.25rem 0.7rem;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
     @media (max-width: 640px) {
       .area-manage-row {
         grid-template-columns: 1fr 1fr;
       }
       .area-manage-count { grid-column: 1 / -1; }
     }
-
     .area-chips {
       display: flex;
       flex-wrap: wrap;
@@ -3603,38 +3582,6 @@
       ).join("");
     }
 
-    function ownerPickerHtml(selected, role = "project-owner") {
-      const cur = PROJECT_OWNERS[selected] ? selected : "both";
-      return `
-        <div class="owner-picker" data-role="${role}" role="group" aria-label="Responsable del proyecto">
-          ${Object.values(PROJECT_OWNERS).map((o) => `
-            <button type="button" class="owner-pick owner-${o.id}${o.id === cur ? " active" : ""}" data-owner="${o.id}" aria-pressed="${o.id === cur ? "true" : "false"}">
-              ${escapeHtml(o.label)}
-            </button>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    function bindOwnerPicker(root, current, onPick) {
-      const box = root?.matches?.(".owner-picker") ? root : root?.querySelector?.(".owner-picker");
-      if (!box) return;
-      let cur = PROJECT_OWNERS[current] ? current : "both";
-      box.querySelectorAll("[data-owner]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const next = btn.dataset.owner;
-          if (!PROJECT_OWNERS[next] || next === cur) return;
-          cur = next;
-          box.querySelectorAll("[data-owner]").forEach((b) => {
-            const on = b.dataset.owner === cur;
-            b.classList.toggle("active", on);
-            b.setAttribute("aria-pressed", on ? "true" : "false");
-          });
-          onPick(next);
-        });
-      });
-    }
-
     function matchesPersonFilter(t, filter) {
       if (!filter) return true;
       const c = taskChampion(t);
@@ -3759,22 +3706,24 @@
       return { text: `hace ${n} día${n === 1 ? "" : "s"}`, late: true };
     }
 
-    function dropdownHtml(kind, value, options) {
-      const current = options.find((o) => o.id === value) || options[0];
-      const btnCls = kind === "prio" ? `dd-btn has ${PRIORITY[value]?.cls || "p2"}` : "dd-btn has";
-      const btnLabel = kind === "prio" ? `P${value}` : current.label;
+    function dropdownHtml(kind, value, options, extraBtnClass = "") {
+      const current = options.find((o) => String(o.id) === String(value)) || options[0];
+      const btnCls = kind === "prio"
+        ? `dd-btn has ${PRIORITY[value]?.cls || "p2"}`
+        : `dd-btn has ${extraBtnClass}`.trim();
+      const btnLabel = kind === "prio" ? `P${value}` : (current?.label || "—");
       return `
         <div class="dd" data-dd="${kind}">
-          <button type="button" class="${btnCls}" data-dd-toggle>${btnLabel}</button>
+          <button type="button" class="${btnCls}" data-dd-toggle>${kind === "prio" ? btnLabel : escapeHtml(btnLabel)}</button>
           <div class="dd-menu">
-            ${options.map((o) => `<button type="button" data-dd-val="${o.id}">${kind === "prio" ? "P" + o.id + " · " : ""}${o.label}</button>`).join("")}
+            ${options.map((o) => `<button type="button" data-dd-val="${escapeHtml(String(o.id))}">${kind === "prio" ? "P" + o.id + " · " : ""}${escapeHtml(o.label)}</button>`).join("")}
           </div>
         </div>
       `;
     }
 
     function bindDropdown(root, onPick) {
-      const dd = root.querySelector(".dd");
+      const dd = root?.querySelector?.(".dd") || (root?.classList?.contains("dd") ? root : null);
       if (!dd) return;
       dd.querySelector("[data-dd-toggle]")?.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -3800,6 +3749,18 @@
 
     function championDropdown(active) {
       return dropdownHtml("champ", active, Object.values(CHAMPIONS));
+    }
+
+    function areaDropdown(active, { includeNew = false } = {}) {
+      const options = getAreas().map((a) => ({ id: a.id, label: a.label }));
+      if (includeNew) options.push({ id: "__new__", label: "+ Crear área nueva…" });
+      const cur = options.some((o) => o.id === active) ? active : options[0]?.id;
+      return dropdownHtml("area", cur, options, "dd-proj");
+    }
+
+    function ownerDropdown(active) {
+      const cur = PROJECT_OWNERS[active] ? active : "both";
+      return dropdownHtml("owner", cur, Object.values(PROJECT_OWNERS), `dd-proj owner-${cur}`);
     }
 
     const LOCAL_KEY = "ce-tablero-v3-shared";
@@ -5199,15 +5160,15 @@
           <div class="proj-detail-hero-top">
             <div>
               <div class="proj-tile-meta">
-                <label class="proj-area-select-wrap">
+                <div class="proj-meta-field" data-wrap="area">
                   <span class="proj-area">Área</span>
-                  <select data-role="project-area">${getAreas().map((a) => `<option value="${escapeHtml(a.id)}" ${a.id === p.area ? "selected" : ""}>${escapeHtml(a.label)}</option>`).join("")}</select>
-                </label>
+                  ${areaDropdown(p.area)}
+                </div>
+                <div class="proj-meta-field" data-wrap="owner">
+                  <span class="proj-area">Responsable</span>
+                  ${ownerDropdown(owner)}
+                </div>
                 <span class="proj-id">${escapeHtml(p.id)}</span>
-              </div>
-              <div class="owner-field">
-                <span class="proj-area">Responsable</span>
-                ${ownerPickerHtml(owner)}
               </div>
               <h3 contenteditable="true" data-edit="title">${escapeHtml(p.title)}</h3>
             </div>
@@ -5257,15 +5218,15 @@
       }
 
       card.querySelector('[data-act="back-list"]').addEventListener("click", () => closeProjectDetail());
-      card.querySelector('[data-role="project-area"]')?.addEventListener("change", (e) => {
-        const next = e.target.value;
+      bindDropdown(card.querySelector('[data-wrap="area"]'), (next) => {
         if (!next || next === p.area) return;
         p.area = next;
         logActivity("editar", `Movió «${p.title}» a ${areaLabel(next)}`);
         scheduleSave(true);
         renderAll();
       });
-      bindOwnerPicker(card, owner, (next) => {
+      bindDropdown(card.querySelector('[data-wrap="owner"]'), (next) => {
+        if (!PROJECT_OWNERS[next] || next === projectOwner(p)) return;
         p.owner = next;
         logActivity("editar", `«${p.title}» → responsable ${PROJECT_OWNERS[next].label}`);
         scheduleSave(true);
@@ -5593,15 +5554,13 @@
     modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
     function openAddProject(area) {
-      const initial = defaultAreaId(area);
-      const areaOptions = getAreas().map((a) =>
-        `<option value="${escapeHtml(a.id)}" ${a.id === initial ? "selected" : ""}>${escapeHtml(a.label)}</option>`
-      ).join("") + `<option value="__new__">+ Crear área nueva…</option>`;
+      let chosenArea = defaultAreaId(area);
+      let chosenOwner = "both";
       openModal(`
         <h3>Nuevo proyecto</h3>
-        <div class="row"><label>Área</label><select id="mArea">${areaOptions}</select></div>
+        <div class="row"><label>Área</label><div id="mAreaWrap">${areaDropdown(chosenArea, { includeNew: true })}</div></div>
         <div class="row" id="mNewAreaRow" hidden><label>Nombre del área</label><input type="text" id="mNewArea" placeholder="Nueva área…" /></div>
-        <div class="row"><label>Responsable</label>${ownerPickerHtml("both", "m-owner")}</div>
+        <div class="row"><label>Responsable</label><div id="mOwnerWrap">${ownerDropdown(chosenOwner)}</div></div>
         <div class="row"><label>Título</label><input type="text" id="mTitle" placeholder="Nombre del proyecto" /></div>
         <div class="row row-desc">
           <label>Descripción del proyecto</label>
@@ -5614,15 +5573,27 @@
           <button type="button" class="btn btn-gold" id="mOk">Crear</button>
         </div>
       `);
-      const areaSelect = modalBody.querySelector("#mArea");
       const newAreaRow = modalBody.querySelector("#mNewAreaRow");
-      let chosenOwner = "both";
-      bindOwnerPicker(modalBody, chosenOwner, (next) => { chosenOwner = next; });
-      areaSelect.addEventListener("change", () => {
-        const isNew = areaSelect.value === "__new__";
-        newAreaRow.hidden = !isNew;
-        if (isNew) modalBody.querySelector("#mNewArea")?.focus();
-      });
+      function rebindArea() {
+        const wrap = modalBody.querySelector("#mAreaWrap");
+        wrap.innerHTML = areaDropdown(chosenArea, { includeNew: true });
+        bindDropdown(wrap, (val) => {
+          chosenArea = val;
+          newAreaRow.hidden = val !== "__new__";
+          if (val === "__new__") modalBody.querySelector("#mNewArea")?.focus();
+          rebindArea();
+        });
+      }
+      function rebindOwner() {
+        const wrap = modalBody.querySelector("#mOwnerWrap");
+        wrap.innerHTML = ownerDropdown(chosenOwner);
+        bindDropdown(wrap, (val) => {
+          chosenOwner = val;
+          rebindOwner();
+        });
+      }
+      rebindArea();
+      rebindOwner();
       modalBody.querySelector("#mCancel").onclick = closeModal;
       modalBody.querySelector("#mOk").onclick = () => {
         const title = modalBody.querySelector("#mTitle").value.trim();
@@ -5632,7 +5603,7 @@
           modalBody.querySelector("#mLede")?.focus();
           return toast("Añade una descripción más clara (al menos un par de frases)");
         }
-        let chosen = areaSelect.value || initial;
+        let chosen = chosenArea || defaultAreaId();
         if (chosen === "__new__") {
           const row = addArea(modalBody.querySelector("#mNewArea")?.value);
           if (!row) return toast("Pon un nombre para el área nueva");
