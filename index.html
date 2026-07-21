@@ -2549,11 +2549,6 @@
       outline: none;
     }
     .proj-tile.is-archived { opacity: 0.62; }
-    .proj-tile[data-area="emprendimientos"] { --proj-accent: #d8dee6; }
-    .proj-tile[data-area="tfg"] { --proj-accent: #c5d0dc; }
-    .proj-tile[data-area="casa"] { --proj-accent: #d0c4c0; }
-    .proj-tile[data-area="cursos"] { --proj-accent: #c5d4c8; }
-    .proj-tile[data-area="marcas"] { --proj-accent: #c8c0d0; }
     .proj-ring {
       width: 52px;
       height: 52px;
@@ -2788,6 +2783,69 @@
         justify-content: space-between;
         align-items: center;
       }
+    }
+
+
+    .area-chip-action {
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      border: 1px dashed var(--line-strong);
+      background: transparent;
+      color: var(--gold-bright);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .area-chip-action:hover {
+      background: var(--bg-soft);
+      border-style: solid;
+    }
+    .area-manage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      max-height: min(50vh, 360px);
+      overflow: auto;
+      margin-bottom: 1rem;
+    }
+    .area-manage-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 0.45rem;
+      align-items: center;
+    }
+    .area-manage-row input {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--input-bg);
+    }
+    .area-manage-count {
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .proj-area-select-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .proj-area-select-wrap select {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    @media (max-width: 640px) {
+      .area-manage-row {
+        grid-template-columns: 1fr 1fr;
+      }
+      .area-manage-count { grid-column: 1 / -1; }
     }
 
     .area-chips {
@@ -3309,9 +3367,11 @@
       if (!Array.isArray(s.ideas)) s.ideas = [];
       if (!s.weeks || typeof s.weeks !== "object") s.weeks = {};
       if (!Array.isArray(s.activity)) s.activity = [];
+      s.areas = normalizeAreas(s);
       const used = new Set();
       s.projects.forEach((p) => {
         if (typeof p.archived !== "boolean") p.archived = !!p.archived;
+        if (!p.area) p.area = (s.areas[0] && s.areas[0].id) || "general";
         (p.steps || []).forEach((st) => {
           (st.tasks || []).forEach((t) => {
             t.priority = taskPriority(t);
@@ -3669,6 +3729,13 @@
           }]
         }
       ],
+      areas: [
+        { id: "emprendimientos", label: "Emprendimientos" },
+        { id: "tfg", label: "TFG" },
+        { id: "casa", label: "Casa" },
+        { id: "cursos", label: "Cursos" },
+        { id: "marcas", label: "Marcas" }
+      ],
       activity: [],
       weeks: {},
       goals: [],
@@ -3684,13 +3751,196 @@
     let calCursor = new Date();
     calCursor.setHours(12, 0, 0, 0);
     let calMode = "month"; // day | week | month
-    const AREA_LABELS = {
-      emprendimientos: "Emprendimientos",
-      tfg: "TFG",
-      casa: "Casa",
-      cursos: "Cursos",
-      marcas: "Marcas"
-    };
+    const DEFAULT_AREAS = [
+      { id: "emprendimientos", label: "Emprendimientos" },
+      { id: "tfg", label: "TFG" },
+      { id: "casa", label: "Casa" },
+      { id: "cursos", label: "Cursos" },
+      { id: "marcas", label: "Marcas" }
+    ];
+    const AREA_ACCENTS = ["#d8dee6", "#c5d0dc", "#d0c4c0", "#c5d4c8", "#c8c0d0", "#d4c8b8", "#b8c8d0", "#c8d0c0"];
+
+    function slugArea(label) {
+      const base = String(label || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 28);
+      return base || ("area-" + Date.now().toString(36));
+    }
+
+    function normalizeAreas(s) {
+      const byId = new Map();
+      const push = (id, label) => {
+        const cleanId = String(id || "").trim();
+        if (!cleanId) return;
+        const cleanLabel = String(label || cleanId).trim() || cleanId;
+        if (!byId.has(cleanId)) byId.set(cleanId, { id: cleanId, label: cleanLabel });
+      };
+      if (Array.isArray(s.areas)) {
+        s.areas.forEach((a) => {
+          if (!a) return;
+          if (typeof a === "string") push(a, a);
+          else push(a.id, a.label || a.id);
+        });
+      }
+      if (!byId.size) DEFAULT_AREAS.forEach((a) => push(a.id, a.label));
+      (s.projects || []).forEach((p) => {
+        if (p?.area) push(p.area, byId.get(p.area)?.label || p.area);
+      });
+      return [...byId.values()];
+    }
+
+    function getAreas() {
+      if (state && Array.isArray(state.areas) && state.areas.length) return state.areas;
+      return DEFAULT_AREAS.map((a) => ({ ...a }));
+    }
+
+    function areaLabel(id) {
+      const hit = getAreas().find((a) => a.id === id);
+      return hit?.label || id || "Área";
+    }
+
+    function areaAccent(id) {
+      const areas = getAreas();
+      const idx = Math.max(0, areas.findIndex((a) => a.id === id));
+      return AREA_ACCENTS[idx % AREA_ACCENTS.length];
+    }
+
+    function defaultAreaId(preferred) {
+      const areas = getAreas();
+      if (preferred && areas.some((a) => a.id === preferred)) return preferred;
+      if (areaFilter && areas.some((a) => a.id === areaFilter)) return areaFilter;
+      return areas[0]?.id || "general";
+    }
+
+    function ensureArea(id, label) {
+      if (!state) return null;
+      if (!Array.isArray(state.areas)) state.areas = getAreas();
+      const existing = state.areas.find((a) => a.id === id);
+      if (existing) {
+        if (label && label !== existing.label) existing.label = label;
+        return existing;
+      }
+      const row = { id, label: label || id };
+      state.areas.push(row);
+      return row;
+    }
+
+    function addArea(label) {
+      const name = String(label || "").trim();
+      if (!name) return null;
+      if (!state) return null;
+      if (!Array.isArray(state.areas)) state.areas = getAreas();
+      const dup = state.areas.find((a) => a.label.toLowerCase() === name.toLowerCase());
+      if (dup) return dup;
+      let id = slugArea(name);
+      const ids = new Set(state.areas.map((a) => a.id));
+      if (ids.has(id)) id = id + "-" + Date.now().toString(36).slice(-3);
+      const row = { id, label: name };
+      state.areas.push(row);
+      return row;
+    }
+
+    function renameArea(id, label) {
+      const name = String(label || "").trim();
+      if (!name || !state?.areas) return false;
+      const row = state.areas.find((a) => a.id === id);
+      if (!row) return false;
+      row.label = name;
+      return true;
+    }
+
+    function deleteArea(id) {
+      if (!state?.areas) return { ok: false, reason: "missing" };
+      const used = (state.projects || []).some((p) => p.area === id);
+      if (used) return { ok: false, reason: "in-use" };
+      if (state.areas.length <= 1) return { ok: false, reason: "last" };
+      state.areas = state.areas.filter((a) => a.id !== id);
+      if (areaFilter === id) areaFilter = "";
+      return { ok: true };
+    }
+
+    function openAddAreaModal(onDone) {
+      openModal(`
+        <h3>Nueva área</h3>
+        <div class="row"><label>Nombre</label><input type="text" id="mAreaName" placeholder="Ej. Clientes, Viajes, Salud…" /></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="mCancel">Cancelar</button>
+          <button type="button" class="btn btn-gold" id="mOk">Crear área</button>
+        </div>
+      `);
+      const input = modalBody.querySelector("#mAreaName");
+      input?.focus();
+      modalBody.querySelector("#mCancel").onclick = closeModal;
+      const save = () => {
+        const row = addArea(input.value);
+        if (!row) return toast("Escribe un nombre de área");
+        logActivity("crear", `Creó el área «${row.label}»`);
+        scheduleSave(true);
+        closeModal();
+        if (typeof onDone === "function") onDone(row);
+        else {
+          areaFilter = row.id;
+          renderProjects();
+        }
+      };
+      modalBody.querySelector("#mOk").onclick = save;
+      input?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); save(); }
+      });
+    }
+
+    function openManageAreasModal() {
+      const paint = () => {
+        const rows = getAreas().map((a) => {
+          const count = (state.projects || []).filter((p) => p.area === a.id).length;
+          return `
+            <div class="area-manage-row" data-area-id="${escapeHtml(a.id)}">
+              <input type="text" value="${escapeHtml(a.label)}" data-role="area-label" />
+              <span class="area-manage-count">${count} proy.</span>
+              <button type="button" class="mini" data-act="save-area">Guardar</button>
+              <button type="button" class="mini" data-act="del-area" style="color:var(--danger)">Eliminar</button>
+            </div>`;
+        }).join("");
+        openModal(`
+          <h3>Gestionar áreas</h3>
+          <p style="color:var(--muted);font-size:0.82rem;margin:0 0 0.85rem">Añade, renombra o elimina áreas. Solo se pueden borrar si no tienen proyectos.</p>
+          <div class="area-manage-list">${rows || `<p class="empty">No hay áreas.</p>`}</div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="mAddArea">+ Nueva área</button>
+            <button type="button" class="btn btn-gold" id="mCloseAreas">Listo</button>
+          </div>
+        `);
+        modalBody.querySelector("#mCloseAreas").onclick = () => { closeModal(); renderProjects(); };
+        modalBody.querySelector("#mAddArea").onclick = () => openAddAreaModal(() => openManageAreasModal());
+        modalBody.querySelectorAll(".area-manage-row").forEach((row) => {
+          const id = row.dataset.areaId;
+          row.querySelector('[data-act="save-area"]').onclick = () => {
+            const label = row.querySelector('[data-role="area-label"]').value;
+            if (!renameArea(id, label)) return toast("Nombre no válido");
+            logActivity("editar", `Renombró área a «${label.trim()}»`);
+            scheduleSave(true);
+            toast("Área actualizada");
+            paint();
+          };
+          row.querySelector('[data-act="del-area"]').onclick = () => {
+            const res = deleteArea(id);
+            if (!res.ok) {
+              if (res.reason === "in-use") return toast("Mueve o archiva sus proyectos antes de eliminarla");
+              if (res.reason === "last") return toast("Tiene que quedar al menos un área");
+              return toast("No se pudo eliminar");
+            }
+            logActivity("eliminar", `Eliminó el área «${id}»`);
+            scheduleSave(true);
+            paint();
+          };
+        });
+      };
+      paint();
+    }
 
     function uid(prefix) {
       return prefix + "-" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
@@ -4058,7 +4308,7 @@
           };
         } else {
           box.innerHTML = `<button type="button" class="btn btn-gold" id="btnNewProject">+ Proyecto</button>`;
-          box.querySelector("#btnNewProject").onclick = () => openAddProject(areaFilter || "emprendimientos");
+          box.querySelector("#btnNewProject").onclick = () => openAddProject(defaultAreaId());
         }
       } else if (moduleId === "pendientes") {
         box.innerHTML = `<button type="button" class="btn btn-gold" id="btnQuickTask">+ Tarea</button>`;
@@ -4485,10 +4735,13 @@
     function paintAreaChips() {
       const root = document.getElementById("areaChips");
       if (!root) return;
-      const items = [["", "Todos"], ...Object.entries(AREA_LABELS)];
+      const items = [["", "Todos"], ...getAreas().map((a) => [a.id, a.label])];
       root.innerHTML = items.map(([id, label]) =>
-        `<button type="button" data-area-filter="${id}" class="${areaFilter === id ? "active" : ""}">${label}</button>`
-      ).join("");
+        `<button type="button" data-area-filter="${id}" class="${areaFilter === id ? "active" : ""}">${escapeHtml(label)}</button>`
+      ).join("") + `
+        <button type="button" class="area-chip-action" data-act="add-area" title="Añadir área">+ Área</button>
+        <button type="button" class="area-chip-action" data-act="manage-areas" title="Gestionar áreas">Gestionar</button>
+      `;
     }
 
     function closeProjectDetail() {
@@ -4579,6 +4832,7 @@
       btn.className = "proj-tile" + (p.archived ? " is-archived" : "");
       btn.dataset.area = p.area || "";
       btn.dataset.projectId = p.id;
+      btn.style.setProperty("--proj-accent", areaAccent(p.area));
       const pct = projectProgress(p);
       const tasks = p.steps.flatMap((s) => s.tasks);
       const open = tasks.filter((t) => !t.done).length;
@@ -4588,7 +4842,7 @@
         <div class="proj-ring" style="--pct:${pct}" aria-hidden="true"><span>${pct}%</span></div>
         <div class="proj-tile-main">
           <div class="proj-tile-meta">
-            <span class="proj-area">${escapeHtml(AREA_LABELS[p.area] || p.area || "Área")}</span>
+            <span class="proj-area">${escapeHtml(areaLabel(p.area))}</span>
             <span class="proj-id">${escapeHtml(p.id)}</span>
             ${p.archived ? `<span class="proj-stat">Archivado</span>` : ""}
           </div>
@@ -4624,7 +4878,10 @@
           <div class="proj-detail-hero-top">
             <div>
               <div class="proj-tile-meta">
-                <span class="proj-area">${escapeHtml(AREA_LABELS[p.area] || p.area || "")}</span>
+                <label class="proj-area-select-wrap">
+                  <span class="proj-area">Área</span>
+                  <select data-role="project-area">${getAreas().map((a) => `<option value="${escapeHtml(a.id)}" ${a.id === p.area ? "selected" : ""}>${escapeHtml(a.label)}</option>`).join("")}</select>
+                </label>
                 <span class="proj-id">${escapeHtml(p.id)}</span>
               </div>
               <h3 contenteditable="true" data-edit="title">${escapeHtml(p.title)}</h3>
@@ -4671,6 +4928,14 @@
       }
 
       card.querySelector('[data-act="back-list"]').addEventListener("click", () => closeProjectDetail());
+      card.querySelector('[data-role="project-area"]')?.addEventListener("change", (e) => {
+        const next = e.target.value;
+        if (!next || next === p.area) return;
+        p.area = next;
+        logActivity("editar", `Movió «${p.title}» a ${areaLabel(next)}`);
+        scheduleSave(true);
+        renderAll();
+      });
       card.querySelector('[data-edit="title"]').addEventListener("blur", (e) => {
         const v = e.target.textContent.trim();
         if (v && v !== p.title) {
@@ -4975,13 +5240,14 @@
     modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
     function openAddProject(area) {
-      const initial = AREA_LABELS[area] ? area : "emprendimientos";
-      const areaOptions = Object.entries(AREA_LABELS).map(([id, label]) =>
-        `<option value="${id}" ${id === initial ? "selected" : ""}>${label}</option>`
-      ).join("");
+      const initial = defaultAreaId(area);
+      const areaOptions = getAreas().map((a) =>
+        `<option value="${escapeHtml(a.id)}" ${a.id === initial ? "selected" : ""}>${escapeHtml(a.label)}</option>`
+      ).join("") + `<option value="__new__">+ Crear área nueva…</option>`;
       openModal(`
         <h3>Nuevo proyecto</h3>
         <div class="row"><label>Área</label><select id="mArea">${areaOptions}</select></div>
+        <div class="row" id="mNewAreaRow" hidden><label>Nombre del área</label><input type="text" id="mNewArea" placeholder="Nueva área…" /></div>
         <div class="row"><label>Título</label><input type="text" id="mTitle" placeholder="Nombre del proyecto" /></div>
         <div class="row"><label>Descripción</label><textarea id="mLede" placeholder="De qué va…"></textarea></div>
         <div class="row"><label>Etiqueta</label><input type="text" id="mBadge" placeholder="Ej. En producción" /></div>
@@ -4990,11 +5256,25 @@
           <button type="button" class="btn btn-gold" id="mOk">Crear</button>
         </div>
       `);
+      const areaSelect = modalBody.querySelector("#mArea");
+      const newAreaRow = modalBody.querySelector("#mNewAreaRow");
+      areaSelect.addEventListener("change", () => {
+        const isNew = areaSelect.value === "__new__";
+        newAreaRow.hidden = !isNew;
+        if (isNew) modalBody.querySelector("#mNewArea")?.focus();
+      });
       modalBody.querySelector("#mCancel").onclick = closeModal;
       modalBody.querySelector("#mOk").onclick = () => {
         const title = modalBody.querySelector("#mTitle").value.trim();
         if (!title) return toast("Pon un título");
-        const chosen = modalBody.querySelector("#mArea").value || initial;
+        let chosen = areaSelect.value || initial;
+        if (chosen === "__new__") {
+          const row = addArea(modalBody.querySelector("#mNewArea")?.value);
+          if (!row) return toast("Pon un nombre para el área nueva");
+          chosen = row.id;
+        } else {
+          ensureArea(chosen, areaLabel(chosen));
+        }
         const project = {
           id: uid(chosen.slice(0, 3)),
           area: chosen,
@@ -5112,7 +5392,7 @@
     });
 
     document.getElementById("fabAdd").addEventListener("click", () => {
-      if (currentModule === "projects") return openAddProject(areaFilter || "emprendimientos");
+      if (currentModule === "projects") return openAddProject(defaultAreaId());
       if (currentModule === "pendientes") {
         const first = state.projects.find((p) => !p.archived);
         if (!first) return toast("Crea un proyecto primero");
@@ -5246,6 +5526,16 @@
     }
 
     document.getElementById("areaChips")?.addEventListener("click", (e) => {
+      const addBtn = e.target.closest("[data-act='add-area']");
+      if (addBtn) {
+        openAddAreaModal();
+        return;
+      }
+      const manageBtn = e.target.closest("[data-act='manage-areas']");
+      if (manageBtn) {
+        openManageAreasModal();
+        return;
+      }
       const btn = e.target.closest("[data-area-filter]");
       if (!btn) return;
       areaFilter = btn.dataset.areaFilter || "";
