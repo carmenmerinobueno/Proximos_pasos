@@ -5643,8 +5643,8 @@
     const THEME_KEY = "ce-tablero-theme";
     const CLOUD_TOKEN_KEY = "ce-tablero-gh-token";
     /* Nube real: archivo en vuestro GitHub (no JSONBlob). */
-    const GH_OWNER = "carmenmerinobueno";
-    const GH_REPO = "Proximos_pasos";
+    const GH_OWNER = "administradordharmagc";
+    const GH_REPO = "DHARMAGC";
     const GH_PATH = "cloud/state.json";
     const GH_API = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
     const SHARED_CLOUD_ID = "github-cloud";
@@ -9617,7 +9617,7 @@
       if (help) {
         help.textContent = isCloudReady()
           ? "Token guardado en este dispositivo. Usa el mismo token en el móvil y en el PC."
-          : "Crea un token (Fine-grained) con permiso Contents Read/Write en Proximos_pasos, pégalo y guarda.";
+          : "Crea un token (Fine-grained) con permiso Contents Read/Write en el repo DHARMAGC, pégalo y guarda.";
       }
       const tokenInput = document.getElementById("settingsCloudToken");
       if (tokenInput && !tokenInput.dataset.filled) {
