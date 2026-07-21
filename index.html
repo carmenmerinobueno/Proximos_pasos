@@ -2914,6 +2914,61 @@
       font-size: 0.95rem;
       outline: none;
     }
+    .proj-desc-block {
+      margin-top: 1rem;
+      padding: 0.95rem 1rem;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.18);
+    }
+    .proj-desc-block.is-empty {
+      border-style: dashed;
+      border-color: rgba(230, 210, 160, 0.45);
+      background: rgba(230, 210, 160, 0.06);
+    }
+    .proj-desc-block label {
+      display: block;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 0.45rem;
+    }
+    .proj-desc-block textarea {
+      width: 100%;
+      min-height: 7.5rem;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      padding: 0;
+      font-family: inherit;
+    }
+    .proj-desc-block textarea::placeholder { color: var(--muted); opacity: 0.85; }
+    .proj-desc-hint {
+      margin-top: 0.45rem;
+      font-size: 0.72rem;
+      color: var(--gold-bright);
+      font-weight: 600;
+    }
+    [data-theme="light"] .proj-desc-block {
+      background: rgba(255,255,255,0.5);
+    }
+    .modal .row-desc textarea {
+      min-height: 8rem;
+      line-height: 1.45;
+    }
+    .modal .field-hint {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
     .proj-detail-progress {
       display: flex;
       align-items: center;
@@ -5155,9 +5210,13 @@
                 ${ownerPickerHtml(owner)}
               </div>
               <h3 contenteditable="true" data-edit="title">${escapeHtml(p.title)}</h3>
-              <p class="lede" contenteditable="true" data-edit="lede">${escapeHtml(p.lede || "")}</p>
             </div>
             <span class="badge ${p.area === "emprendimientos" && String(p.id).includes("replay") ? "silver" : ""}">${escapeHtml(p.badge || "Proyecto")}</span>
+          </div>
+          <div class="proj-desc-block${(p.lede || "").trim() ? "" : " is-empty"}">
+            <label for="projDesc-${escapeHtml(p.id)}">De qué va el proyecto</label>
+            <textarea id="projDesc-${escapeHtml(p.id)}" data-role="project-desc" placeholder="Describe el objetivo, el alcance y por qué importa este proyecto. Cuanto más claro, mejor para las dos.">${escapeHtml(p.lede || "")}</textarea>
+            ${(p.lede || "").trim() ? "" : `<div class="proj-desc-hint">Aún no hay descripción. Escríbela aquí para que quede claro de qué va.</div>`}
           </div>
           <div class="proj-detail-progress">
             <div class="progress"><div class="progress-bar"><i style="width:${pct}%"></i></div><span>${pct}%</span></div>
@@ -5222,9 +5281,27 @@
           if (title && currentModule === "projects") title.textContent = v;
         }
       });
-      card.querySelector('[data-edit="lede"]').addEventListener("blur", (e) => {
-        p.lede = e.target.textContent.trim();
+      const descBox = card.querySelector(".proj-desc-block");
+      const descTa = card.querySelector('[data-role="project-desc"]');
+      const syncDescUi = () => {
+        const has = !!(descTa?.value || "").trim();
+        descBox?.classList.toggle("is-empty", !has);
+        const hint = descBox?.querySelector(".proj-desc-hint");
+        if (!has && descBox && !hint) {
+          const h = document.createElement("div");
+          h.className = "proj-desc-hint";
+          h.textContent = "Aún no hay descripción. Escríbela aquí para que quede claro de qué va.";
+          descBox.appendChild(h);
+        } else if (has && hint) {
+          hint.remove();
+        }
+      };
+      descTa?.addEventListener("input", syncDescUi);
+      descTa?.addEventListener("change", () => {
+        p.lede = descTa.value.trim();
+        logActivity("descripción", `Actualizó la descripción de «${p.title}»`);
         scheduleSave(true);
+        syncDescUi();
       });
       card.querySelector('[data-role="project-note"]').addEventListener("change", (e) => {
         p.note = e.target.value;
@@ -5526,7 +5603,11 @@
         <div class="row" id="mNewAreaRow" hidden><label>Nombre del área</label><input type="text" id="mNewArea" placeholder="Nueva área…" /></div>
         <div class="row"><label>Responsable</label>${ownerPickerHtml("both", "m-owner")}</div>
         <div class="row"><label>Título</label><input type="text" id="mTitle" placeholder="Nombre del proyecto" /></div>
-        <div class="row"><label>Descripción</label><textarea id="mLede" placeholder="De qué va…"></textarea></div>
+        <div class="row row-desc">
+          <label>Descripción del proyecto</label>
+          <textarea id="mLede" placeholder="De qué va, qué queréis conseguir y cuál es el alcance…"></textarea>
+          <span class="field-hint">Obligatoria. Escribe al menos un par de frases claras para que quede bien definido.</span>
+        </div>
         <div class="row"><label>Etiqueta</label><input type="text" id="mBadge" placeholder="Ej. En producción" /></div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" id="mCancel">Cancelar</button>
@@ -5546,6 +5627,11 @@
       modalBody.querySelector("#mOk").onclick = () => {
         const title = modalBody.querySelector("#mTitle").value.trim();
         if (!title) return toast("Pon un título");
+        const lede = modalBody.querySelector("#mLede").value.trim();
+        if (lede.length < 40) {
+          modalBody.querySelector("#mLede")?.focus();
+          return toast("Añade una descripción más clara (al menos un par de frases)");
+        }
         let chosen = areaSelect.value || initial;
         if (chosen === "__new__") {
           const row = addArea(modalBody.querySelector("#mNewArea")?.value);
@@ -5560,7 +5646,7 @@
           owner: projectOwner({ owner: chosenOwner }),
           title,
           badge: modalBody.querySelector("#mBadge").value.trim() || "Nuevo",
-          lede: modalBody.querySelector("#mLede").value.trim(),
+          lede,
           note: "",
           archived: false,
           steps: [{ id: uid("step"), title: "Paso 1", tasks: [] }]
