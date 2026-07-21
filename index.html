@@ -1881,24 +1881,69 @@
 
     .fab-bar {
       position: fixed;
-      left: 0; right: 0; bottom: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       z-index: 45;
-      padding: 0.65rem 1rem calc(0.65rem + var(--safe-b));
-      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.85) 40%);
+      padding: 0.85rem 1.1rem calc(0.95rem + var(--safe-b));
+      padding-left: calc(12.75rem + 1.1rem);
+      background: linear-gradient(180deg, transparent 0%, rgba(8, 6, 10, 0.35) 45%, rgba(8, 6, 10, 0.72) 100%);
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
+      align-items: center;
       gap: 0.5rem;
       pointer-events: none;
     }
     .fab-bar > * { pointer-events: auto; }
     .fab {
-      padding: 0.95rem 1.6rem;
-      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      min-height: 3.1rem;
+      padding: 0.85rem 1.35rem 0.85rem 1.15rem;
+      border-radius: 18px;
+      font-family: var(--font-display);
       font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 0;
+      font-size: 0.92rem;
+      letter-spacing: -0.01em;
       text-transform: none;
-      box-shadow: var(--shadow-card), var(--glow);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255,255,255,0.04) inset;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+    .fab:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+      box-shadow:
+        0 16px 34px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255,255,255,0.08) inset;
+    }
+    .fab:active { transform: translateY(0) scale(0.98); }
+    .fab-ico {
+      width: 1.55rem;
+      height: 1.55rem;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(0,0,0,0.18);
+      flex-shrink: 0;
+    }
+    .fab-ico svg {
+      width: 0.95rem;
+      height: 0.95rem;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .fab-label { white-space: nowrap; }
+    @media (max-width: 860px) {
+      .fab-bar { padding-left: calc(4.35rem + 0.85rem); justify-content: center; }
+      .fab { min-height: 2.85rem; padding: 0.75rem 1.15rem; border-radius: 16px; }
     }
 
     .modal-backdrop {
@@ -2026,7 +2071,6 @@
       .kpi { min-height: 92px; padding: 0.85rem; }
       .prio-item, .pending-item { padding: 0.9rem 0.85rem; }
       .cal-toolbar .btn-ghost { min-width: 40px; min-height: 40px; }
-      .fab { min-height: 48px; padding: 0.9rem 1.4rem; }
       .brand-logo { height: 34px; max-width: 170px; }
       .gate-logo-wrap { width: min(360px, 96%); }
     }
@@ -2081,8 +2125,19 @@
       color: #161018 !important;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 0 28px rgba(200, 210, 220, 0.35) !important;
     }
+    [data-theme="dark"] .btn-gold.fab {
+      background: linear-gradient(160deg, #ffffff 0%, #e8eef4 38%, #b8c0c8 100%) !important;
+      color: #141018 !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.7),
+        0 14px 32px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(210, 220, 230, 0.18) !important;
+    }
     [data-theme="dark"] .btn-gold:hover {
       background: linear-gradient(180deg, #ffffff 0%, #d8dee6 45%, #9aa3ad 100%) !important;
+    }
+    [data-theme="dark"] .btn-gold.fab:hover {
+      background: linear-gradient(160deg, #ffffff 0%, #f2f5f8 40%, #c5ccd4 100%) !important;
     }
     [data-theme="dark"] .person-filter button.active,
     [data-theme="dark"] .mini.on, [data-theme="dark"] .mini.has-content {
@@ -2276,7 +2331,13 @@
       border-color: rgba(60, 40, 50, 0.2) !important;
     }
     [data-theme="light"] .fab-bar {
-      background: linear-gradient(180deg, transparent, rgba(221, 214, 212, 0.95) 40%) !important;
+      background: linear-gradient(180deg, transparent 0%, rgba(221, 214, 212, 0.55) 45%, rgba(221, 214, 212, 0.92) 100%) !important;
+    }
+    [data-theme="light"] .btn-gold.fab {
+      background: linear-gradient(160deg, #2a2228 0%, #1c161a 100%) !important;
+      color: #f7f2ef !important;
+      border-color: rgba(40, 30, 36, 0.35) !important;
+      box-shadow: 0 14px 28px rgba(40, 28, 34, 0.22) !important;
     }
     [data-theme="light"] .dd-menu {
       background: rgba(250, 246, 244, 0.98) !important;
@@ -3511,7 +3572,10 @@
     </div>
 
     <div class="fab-bar">
-      <button type="button" class="btn btn-gold fab" id="fabAdd">+ Añadir</button>
+      <button type="button" class="btn btn-gold fab" id="fabAdd" aria-label="Añadir">
+        <span class="fab-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span class="fab-label" id="fabAddLabel">Añadir</span>
+      </button>
     </div>
   </div>
 
@@ -4562,6 +4626,32 @@
         paintHubCounts();
       }
       paintSideNavActive();
+      paintFab();
+    }
+
+    function paintFab() {
+      const bar = document.querySelector(".fab-bar");
+      const btn = document.getElementById("fabAdd");
+      const label = document.getElementById("fabAddLabel");
+      if (!bar || !btn || !label) return;
+      const labels = {
+        projects: selectedProjectId ? "Añadir tarea" : "Nuevo proyecto",
+        pendientes: "Nueva tarea",
+        ideas: "Nueva idea",
+        goals: "Nuevo objetivo",
+        calendario: "Nueva tarea",
+        stats: "",
+        settings: ""
+      };
+      const text = (appView === "module" && currentModule && labels[currentModule] !== undefined)
+        ? labels[currentModule]
+        : "Añadir";
+      const hide = appView !== "module" || !text;
+      bar.style.display = hide ? "none" : "";
+      if (!hide) {
+        label.textContent = text;
+        btn.setAttribute("aria-label", text);
+      }
     }
 
     function openModule(moduleId) {
@@ -5027,6 +5117,7 @@
       const title = document.getElementById("moduleTitle");
       if (title && currentModule === "projects") title.textContent = "Proyectos";
       paintModuleActions("projects");
+      paintFab();
       renderProjects();
     }
 
@@ -5037,6 +5128,7 @@
       const title = document.getElementById("moduleTitle");
       if (title) title.textContent = p.title;
       paintModuleActions("projects");
+      paintFab();
       renderProjects();
     }
 
@@ -5729,8 +5821,16 @@
     });
 
     document.getElementById("fabAdd").addEventListener("click", () => {
-      if (currentModule === "projects") return openAddProject(defaultAreaId());
-      if (currentModule === "pendientes") {
+      if (currentModule === "projects") {
+        if (selectedProjectId) {
+          const p = state.projects.find((x) => x.id === selectedProjectId);
+          if (!p) return openAddProject(defaultAreaId());
+          if (!p.steps.length) return openAddStep(p.id);
+          return openAddTask(p.id, p.steps[p.steps.length - 1].id);
+        }
+        return openAddProject(defaultAreaId());
+      }
+      if (currentModule === "pendientes" || currentModule === "calendario") {
         const first = state.projects.find((p) => !p.archived);
         if (!first) return toast("Crea un proyecto primero");
         if (!first.steps.length) return openAddStep(first.id);
@@ -5744,7 +5844,7 @@
         document.getElementById("goalTitleInput")?.focus();
         return;
       }
-      openAddProject("emprendimientos");
+      openAddProject(defaultAreaId());
     });
 
     /* ——— Goals & Ideas ——— */
