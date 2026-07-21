@@ -2708,6 +2708,42 @@
       gap: 0.4rem 0.55rem;
       margin-bottom: 0.35rem;
     }
+    .proj-owner-chip {
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 0.22rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    .proj-owner-chip.owner-carmen,
+    .owner-select.owner-carmen {
+      color: #f0c4d4;
+      border-color: rgba(240, 196, 212, 0.35);
+      background: rgba(240, 196, 212, 0.08);
+    }
+    .proj-owner-chip.owner-edgar,
+    .owner-select.owner-edgar {
+      color: #c4d4f0;
+      border-color: rgba(196, 212, 240, 0.35);
+      background: rgba(196, 212, 240, 0.08);
+    }
+    .proj-owner-chip.owner-both,
+    .owner-select.owner-both {
+      color: var(--gold-bright);
+      border-color: rgba(230, 210, 160, 0.35);
+      background: rgba(230, 210, 160, 0.08);
+    }
+    [data-theme="light"] .proj-owner-chip.owner-carmen {
+      color: #8a3d5c;
+      background: rgba(138, 61, 92, 0.08);
+    }
+    [data-theme="light"] .proj-owner-chip.owner-edgar {
+      color: #3d5a8a;
+      background: rgba(61, 90, 138, 0.08);
+    }
     .proj-area {
       font-size: 0.62rem;
       letter-spacing: 0.12em;
@@ -3428,6 +3464,12 @@
       third: { id: "third", label: "Tercero" }
     };
 
+    const PROJECT_OWNERS = {
+      carmen: { id: "carmen", label: "Carmen" },
+      edgar: { id: "edgar", label: "Edgar" },
+      both: { id: "both", label: "Ambos" }
+    };
+
     let personFilter = ""; // "" | edgar | carmen
     let sharedQuery = ""; // búsqueda compartida (código + nombre)
 
@@ -3439,6 +3481,29 @@
     function taskChampion(t) {
       const c = t?.champion;
       return CHAMPIONS[c] ? c : "both";
+    }
+
+    function projectOwner(p) {
+      const o = p?.owner;
+      return PROJECT_OWNERS[o] ? o : "both";
+    }
+
+    function projectOwnerLabel(p) {
+      return PROJECT_OWNERS[projectOwner(p)].label;
+    }
+
+    function matchesProjectOwnerFilter(p, filter) {
+      if (!filter) return true;
+      const o = projectOwner(p);
+      if (o === "both") return true;
+      return o === filter;
+    }
+
+    function ownerOptionsHtml(selected) {
+      const cur = PROJECT_OWNERS[selected] ? selected : "both";
+      return Object.values(PROJECT_OWNERS).map((o) =>
+        `<option value="${o.id}" ${o.id === cur ? "selected" : ""}>${o.label}</option>`
+      ).join("");
     }
 
     function matchesPersonFilter(t, filter) {
@@ -3497,6 +3562,7 @@
       s.projects.forEach((p) => {
         if (typeof p.archived !== "boolean") p.archived = !!p.archived;
         if (!p.area) p.area = (s.areas[0] && s.areas[0].id) || "general";
+        p.owner = projectOwner(p);
         (p.steps || []).forEach((st) => {
           (st.tasks || []).forEach((t) => {
             t.priority = taskPriority(t);
@@ -4890,8 +4956,9 @@
         if (areaFilter && p.area !== areaFilter) return false;
         if (projectArchFilter === "active" && p.archived) return false;
         if (projectArchFilter === "archived" && !p.archived) return false;
+        if (!matchesProjectOwnerFilter(p, personFilter)) return false;
         if (q) {
-          const blob = `${p.title} ${p.lede || ""} ${p.badge || ""} ${p.id}`.toLowerCase();
+          const blob = `${p.title} ${p.lede || ""} ${p.badge || ""} ${p.id} ${projectOwnerLabel(p)}`.toLowerCase();
           if (!blob.includes(q) && !p.steps.some((s) => s.tasks.some((t) => matchesSearch(t, p)))) return false;
         }
         return true;
@@ -4956,6 +5023,7 @@
       btn.dataset.projectId = p.id;
       btn.style.setProperty("--proj-accent", areaAccent(p.area));
       const pct = projectProgress(p);
+      const owner = projectOwner(p);
       const tasks = p.steps.flatMap((s) => s.tasks);
       const open = tasks.filter((t) => !t.done).length;
       const done = tasks.filter((t) => t.done).length;
@@ -4965,6 +5033,7 @@
         <div class="proj-tile-main">
           <div class="proj-tile-meta">
             <span class="proj-area">${escapeHtml(areaLabel(p.area))}</span>
+            <span class="proj-owner-chip owner-${owner}">${escapeHtml(projectOwnerLabel(p))}</span>
             <span class="proj-id">${escapeHtml(p.id)}</span>
             ${p.archived ? `<span class="proj-stat">Archivado</span>` : ""}
           </div>
@@ -4990,6 +5059,7 @@
       card.className = "proj-detail";
       card.dataset.projectId = p.id;
       const pct = projectProgress(p);
+      const owner = projectOwner(p);
       const tasks = p.steps.flatMap((s) => s.tasks);
       const open = tasks.filter((t) => !t.done).length;
       const done = tasks.filter((t) => t.done).length;
@@ -5003,6 +5073,10 @@
                 <label class="proj-area-select-wrap">
                   <span class="proj-area">Área</span>
                   <select data-role="project-area">${getAreas().map((a) => `<option value="${escapeHtml(a.id)}" ${a.id === p.area ? "selected" : ""}>${escapeHtml(a.label)}</option>`).join("")}</select>
+                </label>
+                <label class="proj-area-select-wrap">
+                  <span class="proj-area">Responsable</span>
+                  <select data-role="project-owner" class="owner-select owner-${owner}">${ownerOptionsHtml(owner)}</select>
                 </label>
                 <span class="proj-id">${escapeHtml(p.id)}</span>
               </div>
@@ -5018,6 +5092,7 @@
             <span class="proj-stat">${p.steps.length} pasos</span>
             <span class="proj-stat">${open} tareas abiertas</span>
             <span class="proj-stat">${done} completadas</span>
+            <span class="proj-owner-chip owner-${owner}">${escapeHtml(projectOwnerLabel(p))}</span>
             ${p.archived ? `<span class="proj-stat">Archivado</span>` : ""}
           </div>
         </header>
@@ -5055,6 +5130,14 @@
         if (!next || next === p.area) return;
         p.area = next;
         logActivity("editar", `Movió «${p.title}» a ${areaLabel(next)}`);
+        scheduleSave(true);
+        renderAll();
+      });
+      card.querySelector('[data-role="project-owner"]')?.addEventListener("change", (e) => {
+        const next = e.target.value;
+        if (!PROJECT_OWNERS[next] || next === projectOwner(p)) return;
+        p.owner = next;
+        logActivity("editar", `«${p.title}» → responsable ${PROJECT_OWNERS[next].label}`);
         scheduleSave(true);
         renderAll();
       });
@@ -5370,6 +5453,7 @@
         <h3>Nuevo proyecto</h3>
         <div class="row"><label>Área</label><select id="mArea">${areaOptions}</select></div>
         <div class="row" id="mNewAreaRow" hidden><label>Nombre del área</label><input type="text" id="mNewArea" placeholder="Nueva área…" /></div>
+        <div class="row"><label>Responsable</label><select id="mOwner">${ownerOptionsHtml("both")}</select></div>
         <div class="row"><label>Título</label><input type="text" id="mTitle" placeholder="Nombre del proyecto" /></div>
         <div class="row"><label>Descripción</label><textarea id="mLede" placeholder="De qué va…"></textarea></div>
         <div class="row"><label>Etiqueta</label><input type="text" id="mBadge" placeholder="Ej. En producción" /></div>
@@ -5400,6 +5484,7 @@
         const project = {
           id: uid(chosen.slice(0, 3)),
           area: chosen,
+          owner: projectOwner({ owner: modalBody.querySelector("#mOwner")?.value }),
           title,
           badge: modalBody.querySelector("#mBadge").value.trim() || "Nuevo",
           lede: modalBody.querySelector("#mLede").value.trim(),
@@ -5408,7 +5493,7 @@
           steps: [{ id: uid("step"), title: "Paso 1", tasks: [] }]
         };
         state.projects.push(project);
-        logActivity("crear", `Creó el proyecto «${title}»`);
+        logActivity("crear", `Creó el proyecto «${title}» · ${projectOwnerLabel(project)}`);
         scheduleSave(true);
         closeModal();
         areaFilter = chosen;
